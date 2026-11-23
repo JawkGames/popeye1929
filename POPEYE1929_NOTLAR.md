@@ -2,8 +2,13 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.010`
+- **Güncel Sürüm:** `v0.011`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.011
+- Arka plandaki aydınlık gezegen görselleri kaldırıldı.
+- Arka plan uzay/yıldız renkleri zamanla sürekli değişmek yerine yalnızca Boss yenildikten sonra (yeni bölüme geçerken) karanlık atmosferik modlar arasında değişecek şekilde ayarlandı.
+- Seviye atlama (`LEVELUP` yetenek seçimi) ve duraklatma ekranlarında oyun durduğunda arkada akan yıldızlar, nebulalar ve üs duvarları da tamamen duracak şekilde güncellendi.
 
 ## v0.010 — 20 Yeni Düşman + 10 Yeni Mermi, 10 Dev Boss, Gezegenli Değişen Uzay, Alt Mıknatıslı XP ve Tek Seferlik Yetenekler
 - **Tek Seferlik Yetenekler:** 50 yeteneğin tamamı `max: 1` yapıldı; bir kez seçilen yetenek bir daha asla seçime gelmez.

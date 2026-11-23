@@ -174,28 +174,29 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   // =========================================================================
-  // SÜREKLİ DEĞİŞEN GEZEGENLİ, NEBULALI VE RENKLİ YILDIZLI UZAY ARKA PLANI
+  // BOSS SONRASI DEĞİŞEN KARANLIK UZAY ATMOSFERİ VE YILDIZ MODLARI (Gezegenler kaldırıldı)
   // =========================================================================
   initCosmicBackground() {
     this.cosmicThemes = [
-      // 0: Derin Mavi Uzay & Buz Halkalı Gezegen
-      { top: [7, 20, 38],   mid: [12, 34, 62],  bot: [6, 17, 32],   nebula: 'rgba(0, 195, 255, 0.14)', starColors: ['#ffffff', '#9be8ff', '#ffe49e'] },
-      // 1: Kızıl Mars Nebulası & Lav Gezegeni
-      { top: [36, 8, 20],   mid: [68, 16, 36],  bot: [24, 6, 16],   nebula: 'rgba(255, 72, 48, 0.16)',  starColors: ['#ffe5b4', '#ff8da1', '#ffffff'] },
-      // 2: Zümrüt Biyo-Sektör & Halkalı Gaz Devi
-      { top: [6, 30, 24],   mid: [14, 58, 46],  bot: [4, 22, 18],   nebula: 'rgba(45, 255, 165, 0.15)', starColors: ['#b8ffda', '#70f8ff', '#ffffff'] },
-      // 3: Ametist Hiçlik Galaksisi & Mor Süpernova
-      { top: [24, 8, 44],   mid: [48, 18, 84],  bot: [16, 6, 32],   nebula: 'rgba(195, 80, 255, 0.17)', starColors: ['#ecc2ff', '#ff94e8', '#9be8ff'] },
-      // 4: Altın Güneş Koronası & Kehribar Uzay
-      { top: [38, 22, 6],   mid: [72, 44, 12],  bot: [26, 14, 4],   nebula: 'rgba(255, 185, 35, 0.16)', starColors: ['#fff0a8', '#ffb36b', '#ffffff'] },
-      // 5: Kutup Buzul Sektörü & Kristal Gökyüzü
-      { top: [5, 28, 46],   mid: [14, 62, 92],  bot: [4, 20, 36],   nebula: 'rgba(85, 235, 255, 0.17)', starColors: ['#d4faff', '#80e5ff', '#ffffff'] },
-      // 6: Siber-Kızıl Çatlak & İkili Gezegen
-      { top: [34, 6, 38],   mid: [64, 14, 72],  bot: [22, 4, 26],   nebula: 'rgba(255, 60, 190, 0.16)', starColors: ['#ffb8f0', '#70f8ff', '#ffe066'] }
+      // Stage 1: Klasik Derin Karanlık Lacivert Uzay
+      { top: [5, 14, 28],   mid: [9, 24, 46],   bot: [4, 11, 22],   nebula: 'rgba(0, 150, 220, 0.09)',  starColors: ['#ffffff', '#9be8ff', '#d0e8ff'] },
+      // Stage 2 (Boss 1 Sonrası): Karanlık Kızıl Kıyamet Uzayı
+      { top: [24, 5, 12],   mid: [42, 9, 22],   bot: [16, 3, 9],    nebula: 'rgba(210, 40, 30, 0.10)',  starColors: ['#ffd2b4', '#ff758f', '#ffffff'] },
+      // Stage 3 (Boss 2 Sonrası): Karanlık Zümrüt Biyo-Boşluk
+      { top: [4, 20, 16],   mid: [9, 38, 30],   bot: [3, 14, 11],   nebula: 'rgba(30, 190, 120, 0.10)', starColors: ['#a8ffd2', '#64e8ff', '#ffffff'] },
+      // Stage 4 (Boss 3 Sonrası): Karanlık Ametist Hiçlik Sektörü
+      { top: [16, 5, 30],   mid: [32, 11, 56],  bot: [10, 3, 20],   nebula: 'rgba(155, 50, 220, 0.11)', starColors: ['#e2b8ff', '#ff85e0', '#9be8ff'] },
+      // Stage 5 (Boss 4 Sonrası): Karanlık Kehribar Korona
+      { top: [24, 14, 4],   mid: [44, 26, 8],   bot: [16, 9, 2],    nebula: 'rgba(215, 140, 20, 0.10)', starColors: ['#ffe89e', '#ffa652', '#ffffff'] },
+      // Stage 6 (Boss 5 Sonrası): Karanlık Kutup Buzul Boşluğu
+      { top: [4, 18, 32],   mid: [9, 40, 64],   bot: [3, 12, 24],   nebula: 'rgba(60, 195, 235, 0.11)', starColors: ['#c8f8ff', '#6ee0ff', '#ffffff'] },
+      // Stage 7+ (Boss 6+ Sonrası): Karanlık Siber-Kızıl Çatlak
+      { top: [22, 4, 26],   mid: [42, 9, 48],   bot: [14, 2, 18],   nebula: 'rgba(205, 40, 155, 0.10)', starColors: ['#ffb0eb', '#68f0ff', '#ffe066'] }
     ];
 
-    this.cosmicClock = 0;
-    this.themeDuration = 18.0; // Her 18 saniyede bir gökyüzü, yıldızlar ve nebulalar yumuşakça yeni renge evrilir
+    this.themeIdx = 0;
+    this.targetThemeIdx = 0;
+    this.themeBlend = 0;
 
     // Çok renkli paralaks yıldızlar
     this.stars = [];
@@ -212,48 +213,18 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       });
     }
 
-    // Paralaks Gezegenler, Halkalı Gaz Devleri ve Uydular
-    this.planetPalettes = [
-      { body: '#2b7de9', shade: '#133b7a', band: '#6bc5ff', ring: '#9be8ff', hasRing: true },
-      { body: '#e04832', shade: '#781912', band: '#ff964f', ring: '#ffd27d', hasRing: false },
-      { body: '#28c77a', shade: '#105e3a', band: '#8affc1', ring: '#befce0', hasRing: true },
-      { body: '#9b42f5', shade: '#481582', band: '#df99ff', ring: '#ff94e8', hasRing: true },
-      { body: '#f2a62c', shade: '#85490a', band: '#ffe07d', ring: '#fff2b8', hasRing: true },
-      { body: '#24bcd9', shade: '#0e5269', band: '#9ef3ff', ring: '#ffffff', hasRing: false }
-    ];
-
-    this.planets = [
-      this.createPlanet(115, 190, 56, 0, 26),
-      this.createPlanet(425, 540, 38, 1, 19),
-      this.createPlanet(150, 820, 46, 3, 22)
-    ];
-
-    // Süzülen Renkli Nebula Bulutları
+    // Süzülen Karanlık Atmosferik Nebula Bulutları
     this.nebulae = [
       { x: 140, y: 240, r: 190, speed: 16 },
       { x: 400, y: 650, r: 220, speed: 21 }
     ];
   }
 
-  createPlanet(x, y, radius, palIdx, speed) {
-    const pal = this.planetPalettes[palIdx % this.planetPalettes.length];
-    return {
-      x,
-      y,
-      r: radius,
-      speed: speed || 22,
-      palIdx: palIdx % this.planetPalettes.length,
-      body: pal.body,
-      shade: pal.shade,
-      band: pal.band,
-      ring: pal.ring,
-      hasRing: pal.hasRing,
-      ringTilt: (Math.random() < 0.5 ? -1 : 1) * (0.22 + Math.random() * 0.25)
-    };
-  }
-
+  // Yalnızca Boss yenildiğinde çağrılır ve arka planı yeni bölüm moduna geçirir
   advanceCosmicTheme() {
-    this.cosmicClock += this.themeDuration;
+    this.themeIdx = this.targetThemeIdx;
+    this.targetThemeIdx = (this.themeIdx + 1) % this.cosmicThemes.length;
+    this.themeBlend = 0;
   }
 
   lerpRgb(c1, c2, t) {
@@ -261,82 +232,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
     const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
     return `rgb(${r},${g},${b})`;
-  }
-
-  drawPlanet(ctx, pl) {
-    ctx.save();
-    ctx.translate(pl.x, pl.y);
-
-    // Arka Halka Yarısı
-    if (pl.hasRing) {
-      ctx.save();
-      ctx.rotate(pl.ringTilt);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, pl.r * 1.95, pl.r * 0.52, 0, Math.PI, Math.PI * 2);
-      ctx.strokeStyle = '#07111e';
-      ctx.lineWidth = 10;
-      ctx.stroke();
-      ctx.strokeStyle = pl.ring;
-      ctx.lineWidth = 5;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // Gezegen Ana Gövdesi (Çizgi roman konturlu)
-    ctx.beginPath();
-    ctx.arc(0, 0, pl.r, 0, Math.PI * 2);
-    ctx.fillStyle = pl.body;
-    ctx.fill();
-
-    // Gezegen Atmosfer Kuşakları ve Gölge Yarımküresi (Clip içinde)
-    ctx.save();
-    ctx.clip();
-
-    ctx.fillStyle = pl.band;
-    ctx.globalAlpha = 0.55;
-    ctx.fillRect(-pl.r, -pl.r * 0.45, pl.r * 2, pl.r * 0.24);
-    ctx.fillRect(-pl.r, pl.r * 0.12, pl.r * 2, pl.r * 0.18);
-
-    // Kraterler veya Fırtına Gözü
-    ctx.fillStyle = pl.shade;
-    ctx.globalAlpha = 0.65;
-    ctx.beginPath();
-    ctx.arc(-pl.r * 0.28, -pl.r * 0.15, pl.r * 0.18, 0, Math.PI * 2);
-    ctx.arc(pl.r * 0.22, pl.r * 0.32, pl.r * 0.12, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Sağ-Alt Karanlık Hilal Gölgesi
-    ctx.globalAlpha = 0.72;
-    ctx.beginPath();
-    ctx.arc(pl.r * 0.35, pl.r * 0.25, pl.r * 0.98, 0, Math.PI * 2);
-    ctx.fillStyle = pl.shade;
-    ctx.fill();
-
-    ctx.restore();
-
-    // Gezegen Dış Çizgi Roman Siyah Konturu
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#07111e';
-    ctx.beginPath();
-    ctx.arc(0, 0, pl.r, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Ön Halka Yarısı
-    if (pl.hasRing) {
-      ctx.save();
-      ctx.rotate(pl.ringTilt);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, pl.r * 1.95, pl.r * 0.52, 0, 0, Math.PI);
-      ctx.strokeStyle = '#07111e';
-      ctx.lineWidth = 10;
-      ctx.stroke();
-      ctx.strokeStyle = pl.ring;
-      ctx.lineWidth = 5;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    ctx.restore();
   }
 
   resetParallaxWalls() {
@@ -359,7 +254,9 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.xpToNext = window.GAME_CONFIG.XP.START_NEEDED;
     this.pendingLevelUps = 0;
     this.levelUpChoices = [];
-    this.cosmicClock = 0;
+    this.themeIdx = 0;
+    this.targetThemeIdx = 0;
+    this.themeBlend = 1;
 
     this.playerBulletPool.clear();
     this.enemyBulletPool.clear();
@@ -639,8 +536,16 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   update(dt) {
-    // 1) Kozmik Arka Plan, Yıldızlar, Gezegenler ve Nebulalar Sürekli Akar ve Renk Değiştirir
-    this.cosmicClock += dt;
+    // Oyun durduğunda (LEVELUP skill seçim ekranı, PAUSED, GAMEOVER) arka akan plan da tamamen durur
+    if (this.state !== 'PLAYING') return;
+
+    // Boss sonrası yeni arka plan moduna yumuşak geçiş
+    if (this.themeIdx !== this.targetThemeIdx) {
+      this.themeBlend = Math.min(1, this.themeBlend + dt * 0.45);
+      if (this.themeBlend >= 1) {
+        this.themeIdx = this.targetThemeIdx;
+      }
+    }
 
     for (let i = 0; i < this.stars.length; i++) {
       const s = this.stars[i];
@@ -661,17 +566,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       }
     }
 
-    for (let i = 0; i < this.planets.length; i++) {
-      const pl = this.planets[i];
-      pl.y += pl.speed * dt;
-      if (pl.y - pl.r * 2 > this.H + 60) {
-        const nextPalIdx = (pl.palIdx + 1 + Math.floor(Math.random() * (this.planetPalettes.length - 1))) % this.planetPalettes.length;
-        const newR = 34 + Math.floor(Math.random() * 32);
-        const newX = 75 + Math.random() * (this.W - 150);
-        this.planets[i] = this.createPlanet(newX, -newR * 2 - 40, newR, nextPalIdx, 18 + Math.random() * 14);
-      }
-    }
-
     const leftFrames = ['wall_left_radar', 'wall_left_reactor'];
     const rightFrames = ['wall_right_tower', 'wall_right_coil'];
     this.wallPool.updateAll(dt, (w) => {
@@ -687,8 +581,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       }
       return true;
     });
-
-    if (this.state !== 'PLAYING') return;
 
     if (this.shakeTime > 0) {
       this.shakeTime = Math.max(0, this.shakeTime - dt);
@@ -926,14 +818,10 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     ctx.save();
     ctx.scale(this.dpr, this.dpr);
 
-    // 1) Dinamik Değişen Uzay Gökyüzü Gradyanı
-    const totalThemes = this.cosmicThemes.length;
-    const rawIdx = this.cosmicClock / this.themeDuration;
-    const idxA = Math.floor(rawIdx) % totalThemes;
-    const idxB = (idxA + 1) % totalThemes;
-    const blend = rawIdx - Math.floor(rawIdx);
-    const thA = this.cosmicThemes[idxA];
-    const thB = this.cosmicThemes[idxB];
+    // 1) Boss Sonrası Değişen Karanlık Uzay Gökyüzü Gradyanı
+    const thA = this.cosmicThemes[this.themeIdx % this.cosmicThemes.length];
+    const thB = this.cosmicThemes[this.targetThemeIdx % this.cosmicThemes.length];
+    const blend = this.themeIdx === this.targetThemeIdx ? 0 : this.themeBlend;
 
     const grad = ctx.createLinearGradient(0, 0, 0, this.H);
     grad.addColorStop(0,   this.lerpRgb(thA.top, thB.top, blend));
@@ -949,7 +837,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       ctx.translate(sx, sy);
     }
 
-    // 2) Renkli Nebula Bulutları
+    // 2) Karanlık Atmosferik Nebula Bulutları
     for (let i = 0; i < this.nebulae.length; i++) {
       const nb = this.nebulae[i];
       const nGrad = ctx.createRadialGradient(nb.x, nb.y, 10, nb.x, nb.y, nb.r);
@@ -973,12 +861,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     }
     ctx.globalAlpha = 1;
 
-    // 4) Paralaks Gezegenler, Halkalı Gaz Devleri ve Uydular
-    for (let i = 0; i < this.planets.length; i++) {
-      this.drawPlanet(ctx, this.planets[i]);
-    }
-
-    // 5) Sonsuz Modüler Metalik Üs Duvarları
+    // 4) Sonsuz Modüler Metalik Üs Duvarları
     const walls = this.wallPool.activeList;
     for (let i = 0; i < walls.length; i++) {
       const w = walls[i];
