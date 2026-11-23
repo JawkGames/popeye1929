@@ -157,10 +157,8 @@ window.PlayerController = class PlayerController {
   // Daha yüksek bir konserve (örn. 4X veya 6X) alınırsa doğrudan o mermi sayısına sıçrar veya üstüne ekler.
   upgradeWeapon(canTier) {
     const maxLevel = 8;
-    if (canTier > this.weaponLevel) {
-      this.weaponLevel = Math.min(maxLevel, canTier);
-      return { upgraded: true, level: this.weaponLevel };
-    } else if (this.weaponLevel < maxLevel) {
+    // Her silah konservesi sadece +1 atış ekler (1->2->3->4->5...), seviye atlamaz
+    if (this.weaponLevel < maxLevel) {
       this.weaponLevel = Math.min(maxLevel, this.weaponLevel + 1);
       return { upgraded: true, level: this.weaponLevel };
     } else {

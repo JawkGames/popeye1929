@@ -24,15 +24,19 @@ window.WaveDirector = class WaveDirector {
       { time: 68,  type: 'can_shield',  spawned: false },
       { time: 98,  type: 'can_wingman', spawned: false },
       { time: 128, type: 'can_bomb',    spawned: false },
-      { time: 142, type: 'can_hp',      spawned: false }
+      // 142. sn ıspanağı kaldırıldı (ıspanak yarı yarıya azaltıldı)
     ];
   }
 
   // Silah konservesi ise WEAPON_CAN_RATE ihtimalle bırakır, değilse altın paraya çevirir
   filterCan(type) {
-    if (/^can_\d+x$/.test(type) && Math.random() > window.GAME_CONFIG.WEAPON_CAN_RATE) {
-      return 'coin_gold';
+    const cfg = window.GAME_CONFIG;
+    if (/^can_\d+x$/.test(type)) {
+      if (Math.random() > cfg.WEAPON_CAN_RATE) return 'coin_gold';
+      // İlk bölümde (boss öncesi) sadece 2X çıkar
+      if (this.stage === 1) return 'can_2x';
     }
+    if (type === 'can_hp' && Math.random() > cfg.HP_CAN_RATE) return 'coin_gold';
     return type;
   }
 
@@ -334,7 +338,7 @@ window.WaveDirector = class WaveDirector {
     e.maxHp = Math.round(base.hp * mult);
     e.hp = e.maxHp;
     e.score = base.score;
-    e.damage = base.damage;
+    e.damage = Math.round(base.damage * window.GAME_CONFIG.ENEMY_DAMAGE_MULT);
     e.fireRate = base.fireRate / Math.min(1.45, 1 + (this.stage - 1) * 0.12);
     e.fireTimer = 0.8 + Math.random() * e.fireRate;
     e.bulletSpeed = base.bulletSpeed;
@@ -585,7 +589,7 @@ window.WaveDirector = class WaveDirector {
       this.game.spawnPickup(bx + Math.cos(ang) * dist * 0.8, by + Math.sin(ang) * dist * 0.5, 'coin_gold');
     }
     this.game.spawnPickup(bx - 45, by, 'can_hp');
-    this.game.spawnPickup(bx + 45, by, 'can_6x');
+    this.game.spawnPickup(bx + 45, by, 'can_4x'); // Boss sonrası tek 4X
 
     this.game.addScore(b.score, bx, by);
     this.game.addFloatText(window.I18N.t('STAGE_CLEAR') + ' +10,000', bx, by - 40, '#ffe047', 28);

@@ -2,7 +2,7 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.004`
+- **Güncel Sürüm:** `v0.005`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
 
 ## v0.003
@@ -12,3 +12,9 @@ Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konser
 
 ## v0.004
 - Wingman konservesi artık 1 uçak ekler; sırayla sol, sağ, sol, sağ (maks 4).
+
+## v0.005
+- Silah konservesi oranı 0.05 (önceki 0.2nin 4te 1i). Stage 1de (boss öncesi) sadece 2X çıkar; boss sonrası tek 4X düşer.
+- Her silah konservesi sadece +1 atış ekler (1,2,3,4,5...), seviye atlamaz.
+- Ispanak yarı yarıya az: `HP_CAN_RATE: 0.5`, 142. sn garantili ıspanak kaldırıldı.
+- Normal düşman hasarı x1.5: `ENEMY_DAMAGE_MULT`.
