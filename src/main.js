@@ -294,36 +294,24 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.addScreenShake(5, 0.14);
       this.addScore(e.score, e.x, e.y);
 
-      if (e.guaranteedCan) {
-        this.spawnPickup(e.x, e.y, this.waveDirector.filterCan(e.guaranteedCan));
-      } else {
-        const roll = Math.random();
-        if (roll < 0.14) {
-          const cans = this.waveDirector.getAvailableCanPool();
-          const pick = this.waveDirector.filterCan(cans[Math.floor(Math.random() * cans.length)]);
-          this.spawnPickup(e.x, e.y, pick);
-        } else if (roll < 0.48) {
-          this.spawnPickup(e.x, e.y, 'coin_gold');
-        }
-      }
+      const drop = this.waveDirector.rollDrop();
+      if (drop) this.spawnPickup(e.x, e.y, drop);
     }
   }
 
-  applyWeaponCan(tier, color) {
+  applyWeaponCan(kind, color) {
     const player = this.player;
-    const res = player.upgradeWeapon(tier);
-    if (res.upgraded) {
-      const label = window.I18N.lang === 'TR'
-        ? `${res.level}X MERMİ ATIŞI!`
-        : `${res.level}X MULTI-SHOT!`;
-      this.addFloatText(label, player.x, player.y - 45, color, 20);
-    } else {
-      const label = window.I18N.lang === 'TR'
-        ? `8X + GÜÇ ARTTI!`
-        : `8X + POWER UP!`;
-      this.addFloatText(label, player.x, player.y - 45, '#ffe047', 20);
-    }
-    this.addScore(300);
+    const tr = window.I18N.lang === 'TR';
+    const res = player.applyWeaponCan(kind);
+    let label;
+    if (res === 'wing') label = tr ? 'UÇAKLAR GÜÇLENDİ!' : 'WINGMEN POWER UP!';
+    else if (res === 'score') label = tr ? 'MAX GÜÇ!' : 'MAX POWER!';
+    else if (kind === '3x') label = tr ? 'KALIN MERMİ!' : 'HEAVY SHOT!';
+    else if (kind === '4x') label = tr ? 'ATIŞ HIZI!' : 'FIRE RATE!';
+    else if (kind === '6x') label = tr ? 'SÜPER GÜÇ!' : 'SUPER POWER!';
+    else label = `${player.weaponLevel}X ${tr ? 'ATIŞ!' : 'SHOT!'}`;
+    this.addFloatText(label, player.x, player.y - 45, res === 'score' ? '#ffe047' : color, 20);
+    this.addScore(res === 'score' ? 600 : 300);
   }
 
   applyPickup(p) {
@@ -342,19 +330,19 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         break;
 
       case 'can_2x':
-        this.applyWeaponCan(2, '#57e2ff');
+        this.applyWeaponCan('2x', '#57e2ff');
         break;
 
       case 'can_3x':
-        this.applyWeaponCan(3, '#57e2ff');
+        this.applyWeaponCan('3x', '#57e2ff');
         break;
 
       case 'can_4x':
-        this.applyWeaponCan(4, '#ffa834');
+        this.applyWeaponCan('4x', '#ffa834');
         break;
 
       case 'can_6x':
-        this.applyWeaponCan(6, '#ff4d6d');
+        this.applyWeaponCan('6x', '#ff4d6d');
         break;
 
       case 'can_wingman':

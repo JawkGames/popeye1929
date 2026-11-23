@@ -1,6 +1,6 @@
 // Popeye 1929: Vertical Arcade SHMUP — Yapılandırma ve Sürüm Bilgisi
 window.GAME_CONFIG = {
-  VERSION: 'v0.005',
+  VERSION: 'v0.006',
   TITLE: 'POPEYE 1929: IRON ARMADA',
 
   // 9:16 Dikey Mobil Referans Çözünürlük (Tüm ekranlara responsive ölçeklenir)
@@ -10,10 +10,6 @@ window.GAME_CONFIG = {
   MIN_HEIGHT: 800,
   MAX_HEIGHT: 1400,
 
-  // Silah konservesi (2X/3X/4X/6X) çıkma oranı (1 = eski, 0.2 = 5 kat az)
-  WEAPON_CAN_RATE: 0.05,
-  // Ispanak (can_hp) çıkma oranı (0.5 = yarı yarıya az)
-  HP_CAN_RATE: 0.5,
   // Normal düşmanların vuruş hasarı çarpanı
   ENEMY_DAMAGE_MULT: 1.5,
   // Boss güç çarpanı (can ve mermi hasarı)
@@ -52,17 +48,39 @@ window.GAME_CONFIG = {
     ]
   },
 
-  // Silah Seviyeleri (1x..8x Mermi Sayısı ve Hasar Tablosu)
-  WEAPONS: {
-    1: { level: 1, label: '1X', count: 1, spreadDeg: 0,  damage: 22, speed: 890 },
-    2: { level: 2, label: '2X', count: 2, spreadDeg: 0,  damage: 19, speed: 900 },
-    3: { level: 3, label: '3X', count: 3, spreadDeg: 10, damage: 18, speed: 920 },
-    4: { level: 4, label: '4X', count: 4, spreadDeg: 7,  damage: 17, speed: 940 },
-    5: { level: 5, label: '5X', count: 5, spreadDeg: 8,  damage: 17, speed: 950 },
-    6: { level: 6, label: '6X', count: 6, spreadDeg: 8,  damage: 17, speed: 960 },
-    7: { level: 7, label: '7X', count: 7, spreadDeg: 7,  damage: 18, speed: 970 },
-    8: { level: 8, label: '8X', count: 8, spreadDeg: 7,  damage: 19, speed: 980 }
-  },
+  // Silah Merdiveni: her adım şeritler (T = ince, K = kalın). İnce çoğalır -> birleşip kalınlaşır
+  WEAPON_LADDER: [
+    null,
+    'T',          // 1
+    'TT',         // 2
+    'K',          // 3  (ikisi birleşti, kalın)
+    'TKT',        // 4  (yanlara ince)
+    'TTKTT',      // 5  (bir ince daha)
+    'KKK',        // 6  (yanlar birleşti, hepsi kalın) -> yardımcı uçaklar da kalın atar
+    'TKKKT',      // 7
+    'KKKKK'       // 8  (her yer kalın, MAX)
+  ],
+  WEAPON_THIN:  { damage: 20, w: 20, h: 44, speed: 900 },
+  WEAPON_THICK: { damage: 36, w: 34, h: 50, speed: 940 },
+  WINGMAN_THICK_LEVEL: 6,
+  FIRE_RATE_STEP: 0.15,   // 4X: her biri atış hızı +%15
+  FIRE_RATE_MAX: 3,
+  DAMAGE_STEP: 0.15,      // 3X: her biri mermi hasarı +%15
+  WINGMAN_BOOST: 0.25,    // Full olunca gelen silah konservesi: uçak hasarı +%25
+
+  // Düşman öldürünce konserve düşme ihtimali ve tür dağılımı (%)
+  CAN_DROP_CHANCE: 0.10,
+  COIN_DROP_CHANCE: 0.34,
+  CAN_TABLE: [
+    { type: 'can_hp',      w: 25 },
+    { type: 'can_2x',      w: 25 },
+    { type: 'can_shield',  w: 13 },
+    { type: 'can_3x',      w: 12 },
+    { type: 'can_wingman', w: 10 },
+    { type: 'can_4x',      w: 8 },
+    { type: 'can_bomb',    w: 4 },
+    { type: 'can_6x',      w: 3 }
+  ],
 
   // Konserve & Güçlendirme Ayarları
   PICKUPS: {

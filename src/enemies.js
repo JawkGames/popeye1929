@@ -16,28 +16,26 @@ window.WaveDirector = class WaveDirector {
     this.bossActive = null;
 
     // Bölüm 1'de garantili sırayla düşecek güçlendirme konserveleri
+    // Zamanlı konserve yok; sadece ilk 20 sn'de 1 garantili ıspanak
     this.scheduledCans = [
-      // Silah konserveleri azaltıldı: bölümde garantili sadece 1 adet 2X (sakin gelişim)
-      { time: 22,  type: 'can_hp',      spawned: false },
-      { time: 35,  type: 'can_wingman', spawned: false },
-      { time: 60,  type: 'can_2x',      spawned: false },
-      { time: 68,  type: 'can_shield',  spawned: false },
-      { time: 98,  type: 'can_wingman', spawned: false },
-      { time: 128, type: 'can_bomb',    spawned: false },
-      // 142. sn ıspanağı kaldırıldı (ıspanak yarı yarıya azaltıldı)
+      { time: 20, type: 'can_hp', spawned: false }
     ];
   }
 
-  // Silah konservesi ise WEAPON_CAN_RATE ihtimalle bırakır, değilse altın paraya çevirir
-  filterCan(type) {
+  // Düşman öldürünce: %CAN_DROP_CHANCE konserve (CAN_TABLE ağırlıklı), değilse altın ihtimali
+  rollDrop() {
     const cfg = window.GAME_CONFIG;
-    if (/^can_\d+x$/.test(type)) {
-      if (Math.random() > cfg.WEAPON_CAN_RATE) return 'coin_gold';
-      // İlk bölümde (boss öncesi) sadece 2X çıkar
-      if (this.stage === 1) return 'can_2x';
+    const r = Math.random();
+    if (r < cfg.CAN_DROP_CHANCE) {
+      let table = cfg.CAN_TABLE;
+      if (this.stage === 1) table = table.filter(t => t.type !== 'can_6x');
+      const total = table.reduce((a, t) => a + t.w, 0);
+      let x = Math.random() * total;
+      for (const t of table) { x -= t.w; if (x <= 0) return t.type; }
+      return table[0].type;
     }
-    if (type === 'can_hp' && Math.random() > cfg.HP_CAN_RATE) return 'coin_gold';
-    return type;
+    if (r < cfg.CAN_DROP_CHANCE + cfg.COIN_DROP_CHANCE) return 'coin_gold';
+    return null;
   }
 
   getDifficultyMult() {
@@ -69,16 +67,6 @@ window.WaveDirector = class WaveDirector {
         const rx = 80 + Math.random() * (window.GAME_CONFIG.WIDTH - 160);
         this.game.spawnPickup(rx, -40, sc.type);
       }
-    }
-
-    // Periyodik rastgele ıspanak / özellik konservesi
-    this.canTimer -= dt;
-    if (this.canTimer <= 0) {
-      this.canTimer = 11.5 + Math.random() * 4.5;
-      const rx = 75 + Math.random() * (window.GAME_CONFIG.WIDTH - 150);
-      const canPool = this.getAvailableCanPool();
-      const chosen = this.filterCan(canPool[Math.floor(Math.random() * canPool.length)]);
-      this.game.spawnPickup(rx, -40, chosen);
     }
 
     const tl = window.GAME_CONFIG.TIMELINE;

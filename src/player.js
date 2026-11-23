@@ -17,7 +17,9 @@ window.PlayerController = class PlayerController {
     this.hp = this.cfg.MAX_HP;
     this.maxHp = this.cfg.MAX_HP;
     this.weaponLevel = 1; // Başlangıçta 1 mermi, her konservede mermi sayısı artar (1..8)
-    this.powerBonus = 0;  // Maksimum mermi sayısından sonra alınan konserveler hasarı artırır
+    this.powerBonus = 0;  // 3X ile artan mermi hasarı bonusu
+    this.rateLvl = 0;     // 4X ile artan atış hızı seviyesi
+    this.wingBonus = 0;   // Full olunca uçaklara gelen hasar bonusu
     this.fireTimer = 0;
     this.invulnTimer = 0;
     this.shieldTimer = 0;
@@ -152,20 +154,24 @@ window.PlayerController = class PlayerController {
     return true;
   }
 
-  // Her silah konservesi alındığında mermi sayısını kesin olarak artırır!
-  // Örn: 1X'te 2X alınca 2 mermi olur; tekrar 2X alınca 3 mermiye (3X), sonra 4 mermiye (4X) çıkar.
-  // Daha yüksek bir konserve (örn. 4X veya 6X) alınırsa doğrudan o mermi sayısına sıçrar veya üstüne ekler.
-  upgradeWeapon(canTier) {
-    const maxLevel = 8;
-    // Her silah konservesi sadece +1 atış ekler (1->2->3->4->5...), seviye atlamaz
-    if (this.weaponLevel < maxLevel) {
-      this.weaponLevel = Math.min(maxLevel, this.weaponLevel + 1);
-      return { upgraded: true, level: this.weaponLevel };
-    } else {
-      // 8 mermiye ulaştıktan sonra alınan her silah konservesi mermi hasarını +%15 artırır
-      this.powerBonus += 0.15;
-      return { upgraded: false, level: this.weaponLevel, powerBonus: this.powerBonus };
-    }
+  // Silah konserveleri: 2X = merdivende +1 adım, 3X = +1 adım + hasar, 4X = atış hızı, 6X = hepsi
+  // Hepsi full ise: uçak varsa uçak gücü, yoksa skor. Dönüş: 'up' | 'wing' | 'score'
+  applyWeaponCan(kind) {
+    const cfg = window.GAME_CONFIG;
+    const maxLevel = cfg.WEAPON_LADDER.length - 1;
+    let changed = false;
+    const stepUp = () => { if (this.weaponLevel < maxLevel) { this.weaponLevel++; changed = true; } };
+    const rateUp = () => { if (this.rateLvl < cfg.FIRE_RATE_MAX) { this.rateLvl++; changed = true; } };
+    const dmgUp = () => { this.powerBonus += cfg.DAMAGE_STEP; changed = true; };
+
+    if (kind === '2x') stepUp();
+    else if (kind === '3x') { stepUp(); if (this.powerBonus < cfg.DAMAGE_STEP * 4) dmgUp(); }
+    else if (kind === '4x') rateUp();
+    else if (kind === '6x') { stepUp(); rateUp(); if (this.powerBonus < cfg.DAMAGE_STEP * 4) dmgUp(); }
+
+    if (changed) return 'up';
+    if (this.wingmen.length > 0) { this.wingBonus += cfg.WINGMAN_BOOST; return 'wing'; }
+    return 'score';
   }
 
   update(dt) {
@@ -198,7 +204,7 @@ window.PlayerController = class PlayerController {
 
     this.fireTimer -= dt;
     if (this.fireTimer <= 0) {
-      this.fireTimer = this.cfg.FIRE_INTERVAL;
+      this.fireTimer = this.cfg.FIRE_INTERVAL / (1 + this.rateLvl * window.GAME_CONFIG.FIRE_RATE_STEP);
       this.fireMainWeapon();
     }
 
@@ -220,7 +226,8 @@ window.PlayerController = class PlayerController {
 
       this.wingmanFireTimer -= dt;
       if (this.wingmanFireTimer <= 0) {
-        this.wingmanFireTimer = wCfg.FIRE_INTERVAL;
+        this.wingmanFireTimer = wCfg.FIRE_INTERVAL / (1 + this.rateLvl * window.GAME_CONFIG.FIRE_RATE_STEP);
+        const thick = this.weaponLevel >= window.GAME_CONFIG.WINGMAN_THICK_LEVEL;
         for (let i = 0; i < this.wingmen.length; i++) {
           const wm = this.wingmen[i];
           this.game.spawnPlayerBullet(
@@ -228,10 +235,10 @@ window.PlayerController = class PlayerController {
             wm.y - 20,
             0,
             -860,
-            wCfg.DAMAGE * (1 + this.powerBonus),
-            'bullet_player',
-            18,
-            34
+            wCfg.DAMAGE * (thick ? 1.7 : 1) * (1 + this.powerBonus + this.wingBonus),
+            thick ? 'bullet_super' : 'bullet_player',
+            thick ? 28 : 18,
+            thick ? 28 : 34
           );
         }
       }
@@ -239,41 +246,29 @@ window.PlayerController = class PlayerController {
   }
 
   fireMainWeapon() {
-    const wData = window.GAME_CONFIG.WEAPONS[this.weaponLevel] || window.GAME_CONFIG.WEAPONS[1];
-    const spd = wData.speed;
-    const dmg = wData.damage * (1 + this.powerBonus);
+    const cfg = window.GAME_CONFIG;
+    const lanes = cfg.WEAPON_LADDER[this.weaponLevel] || 'T';
     const baseY = this.y - 36;
-    const count = wData.count;
-
-    if (count === 1) {
-      // 1X: Tek merkez plazma mermisi
-      this.game.spawnPlayerBullet(this.x, baseY, 0, -spd, dmg, 'bullet_player', 22, 46);
-    } else if (count === 2) {
-      // 2X: 2 adet paralel mermi
-      this.game.spawnPlayerBullet(this.x - 14, baseY, 0, -spd, dmg, 'bullet_player', 22, 46);
-      this.game.spawnPlayerBullet(this.x + 14, baseY, 0, -spd, dmg, 'bullet_player', 22, 46);
-    } else {
-      // 3X..8X: Tam olarak count (3, 4, 5, 6, 7, 8) adet mermi yelpazesi
-      const stepDeg = wData.spreadDeg || 7;
-      const half = (count - 1) * 0.5;
-      for (let i = 0; i < count; i++) {
-        const rel = i - half; // Örn 3 mermi için -1, 0, +1; 4 mermi için -1.5, -0.5, +0.5, +1.5
-        const deg = rel * stepDeg;
-        const rad = (deg * Math.PI) / 180;
-        const ox = rel * 11;
-        const isCenterSuper = (count >= 5 && Math.abs(rel) < 0.6);
-        this.game.spawnPlayerBullet(
-          this.x + ox,
-          baseY - (Math.abs(rel) < 1 ? 4 : 0),
-          Math.sin(rad) * spd,
-          -Math.cos(rad) * spd,
-          isCenterSuper ? dmg * 1.2 : dmg,
-          isCenterSuper ? 'bullet_super' : 'bullet_player',
-          isCenterSuper ? 34 : 22,
-          isCenterSuper ? 34 : 46,
-          rad
-        );
-      }
+    const n = lanes.length;
+    const half = (n - 1) * 0.5;
+    const gap = n <= 2 ? 14 : 15;
+    for (let i = 0; i < n; i++) {
+      const thick = lanes[i] === 'K';
+      const w = thick ? cfg.WEAPON_THICK : cfg.WEAPON_THIN;
+      const rel = i - half;
+      const rad = (rel * (n >= 5 ? 4 : 3) * Math.PI) / 180; // dışa doğru hafif yelpaze
+      const dmg = w.damage * (1 + this.powerBonus);
+      this.game.spawnPlayerBullet(
+        this.x + rel * gap,
+        baseY - (Math.abs(rel) < 1 ? 4 : 0),
+        Math.sin(rad) * w.speed,
+        -Math.cos(rad) * w.speed,
+        dmg,
+        thick ? 'bullet_super' : 'bullet_player',
+        w.w,
+        w.h,
+        rad
+      );
     }
   }
 
