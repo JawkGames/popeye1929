@@ -94,10 +94,17 @@ window.UIManager = class UIManager {
       }
     } else if (this.game.state === 'GAMEOVER') {
       if (this.hitRect(px, py, this.btnPrimary)) {
-        this.game.reviveWithAd();
+        if (!this.adBusy) {
+          this.adBusy = true;
+          window.Ads.showRewarded().then((ok) => {
+            this.adBusy = false;
+            if (ok && this.game.state === 'GAMEOVER') this.game.reviveWithAd();
+          });
+        }
         return true;
       }
       if (this.hitRect(px, py, this.btnSecondary)) {
+        window.Ads.showInterstitial();
         this.game.startGame();
         return true;
       }

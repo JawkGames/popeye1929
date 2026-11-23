@@ -1,6 +1,6 @@
 // Popeye 1929: Vertical Arcade SHMUP — Yapılandırma ve Sürüm Bilgisi
 window.GAME_CONFIG = {
-  VERSION: 'v0.011',
+  VERSION: 'v0.012',
   TITLE: 'POPEYE 1929: IRON ARMADA',
 
   // 9:16 Dikey Mobil Referans Çözünürlük (Tüm ekranlara responsive ölçeklenir)
@@ -147,9 +147,9 @@ window.GAME_CONFIG = {
   },
 
   ADMOB: {
-    IS_TEST: true,
-    APP_ID: 'ca-app-pub-3940256099942544~3347511713',
-    REWARDED_REVIVE: 'ca-app-pub-3940256099942544/5224354917',
-    INTERSTITIAL_STAGE: 'ca-app-pub-3940256099942544/1033173712'
+    IS_TEST: false,
+    APP_ID: 'ca-app-pub-7983529419004158~9792828487',
+    REWARDED_REVIVE: 'ca-app-pub-7983529419004158/1726762511',     // popeye1929_rewarded_revive
+    INTERSTITIAL_STAGE: 'ca-app-pub-7983529419004158/8531717703'   // popeye1929_interstitial_stage
   }
 };

@@ -586,6 +586,7 @@ window.WaveDirector = class WaveDirector {
     }
 
     this.game.addScore(b.score, bx, by);
+    if (window.Ads) window.Ads.showInterstitial();
     this.game.addFloatText(window.I18N.t('STAGE_CLEAR') + ' +10,000', bx, by - 40, '#ffe047', 28);
 
     // Yeni Bölüme Geçiş: Yeni 5'li düşman grubu, yeni gezegenli arka plan teması ve yeni Boss!
