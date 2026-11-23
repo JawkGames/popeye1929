@@ -2,7 +2,7 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.006`
+- **Güncel Sürüm:** `v0.007`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
 
 ## v0.003
@@ -24,4 +24,4 @@ Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konser
 - 2X: +1 adım · 3X: +1 adım + hasar %15 (max 4 kez) · 4X: atış hızı +%15 (max 3) · 6X: hepsi. Hepsi full iken gelen silah konservesi: uçak varsa uçak hasarı +%25, yoksa skor.
 - Düşüş: düşman öldürünce %10 konserve (`CAN_TABLE`: hp 25, 2x 25, kalkan 13, 3x 12, uçak 10, 4x 8, bomba 4, 6x 3), %34 altın. Stage 1'de 6X yok.
 - Zamanlı/periyodik konserveler kaldırıldı; sadece 20. sn garantili ıspanak. Boss faz geçişi ıspanak/kalkan ve boss sonrası 4X duruyor.
-- Hasar alınca seviye 4'ün üstündeyse 1 adım düşer (eski kural).
+- (v0.007) Hasar alınca silaha bir şey olmaz; sadece ölüp baştan başlayınca her şey sıfırlanır. Reklamla canlanmada güç korunur.

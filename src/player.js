@@ -286,7 +286,6 @@ window.PlayerController = class PlayerController {
     this.game.addScreenShake(10, 0.28);
     this.game.spawnVfx(this.x, this.y, 'spark_crit', 84, 0.28);
 
-    if (this.weaponLevel > 4) this.weaponLevel -= 1;
 
     if (this.hp <= 0) {
       this.dead = true;
