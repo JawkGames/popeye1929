@@ -2,8 +2,16 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.009`
+- **Güncel Sürüm:** `v0.010`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.010 — 20 Yeni Düşman + 10 Yeni Mermi, 10 Dev Boss, Gezegenli Değişen Uzay, Alt Mıknatıslı XP ve Tek Seferlik Yetenekler
+- **Tek Seferlik Yetenekler:** 50 yeteneğin tamamı `max: 1` yapıldı; bir kez seçilen yetenek bir daha asla seçime gelmez.
+- **Alt Mıknatıslı XP Elmasları:** XP elmasları ekranın en altına (`H - 115`) indiğinde yok olmaz; mıknatısla otomatik olarak oyuncuya doğru hızla çekilir ve uçağa yapışır.
+- **20 Yeni Düşman + 10 Yeni Düşman Mermisi (`assets/enemies_bullets_atlas.png`):** Tek toplu sayfada 20 kademeli düşman (`e2_1`..`e2_20`) ve altında 10 yeni düşman mermisi (`ebul_1`..`ebul_10`) üretildi. Bölümlerde 5'erli gruplar halinde (Bölüm 2: `e2_1..e2_5`, Bölüm 3: `e2_6..e2_10`, Bölüm 4: `e2_11..e2_15`, Bölüm 5+: `e2_16..e2_20`) 5 farklı güç ve saldırı stiliyle devreye girer.
+- **10 Yeni Dev Boss (`assets/bosses_atlas.png`):** Tek toplu sayfada 5 üstte, 5 altta olmak üzere 10 dev Boss (`boss_1`..`boss_10`) üretildi ve bölümlere bağlandı.
+- **Sürekli Değişen Gezegenli Uzay Arka Planı:** Gökyüzü gradyanı, yıldız renkleri, nebulalar ve halkalı/kraterli gezegenler oyun boyunca sürekli renk ve tema değiştirerek akar.
+- **Bölüm 1 Bina/Duvar İç Beyazlık Temizliği:** `assets/env_atlas.png` içindeki boru ve zincir halkalarının arasında kalan kapalı beyaz arka plan adaları tamamen şeffaflaştırıldı ve 4 geçişli defringe uygulandı.
 
 ## v0.009
 - Oyun durduğunda (seviye atlama, pause, game over) ekran sarsılma/deprem efektinin takılı kalması engellendi; sarsıntı yalnızca aktif oynanışta (`PLAYING`) uygulanır ve duraklatmalarda sıfırlanır.

@@ -1,4 +1,4 @@
-// Ana Oyun Motoru: Sonsuz Paralaks, Object Pool, XP/Seviye Atlama, 50 Archero Yetenek Fiziği ve Çarpışma Motoru
+// Ana Oyun Motoru: Değişen Gezegenli Uzay Arka Planı, Alt Mıknatıslı XP Kristalleri, 50 Yetenek ve Çarpışma Motoru
 window.PopeyeShmupGame = class PopeyeShmupGame {
   constructor() {
     this.canvas = document.getElementById('game-canvas');
@@ -10,7 +10,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.state = 'LOADING'; // LOADING, MENU, PLAYING, LEVELUP, PAUSED, GAMEOVER
     this.score = 0;
 
-    // XP ve Seviye Sistemi (Kombo barı yerine)
+    // XP ve Seviye Sistemi
     this.level = 1;
     this.xp = 0;
     this.xpToNext = window.GAME_CONFIG.XP.START_NEEDED;
@@ -25,7 +25,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     window.addEventListener('resize', () => this.setupCanvasScaling());
 
     this.initPools();
-    this.initParallaxStars();
+    this.initCosmicBackground();
 
     this.player = new window.PlayerController(this);
     this.waveDirector = new window.WaveDirector(this);
@@ -75,7 +75,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   initPools() {
-    // 1) Oyuncu Mermi Havuzu (Delici, Seken, Güdümlü, Bumerang, Şarapnel destekli)
     this.playerBulletPool = new window.ObjectPool(
       () => ({
         x: 0, y: 0, vx: 0, vy: 0, dmg: 10, frame: 'bullet_player', w: 20, h: 42, rot: 0,
@@ -113,7 +112,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         b.dmg = dmg; b.frame = frame || 'bullet_enemy_dart';
         b.w = w || 20; b.h = h || 32; b.rot = rot || 0;
       },
-      120
+      140
     );
 
     this.enemyPool = new window.ObjectPool(
@@ -121,6 +120,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         type: 'scout_pod', x: 0, y: 0, w: 64, h: 64, radius: 26,
         hp: 30, maxHp: 30, score: 100, damage: 15,
         fireRate: 2.0, fireTimer: 1.0, bulletSpeed: 300,
+        bulletFrame: 'bullet_enemy_dart', attackStyle: 'single',
         hitFlash: 0, rotation: 0, isBoss: false,
         burnTimer: 0, burnDps: 0, chillTimer: 0
       }),
@@ -128,8 +128,9 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       36
     );
 
+    // XP Kristalleri Havuzu (En alta gelince yok olmaz; mıknatısla oyuncuya çekilir ve yapışır)
     this.pickupPool = new window.ObjectPool(
-      () => ({ x: 0, y: 0, vy: 130, type: 'xp_gem', xpVal: 22, age: 0 }),
+      () => ({ x: 0, y: 0, vy: 140, type: 'xp_gem', xpVal: 22, age: 0, magnetized: false }),
       (p, x, y, type, xpVal) => {
         p.x = Math.max(46, Math.min(this.W - 46, x));
         p.y = y;
@@ -137,8 +138,9 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         p.type = 'xp_gem';
         p.xpVal = xpVal || window.GAME_CONFIG.XP.GEM_VALUE;
         p.age = 0;
+        p.magnetized = false;
       },
-      32
+      36
     );
 
     this.vfxPool = new window.ObjectPool(
@@ -171,19 +173,170 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     );
   }
 
-  initParallaxStars() {
+  // =========================================================================
+  // SÜREKLİ DEĞİŞEN GEZEGENLİ, NEBULALI VE RENKLİ YILDIZLI UZAY ARKA PLANI
+  // =========================================================================
+  initCosmicBackground() {
+    this.cosmicThemes = [
+      // 0: Derin Mavi Uzay & Buz Halkalı Gezegen
+      { top: [7, 20, 38],   mid: [12, 34, 62],  bot: [6, 17, 32],   nebula: 'rgba(0, 195, 255, 0.14)', starColors: ['#ffffff', '#9be8ff', '#ffe49e'] },
+      // 1: Kızıl Mars Nebulası & Lav Gezegeni
+      { top: [36, 8, 20],   mid: [68, 16, 36],  bot: [24, 6, 16],   nebula: 'rgba(255, 72, 48, 0.16)',  starColors: ['#ffe5b4', '#ff8da1', '#ffffff'] },
+      // 2: Zümrüt Biyo-Sektör & Halkalı Gaz Devi
+      { top: [6, 30, 24],   mid: [14, 58, 46],  bot: [4, 22, 18],   nebula: 'rgba(45, 255, 165, 0.15)', starColors: ['#b8ffda', '#70f8ff', '#ffffff'] },
+      // 3: Ametist Hiçlik Galaksisi & Mor Süpernova
+      { top: [24, 8, 44],   mid: [48, 18, 84],  bot: [16, 6, 32],   nebula: 'rgba(195, 80, 255, 0.17)', starColors: ['#ecc2ff', '#ff94e8', '#9be8ff'] },
+      // 4: Altın Güneş Koronası & Kehribar Uzay
+      { top: [38, 22, 6],   mid: [72, 44, 12],  bot: [26, 14, 4],   nebula: 'rgba(255, 185, 35, 0.16)', starColors: ['#fff0a8', '#ffb36b', '#ffffff'] },
+      // 5: Kutup Buzul Sektörü & Kristal Gökyüzü
+      { top: [5, 28, 46],   mid: [14, 62, 92],  bot: [4, 20, 36],   nebula: 'rgba(85, 235, 255, 0.17)', starColors: ['#d4faff', '#80e5ff', '#ffffff'] },
+      // 6: Siber-Kızıl Çatlak & İkili Gezegen
+      { top: [34, 6, 38],   mid: [64, 14, 72],  bot: [22, 4, 26],   nebula: 'rgba(255, 60, 190, 0.16)', starColors: ['#ffb8f0', '#70f8ff', '#ffe066'] }
+    ];
+
+    this.cosmicClock = 0;
+    this.themeDuration = 18.0; // Her 18 saniyede bir gökyüzü, yıldızlar ve nebulalar yumuşakça yeni renge evrilir
+
+    // Çok renkli paralaks yıldızlar
     this.stars = [];
-    for (let i = 0; i < 85; i++) {
+    for (let i = 0; i < 95; i++) {
       const layer = (i % 3) + 1;
       this.stars.push({
         x: Math.random() * this.W,
         y: Math.random() * this.H,
-        r: layer === 1 ? 1.1 : (layer === 2 ? 1.7 : 2.3),
-        speed: layer * 38,
-        alpha: 0.35 + layer * 0.2,
-        color: layer === 3 ? '#bfe3ff' : '#ffffff'
+        r: layer === 1 ? 1.2 : (layer === 2 ? 1.8 : 2.5),
+        speed: layer * 40,
+        alpha: 0.38 + layer * 0.2,
+        colorIdx: i % 3,
+        twinklePhase: Math.random() * Math.PI * 2
       });
     }
+
+    // Paralaks Gezegenler, Halkalı Gaz Devleri ve Uydular
+    this.planetPalettes = [
+      { body: '#2b7de9', shade: '#133b7a', band: '#6bc5ff', ring: '#9be8ff', hasRing: true },
+      { body: '#e04832', shade: '#781912', band: '#ff964f', ring: '#ffd27d', hasRing: false },
+      { body: '#28c77a', shade: '#105e3a', band: '#8affc1', ring: '#befce0', hasRing: true },
+      { body: '#9b42f5', shade: '#481582', band: '#df99ff', ring: '#ff94e8', hasRing: true },
+      { body: '#f2a62c', shade: '#85490a', band: '#ffe07d', ring: '#fff2b8', hasRing: true },
+      { body: '#24bcd9', shade: '#0e5269', band: '#9ef3ff', ring: '#ffffff', hasRing: false }
+    ];
+
+    this.planets = [
+      this.createPlanet(115, 190, 56, 0, 26),
+      this.createPlanet(425, 540, 38, 1, 19),
+      this.createPlanet(150, 820, 46, 3, 22)
+    ];
+
+    // Süzülen Renkli Nebula Bulutları
+    this.nebulae = [
+      { x: 140, y: 240, r: 190, speed: 16 },
+      { x: 400, y: 650, r: 220, speed: 21 }
+    ];
+  }
+
+  createPlanet(x, y, radius, palIdx, speed) {
+    const pal = this.planetPalettes[palIdx % this.planetPalettes.length];
+    return {
+      x,
+      y,
+      r: radius,
+      speed: speed || 22,
+      palIdx: palIdx % this.planetPalettes.length,
+      body: pal.body,
+      shade: pal.shade,
+      band: pal.band,
+      ring: pal.ring,
+      hasRing: pal.hasRing,
+      ringTilt: (Math.random() < 0.5 ? -1 : 1) * (0.22 + Math.random() * 0.25)
+    };
+  }
+
+  advanceCosmicTheme() {
+    this.cosmicClock += this.themeDuration;
+  }
+
+  lerpRgb(c1, c2, t) {
+    const r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
+    const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
+    const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  drawPlanet(ctx, pl) {
+    ctx.save();
+    ctx.translate(pl.x, pl.y);
+
+    // Arka Halka Yarısı
+    if (pl.hasRing) {
+      ctx.save();
+      ctx.rotate(pl.ringTilt);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, pl.r * 1.95, pl.r * 0.52, 0, Math.PI, Math.PI * 2);
+      ctx.strokeStyle = '#07111e';
+      ctx.lineWidth = 10;
+      ctx.stroke();
+      ctx.strokeStyle = pl.ring;
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Gezegen Ana Gövdesi (Çizgi roman konturlu)
+    ctx.beginPath();
+    ctx.arc(0, 0, pl.r, 0, Math.PI * 2);
+    ctx.fillStyle = pl.body;
+    ctx.fill();
+
+    // Gezegen Atmosfer Kuşakları ve Gölge Yarımküresi (Clip içinde)
+    ctx.save();
+    ctx.clip();
+
+    ctx.fillStyle = pl.band;
+    ctx.globalAlpha = 0.55;
+    ctx.fillRect(-pl.r, -pl.r * 0.45, pl.r * 2, pl.r * 0.24);
+    ctx.fillRect(-pl.r, pl.r * 0.12, pl.r * 2, pl.r * 0.18);
+
+    // Kraterler veya Fırtına Gözü
+    ctx.fillStyle = pl.shade;
+    ctx.globalAlpha = 0.65;
+    ctx.beginPath();
+    ctx.arc(-pl.r * 0.28, -pl.r * 0.15, pl.r * 0.18, 0, Math.PI * 2);
+    ctx.arc(pl.r * 0.22, pl.r * 0.32, pl.r * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sağ-Alt Karanlık Hilal Gölgesi
+    ctx.globalAlpha = 0.72;
+    ctx.beginPath();
+    ctx.arc(pl.r * 0.35, pl.r * 0.25, pl.r * 0.98, 0, Math.PI * 2);
+    ctx.fillStyle = pl.shade;
+    ctx.fill();
+
+    ctx.restore();
+
+    // Gezegen Dış Çizgi Roman Siyah Konturu
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#07111e';
+    ctx.beginPath();
+    ctx.arc(0, 0, pl.r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Ön Halka Yarısı
+    if (pl.hasRing) {
+      ctx.save();
+      ctx.rotate(pl.ringTilt);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, pl.r * 1.95, pl.r * 0.52, 0, 0, Math.PI);
+      ctx.strokeStyle = '#07111e';
+      ctx.lineWidth = 10;
+      ctx.stroke();
+      ctx.strokeStyle = pl.ring;
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.restore();
   }
 
   resetParallaxWalls() {
@@ -206,6 +359,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.xpToNext = window.GAME_CONFIG.XP.START_NEEDED;
     this.pendingLevelUps = 0;
     this.levelUpChoices = [];
+    this.cosmicClock = 0;
 
     this.playerBulletPool.clear();
     this.enemyBulletPool.clear();
@@ -254,16 +408,14 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     }
   }
 
-  resetCombo() {
-    // Kombo kaldırıldı, yerine XP ve Seviye Atlama sistemi eklendi
-  }
+  resetCombo() {}
 
   // =========================================================================
   // XP KAZANMA VE 3'LÜ ISPANAK KUTUSU SEVİYE ATLAMA SİSTEMİ
   // =========================================================================
   addXp(amount) {
     if (this.player.dead) return;
-    const xpMult = 1 + this.player.hasSkill('xp_overdrive') * 0.35;
+    const xpMult = 1 + this.player.hasSkill('xp_overdrive') * 0.40;
     this.xp += amount * xpMult;
 
     while (this.xp >= this.xpToNext) {
@@ -287,6 +439,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.shakeTime = 0;
     this.shakeIntensity = 0;
     this.levelUpChoices = window.SkillSystem.rollThreeChoices(this.player);
+    if (this.levelUpChoices.length === 0) {
+      // 50 yeteneğin tamamı alındıysa doğrudan can ve skor ödülü ver
+      this.player.hp = this.player.maxHp;
+      this.addScore(1000, this.player.x, this.player.y - 40);
+      return;
+    }
     this.state = 'LEVELUP';
   }
 
@@ -381,12 +539,10 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
     let finalDmg = dmg;
 
-    // Boss & Elit Kruvazör Avcısı (boss_hunter)
-    if ((e.isBoss || e.type === 'elite_cruiser') && this.player.hasSkill('boss_hunter') > 0) {
-      finalDmg *= (1 + this.player.hasSkill('boss_hunter') * 0.35);
+    if ((e.isBoss || e.type === 'elite_cruiser' || e.type === 'e2_5' || e.type === 'e2_10' || e.type === 'e2_15' || e.type === 'e2_20') && this.player.hasSkill('boss_hunter') > 0) {
+      finalDmg *= 1.40;
     }
 
-    // Kritik Vuruş Hesabı
     if (!isDot && Math.random() < this.player.critChance) {
       finalDmg *= this.player.critMult;
       this.spawnVfx(e.x, e.y, 'spark_crit', 52, 0.16);
@@ -395,10 +551,9 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     e.hp -= finalDmg;
     e.hitFlash = 1.0;
 
-    // İnfazcı / Headshot (headshot_kill): Canı %20 altına inen normal düşmanı anında yok eder
     const hsLvl = this.player.hasSkill('headshot_kill');
-    if (hsLvl > 0 && !e.isBoss && e.type !== 'elite_cruiser' && e.hp > 0) {
-      if (e.hp / e.maxHp <= 0.14 + hsLvl * 0.04) {
+    if (hsLvl > 0 && !e.isBoss && e.hp > 0) {
+      if (e.hp / e.maxHp <= 0.20) {
         e.hp = 0;
         this.addFloatText(window.I18N.t('HEADSHOT_TXT'), e.x, e.y - 20, '#ff4d6d', 16);
       }
@@ -407,7 +562,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     if (e.hp <= 0) {
       if (e.isBoss) {
         this.waveDirector.onBossKilled(e);
-        this.addXp(window.GAME_CONFIG.ENEMIES.boss_dreadnought.xp || 350);
         return;
       }
 
@@ -416,13 +570,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.addScreenShake(5, 0.14);
       this.addScore(e.score, e.x, e.y);
 
-      // Vampirik Can Çalma (vampiric_leech)
       const vampLvl = this.player.hasSkill('vampiric_leech');
       if (vampLvl > 0 && !this.player.dead) {
-        this.player.hp = Math.min(this.player.maxHp, this.player.hp + vampLvl * 1.8);
+        this.player.hp = Math.min(this.player.maxHp, this.player.hp + 2.2);
       }
 
-      // Uçaklardan konserve veya altın çıkmaz; yalnızca level için XP kristali (xp_gem) çıkar
+      // Vurulan uçaklardan yalnızca XP elması çıkar
       const eCfg = window.GAME_CONFIG.ENEMIES[e.type];
       const xpVal = (eCfg && eCfg.xp) || window.GAME_CONFIG.XP.GEM_VALUE;
       this.spawnPickup(e.x, e.y, 'xp_gem', xpVal);
@@ -430,23 +583,19 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   onBulletHitEnemy(b, e) {
-    // 1) Geri İtme (knockback_impact)
     if (b.knockback > 0 && !e.isBoss) {
-      e.y = Math.max(-40, e.y - b.knockback * 11);
+      e.y = Math.max(-40, e.y - 14);
     }
 
-    // 2) Yakıcı Napalm (fire_rounds)
     if (b.burn > 0) {
       e.burnTimer = 3.0;
-      e.burnDps = b.dmg * 0.35 * b.burn;
+      e.burnDps = b.dmg * 0.45;
     }
 
-    // 3) Buzul Dondurma (ice_rounds)
     if (b.chill > 0) {
-      e.chillTimer = 2.8 + b.chill * 0.5;
+      e.chillTimer = 3.2;
     }
 
-    // 4) Patlayıcı Çekirdek (explosive_shots veya füze)
     if (b.explosive) {
       this.spawnExplosion(e.x, e.y, 76);
       const enemies = this.enemyPool.activeList;
@@ -461,16 +610,14 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       }
     }
 
-    // 5) Zincirleme Yıldırım (chain_lightning)
     if (b.lightning > 0) {
-      const nextTarget = this.findNearestEnemy(e.x, e.y, e, 220);
+      const nextTarget = this.findNearestEnemy(e.x, e.y, e, 240);
       if (nextTarget) {
         this.spawnVfx((e.x + nextTarget.x) * 0.5, (e.y + nextTarget.y) * 0.5, 'proj_lightning', 72, 0.18);
-        this.damageEnemy(nextTarget, b.dmg * (0.45 + b.lightning * 0.15), true);
+        this.damageEnemy(nextTarget, b.dmg * 0.65, true);
       }
     }
 
-    // 6) Şarapnel Bölünmesi (split_shrapnel)
     if (b.split) {
       b.split = false;
       const angles = [-0.55, 0, 0.55];
@@ -479,27 +626,11 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         this.spawnPlayerBullet(
           e.x, e.y,
           Math.cos(ang) * 720, Math.sin(ang) * 720,
-          b.dmg * 0.38, 'bullet_player', 14, 28, angles[i],
+          b.dmg * 0.42, 'bullet_player', 14, 28, angles[i],
           { pierce: 0 }
         );
       }
     }
-  }
-
-  applyWeaponCan(kind, color) {
-    const player = this.player;
-    const tr = window.I18N.lang === 'TR';
-    const res = player.applyWeaponCan(kind);
-    let label;
-    if (res === 'wing') label = tr ? 'UÇAKLAR GÜÇLENDİ!' : 'WINGMEN POWER UP!';
-    else if (res === 'score') label = tr ? 'MAX GÜÇ!' : 'MAX POWER!';
-    else if (kind === '3x') label = tr ? 'KALIN MERMİ!' : 'HEAVY SHOT!';
-    else if (kind === '4x') label = tr ? 'ATIŞ HIZI!' : 'FIRE RATE!';
-    else if (kind === '6x') label = tr ? 'SÜPER GÜÇ!' : 'SUPER POWER!';
-    else label = `${player.weaponLevel}X ${tr ? 'ATIŞ!' : 'SHOT!'}`;
-    this.addFloatText(label, player.x, player.y - 45, res === 'score' ? '#ffe047' : color, 20);
-    this.addScore(res === 'score' ? 600 : 300);
-    this.addXp(window.GAME_CONFIG.XP.CAN_XP);
   }
 
   applyPickup(p) {
@@ -508,12 +639,36 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   update(dt) {
+    // 1) Kozmik Arka Plan, Yıldızlar, Gezegenler ve Nebulalar Sürekli Akar ve Renk Değiştirir
+    this.cosmicClock += dt;
+
     for (let i = 0; i < this.stars.length; i++) {
       const s = this.stars[i];
       s.y += s.speed * dt;
+      s.twinklePhase += dt * 3.5;
       if (s.y > this.H + 5) {
         s.y = -5;
         s.x = Math.random() * this.W;
+      }
+    }
+
+    for (let i = 0; i < this.nebulae.length; i++) {
+      const nb = this.nebulae[i];
+      nb.y += nb.speed * dt;
+      if (nb.y - nb.r > this.H + 40) {
+        nb.y = -nb.r - 40;
+        nb.x = 80 + Math.random() * (this.W - 160);
+      }
+    }
+
+    for (let i = 0; i < this.planets.length; i++) {
+      const pl = this.planets[i];
+      pl.y += pl.speed * dt;
+      if (pl.y - pl.r * 2 > this.H + 60) {
+        const nextPalIdx = (pl.palIdx + 1 + Math.floor(Math.random() * (this.planetPalettes.length - 1))) % this.planetPalettes.length;
+        const newR = 34 + Math.floor(Math.random() * 32);
+        const newX = 75 + Math.random() * (this.W - 150);
+        this.planets[i] = this.createPlanet(newX, -newR * 2 - 40, newR, nextPalIdx, 18 + Math.random() * 14);
       }
     }
 
@@ -545,13 +700,11 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
     const enemies = this.enemyPool.activeList;
 
-    // Oyuncu Mermileri: Güdümlü, Bumerang, Duvar Sekmesi, Delici ve Ricochet Fiziği
     this.playerBulletPool.updateAll(dt, (b) => {
       b.age += dt;
       if (b.spinSpeed !== 0) b.rot += b.spinSpeed * dt;
       if (b.growRate > 0) b.w += b.growRate * dt;
 
-      // Bumerang Çapa Geri Dönüş Fiziği
       if (b.boomerang) {
         b.vy += 980 * dt;
         const dx = this.player.x - b.x;
@@ -561,7 +714,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         }
       }
 
-      // Güdümlü Mermi / Füze Kavis Fiziği
       if (b.homing > 0) {
         const target = this.findNearestEnemy(b.x, b.y, b.lastHitEnemy, 420);
         if (target) {
@@ -581,7 +733,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       b.x += b.vx * dt;
       b.y += b.vy * dt;
 
-      // Duvardan Seken Mermi (bouncy_walls)
       if (b.wallBounces > 0) {
         if (b.x < 18 && b.vx < 0) {
           b.x = 18;
@@ -609,7 +760,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
           this.onBulletHitEnemy(b, e);
           this.damageEnemy(e, b.dmg);
 
-          // Zincirleme Sekme (ricochet_shot)
           if (b.ricochets > 0) {
             const nextE = this.findNearestEnemy(e.x, e.y, e, 260);
             if (nextE) {
@@ -624,7 +774,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
             }
           }
 
-          // İçinden Geçen Delici Atış (piercing_shot)
           if (b.pierce > 0) {
             b.pierce--;
             b.lastHitEnemy = e;
@@ -637,20 +786,17 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return true;
     });
 
-    // Yörünge Küreleri ve Döner Çapalar Çarpışma Kontrolü
     const orbitals = this.player.getOrbitalPositions();
 
     this.enemyPool.updateAll(dt, (e) => {
       if (e.hitFlash > 0) e.hitFlash = Math.max(0, e.hitFlash - dt * 6.5);
 
-      // Yanma (Napalm DoT)
       if (e.burnTimer > 0) {
         e.burnTimer -= dt;
         this.damageEnemy(e, e.burnDps * dt, true);
         if (!e._active) return false;
       }
 
-      // Buzul Yavaşlatma (chillTimer)
       const moveDt = e.chillTimer > 0 ? dt * 0.58 : dt;
       if (e.chillTimer > 0) e.chillTimer -= dt;
 
@@ -663,7 +809,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         }
       }
 
-      // Yörünge birimlerinin düşmanlara teması
       for (let o = 0; o < orbitals.length; o++) {
         const ob = orbitals[o];
         const odx = e.x - ob.x;
@@ -696,7 +841,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       b.y += b.vy * dt;
       if (b.y > this.H + 40 || b.y < -40 || b.x < -40 || b.x > this.W + 40) return false;
 
-      // Yörünge Kalkan Küreleri düşman mermilerini yok eder
       for (let o = 0; o < orbitals.length; o++) {
         const ob = orbitals[o];
         if (!ob.blocksBullets) continue;
@@ -720,21 +864,41 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return true;
     });
 
-    // Konserve, Altın ve XP Kristalleri (Sabit dikey hattında iner, değince alınır)
-    const touchR = window.GAME_CONFIG.PICKUPS.TOUCH_RADIUS || 54;
+    // XP Elmasları: En alta ulaştığında yok olmaz, mıknatısla oyuncuya çekilir ve otomatik yapışır!
+    const touchR = window.GAME_CONFIG.PICKUPS.TOUCH_RADIUS || 56;
+    const bottomMagnetY = this.H - 115;
+
     this.pickupPool.updateAll(dt, (p) => {
       p.age += dt;
-      p.y += p.vy * dt;
+
+      if (!p.magnetized) {
+        p.y += p.vy * dt;
+        if (p.y >= bottomMagnetY) {
+          p.magnetized = true;
+        }
+      }
 
       if (!this.player.dead) {
         const dx = this.player.x - p.x;
         const dy = this.player.y - p.y;
-        if (dx * dx + dy * dy <= touchR * touchR) {
+        const distSq = dx * dx + dy * dy;
+
+        if (p.magnetized) {
+          const dist = Math.max(1, Math.sqrt(distSq));
+          const pullSpeed = 780;
+          p.x += (dx / dist) * pullSpeed * dt;
+          p.y += (dy / dist) * pullSpeed * dt;
+        }
+
+        if (distSq <= touchR * touchR) {
           this.applyPickup(p);
           return false;
         }
+      } else {
+        return false;
       }
-      return p.y < this.H + 60;
+
+      return true;
     });
 
     this.vfxPool.updateAll(dt, (v) => {
@@ -762,49 +926,80 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     ctx.save();
     ctx.scale(this.dpr, this.dpr);
 
+    // 1) Dinamik Değişen Uzay Gökyüzü Gradyanı
+    const totalThemes = this.cosmicThemes.length;
+    const rawIdx = this.cosmicClock / this.themeDuration;
+    const idxA = Math.floor(rawIdx) % totalThemes;
+    const idxB = (idxA + 1) % totalThemes;
+    const blend = rawIdx - Math.floor(rawIdx);
+    const thA = this.cosmicThemes[idxA];
+    const thB = this.cosmicThemes[idxB];
+
     const grad = ctx.createLinearGradient(0, 0, 0, this.H);
-    grad.addColorStop(0, '#071426');
-    grad.addColorStop(0.5, '#0b1e36');
-    grad.addColorStop(1, '#061120');
+    grad.addColorStop(0,   this.lerpRgb(thA.top, thB.top, blend));
+    grad.addColorStop(0.5, this.lerpRgb(thA.mid, thB.mid, blend));
+    grad.addColorStop(1,   this.lerpRgb(thA.bot, thB.bot, blend));
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, this.W, this.H);
 
+    // Sadece aktif oynanışta ekran sarsıntısı uygula
     if (this.state === 'PLAYING' && this.shakeTime > 0 && this.shakeIntensity > 0) {
       const sx = (Math.random() - 0.5) * this.shakeIntensity * 2;
       const sy = (Math.random() - 0.5) * this.shakeIntensity * 2;
       ctx.translate(sx, sy);
     }
 
+    // 2) Renkli Nebula Bulutları
+    for (let i = 0; i < this.nebulae.length; i++) {
+      const nb = this.nebulae[i];
+      const nGrad = ctx.createRadialGradient(nb.x, nb.y, 10, nb.x, nb.y, nb.r);
+      nGrad.addColorStop(0, blend < 0.5 ? thA.nebula : thB.nebula);
+      nGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = nGrad;
+      ctx.beginPath();
+      ctx.arc(nb.x, nb.y, nb.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3) Çok Renkli Parıldayan Yıldızlar
+    const activeStarColors = blend < 0.5 ? thA.starColors : thB.starColors;
     for (let i = 0; i < this.stars.length; i++) {
       const s = this.stars[i];
-      ctx.fillStyle = s.color;
-      ctx.globalAlpha = s.alpha;
+      ctx.fillStyle = activeStarColors[s.colorIdx % activeStarColors.length];
+      ctx.globalAlpha = Math.max(0.2, Math.min(1, s.alpha + Math.sin(s.twinklePhase) * 0.18));
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
 
+    // 4) Paralaks Gezegenler, Halkalı Gaz Devleri ve Uydular
+    for (let i = 0; i < this.planets.length; i++) {
+      this.drawPlanet(ctx, this.planets[i]);
+    }
+
+    // 5) Sonsuz Modüler Metalik Üs Duvarları
     const walls = this.wallPool.activeList;
     for (let i = 0; i < walls.length; i++) {
       const w = walls[i];
       window.Atlas.draw(ctx, w.frame, w.x, w.y, w.w, w.h);
     }
 
+    // 6) XP Kristalleri
     const pickups = this.pickupPool.activeList;
     for (let i = 0; i < pickups.length; i++) {
       const p = pickups[i];
-      const isSmall = (p.type === 'coin_gold' || p.type === 'xp_gem');
-      const sz = isSmall ? 34 : 52;
-      window.Atlas.draw(ctx, p.type, p.x, p.y, sz, sz);
+      window.Atlas.draw(ctx, p.type, p.x, p.y, 34, 34);
     }
 
+    // 7) Oyuncu Mermileri
     const pBullets = this.playerBulletPool.activeList;
     for (let i = 0; i < pBullets.length; i++) {
       const b = pBullets[i];
       window.Atlas.draw(ctx, b.frame, b.x, b.y, b.w, b.h, { rotation: b.rot });
     }
 
+    // 8) Düşman Gemileri ve Dev Bosslar
     const enemies = this.enemyPool.activeList;
     for (let i = 0; i < enemies.length; i++) {
       const e = enemies[i];
@@ -814,14 +1009,17 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       });
     }
 
+    // 9) Oyuncu Uçağı, Lazerler, Yörüngeler ve Wingman'ler
     this.player.draw(ctx);
 
+    // 10) Düşman Mermileri
     const eBullets = this.enemyBulletPool.activeList;
     for (let i = 0; i < eBullets.length; i++) {
       const b = eBullets[i];
       window.Atlas.draw(ctx, b.frame, b.x, b.y, b.w, b.h, { rotation: b.rot });
     }
 
+    // 11) VFX ve Patlamalar
     const vfxs = this.vfxPool.activeList;
     for (let i = 0; i < vfxs.length; i++) {
       const v = vfxs[i];
@@ -834,6 +1032,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       });
     }
 
+    // 12) Uçuşan Yazılar
     const fTexts = this.floatTextPool.activeList;
     for (let i = 0; i < fTexts.length; i++) {
       const ft = fTexts[i];
@@ -844,6 +1043,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       ctx.restore();
     }
 
+    // 13) HUD ve Seviye Atlama Ekranı
     this.ui.draw(ctx);
 
     ctx.restore();

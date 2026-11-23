@@ -394,12 +394,8 @@ window.UIManager = class UIManager {
         window.Atlas.draw(ctx, sk.badge, card.x + 22, canY + 18, 44, 44);
       }
 
-      // 4) Seviye Yıldızları (★)
-      let stars = '';
-      for (let s = 0; s < sk.max; s++) {
-        stars += (s <= curLvl) ? '★' : '☆';
-      }
-      this.drawTextOutlined(ctx, stars, card.x, card.y + 18, 13, '#ffe047', 'center', 3);
+      // 4) Tek Seferlik Özel Yetenek Rozeti (★)
+      this.drawTextOutlined(ctx, isTr ? '★ ÖZEL GÜÇ ★' : '★ UNIQUE PERK ★', card.x, card.y + 18, 10.5, '#ffe047', 'center', 3);
 
       // 5) Yetenek Adı
       this.drawWrappedText(ctx, info.name, card.x, card.y + 42, card.w - 22, 15, 11.5, '#ffffff');

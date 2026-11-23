@@ -233,10 +233,10 @@ window.PlayerController = class PlayerController {
 
   buildBulletOpts(extra = null) {
     return {
-      pierce: (extra && extra.pierce !== undefined) ? extra.pierce : this.hasSkill('piercing_shot'),
-      wallBounces: (extra && extra.wallBounces !== undefined) ? extra.wallBounces : this.hasSkill('bouncy_walls'),
-      ricochets: (extra && extra.ricochets !== undefined) ? extra.ricochets : this.hasSkill('ricochet_shot'),
-      homing: (extra && extra.homing !== undefined) ? extra.homing : (this.hasSkill('homing_bullets') * 1.6),
+      pierce: (extra && extra.pierce !== undefined) ? extra.pierce : (this.hasSkill('piercing_shot') ? 2 : 0),
+      wallBounces: (extra && extra.wallBounces !== undefined) ? extra.wallBounces : (this.hasSkill('bouncy_walls') ? 2 : 0),
+      ricochets: (extra && extra.ricochets !== undefined) ? extra.ricochets : (this.hasSkill('ricochet_shot') ? 2 : 0),
+      homing: (extra && extra.homing !== undefined) ? extra.homing : (this.hasSkill('homing_bullets') ? 3.2 : 0),
       split: (extra && extra.split !== undefined) ? extra.split : (this.hasSkill('split_shrapnel') > 0),
       explosive: (extra && extra.explosive !== undefined) ? extra.explosive : (this.hasSkill('explosive_shots') > 0),
       knockback: this.hasSkill('knockback_impact'),
@@ -641,7 +641,7 @@ window.PlayerController = class PlayerController {
     const res = [];
     const orbLvl = this.hasSkill('orbital_orbs');
     if (orbLvl > 0) {
-      const count = orbLvl * 2;
+      const count = 3;
       for (let i = 0; i < count; i++) {
         const ang = this.orbitAngle + (i / count) * Math.PI * 2;
         res.push({
@@ -652,14 +652,14 @@ window.PlayerController = class PlayerController {
           size: 32,
           rot: ang,
           blocksBullets: true,
-          dmg: 18 * this.getTotalDamageMult()
+          dmg: 22 * this.getTotalDamageMult()
         });
       }
     }
 
     const ancLvl = this.hasSkill('orbital_anchors');
     if (ancLvl > 0) {
-      const count = ancLvl * 2;
+      const count = 2;
       for (let i = 0; i < count; i++) {
         const ang = -this.orbitAngle * 1.25 + (i / count) * Math.PI * 2;
         res.push({
@@ -670,7 +670,7 @@ window.PlayerController = class PlayerController {
           size: 42,
           rot: ang * 3,
           blocksBullets: false,
-          dmg: 26 * this.getTotalDamageMult()
+          dmg: 30 * this.getTotalDamageMult()
         });
       }
     }
