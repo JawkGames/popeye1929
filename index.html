@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Popeye 1929: Iron Armada</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #040b16;
+      overflow: hidden;
+      touch-action: none;
+      font-family: "Arial Black", Impact, Arial, sans-serif;
+    }
+    #game-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #0a1b32 0%, #030912 100%);
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+      box-shadow: 0 0 36px rgba(0, 180, 255, 0.22);
+    }
+  </style>
+</head>
+<body>
+  <div id="game-wrap">
+    <canvas id="game-canvas"></canvas>
+  </div>
+  <script src="src/config.js"></script>
+  <script src="src/i18n.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/pool.js"></script>
+  <script src="src/atlas.js"></script>
+  <script src="src/formations.js"></script>
+  <script src="src/player.js"></script>
+  <script src="src/enemies.js"></script>
+  <script src="src/ui.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
