@@ -56,7 +56,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   initPools() {
-    // 1) Oyuncu Mermi Havuzu
     this.playerBulletPool = new window.ObjectPool(
       () => ({ x: 0, y: 0, vx: 0, vy: 0, dmg: 10, frame: 'bullet_player', w: 20, h: 42, rot: 0 }),
       (b, x, y, vx, vy, dmg, frame, w, h, rot) => {
@@ -67,7 +66,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       80
     );
 
-    // 2) Düşman Mermi Havuzu
     this.enemyBulletPool = new window.ObjectPool(
       () => ({ x: 0, y: 0, vx: 0, vy: 0, dmg: 12, frame: 'bullet_enemy_dart', w: 20, h: 32, rot: 0 }),
       (b, x, y, vx, vy, dmg, frame, w, h, rot) => {
@@ -78,7 +76,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       120
     );
 
-    // 3) Düşman Havuzu
     this.enemyPool = new window.ObjectPool(
       () => ({
         type: 'scout_pod', x: 0, y: 0, w: 64, h: 64, radius: 26,
@@ -90,11 +87,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       36
     );
 
-    // 4) Konserve ve Altın Havuzu
+    // Konserve ve Altın Havuzu (Sağa sola kaçmadan sabit dikey hattında iner, değince alınır)
     this.pickupPool = new window.ObjectPool(
-      () => ({ x: 0, y: 0, vy: 135, type: 'can_hp', age: 0, startX: 0 }),
+      () => ({ x: 0, y: 0, vy: 130, type: 'can_hp', age: 0 }),
       (p, x, y, type) => {
-        p.x = x; p.y = y; p.startX = x;
+        p.x = Math.max(46, Math.min(this.W - 46, x));
+        p.y = y;
         p.vy = window.GAME_CONFIG.PICKUPS.FALL_SPEED;
         p.type = type || 'can_hp';
         p.age = 0;
@@ -102,7 +100,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       24
     );
 
-    // 5) VFX ve Patlama Havuzu
     this.vfxPool = new window.ObjectPool(
       () => ({ x: 0, y: 0, type: 'spark', frame: 'spark_small', size: 48, age: 0, duration: 0.25, rot: 0 }),
       (v, x, y, type, frame, size, duration) => {
@@ -113,7 +110,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       64
     );
 
-    // 6) Uçuşan Kombo / Puan Yazıları Havuzu
     this.floatTextPool = new window.ObjectPool(
       () => ({ text: '', x: 0, y: 0, color: '#fff', size: 18, age: 0, duration: 0.85 }),
       (ft, text, x, y, color, size) => {
@@ -124,7 +120,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       24
     );
 
-    // 7) Sonsuz Modüler Metalik Üs Duvarları Havuzu (Sol ve Sağ Paralaks Kule/Platformlar)
     this.wallPool = new window.ObjectPool(
       () => ({ side: 'left', frame: 'wall_left_radar', x: 0, y: 0, w: 180, h: 200, speed: 95 }),
       (w, side, frame, x, y, width, height, speed) => {
@@ -155,14 +150,11 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const leftFrames = ['wall_left_radar', 'wall_left_reactor'];
     const rightFrames = ['wall_right_tower', 'wall_right_coil'];
 
-    // Ekran boyunca kesintisiz modüler sol ve sağ üs duvarlarını diz
     for (let i = 0; i < 4; i++) {
       const yPos = this.H - i * 290;
       this.wallPool.acquire('left', leftFrames[i % 2], 78, yPos, 175, 220, 92);
       this.wallPool.acquire('right', rightFrames[i % 2], this.W - 78, yPos - 135, 175, 220, 92);
     }
-    this.wallSpawnLeftY = -280;
-    this.wallSpawnRightY = -415;
     this.wallStep = 0;
   }
 
@@ -254,7 +246,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.addFloatText(window.I18N.t('PICKUP_BOMB'), this.player.x, this.player.y - 55, '#ffe047', 22);
     }
 
-    // Ekrana halka halinde patlamalar yay
     for (let i = 0; i < 8; i++) {
       const ang = (i / 8) * Math.PI * 2;
       this.spawnExplosion(
@@ -264,7 +255,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       );
     }
 
-    // Aktif tüm düşmanlara ağır ıspanak şok hasarı ver
     const bombDmg = window.GAME_CONFIG.PICKUPS.BOMB_DAMAGE;
     const list = this.enemyPool.activeList;
     for (let i = list.length - 1; i >= 0; i--) {
@@ -290,7 +280,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.addScreenShake(5, 0.14);
       this.addScore(e.score, e.x, e.y);
 
-      // Garantili konserve veya rastgele altın/konserve düşüşü
       if (e.guaranteedCan) {
         this.spawnPickup(e.x, e.y, e.guaranteedCan);
       } else {
@@ -303,6 +292,23 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         }
       }
     }
+  }
+
+  applyWeaponCan(tier, color) {
+    const player = this.player;
+    const res = player.upgradeWeapon(tier);
+    if (res.upgraded) {
+      const label = window.I18N.lang === 'TR'
+        ? `${res.level}X MERMİ ATIŞI!`
+        : `${res.level}X MULTI-SHOT!`;
+      this.addFloatText(label, player.x, player.y - 45, color, 20);
+    } else {
+      const label = window.I18N.lang === 'TR'
+        ? `8X + GÜÇ ARTTI!`
+        : `8X + POWER UP!`;
+      this.addFloatText(label, player.x, player.y - 45, '#ffe047', 20);
+    }
+    this.addScore(300);
   }
 
   applyPickup(p) {
@@ -321,35 +327,19 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         break;
 
       case 'can_2x':
-        if (player.upgradeWeapon(2)) {
-          this.addFloatText(window.I18N.t('PICKUP_2X'), player.x, player.y - 45, '#57e2ff', 20);
-        } else {
-          this.addScore(500, p.x, p.y);
-        }
+        this.applyWeaponCan(2, '#57e2ff');
         break;
 
       case 'can_3x':
-        if (player.upgradeWeapon(3)) {
-          this.addFloatText(window.I18N.t('PICKUP_3X'), player.x, player.y - 45, '#57e2ff', 20);
-        } else {
-          this.addScore(500, p.x, p.y);
-        }
+        this.applyWeaponCan(3, '#57e2ff');
         break;
 
       case 'can_4x':
-        if (player.upgradeWeapon(4)) {
-          this.addFloatText(window.I18N.t('PICKUP_4X'), player.x, player.y - 45, '#ffa834', 20);
-        } else {
-          this.addScore(500, p.x, p.y);
-        }
+        this.applyWeaponCan(4, '#ffa834');
         break;
 
       case 'can_6x':
-        if (player.upgradeWeapon(6)) {
-          this.addFloatText(window.I18N.t('PICKUP_6X'), player.x, player.y - 45, '#ff4d6d', 22);
-        } else {
-          this.addScore(650, p.x, p.y);
-        }
+        this.applyWeaponCan(6, '#ff4d6d');
         break;
 
       case 'can_wingman':
@@ -373,7 +363,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   update(dt) {
-    // Yıldızlar ve Modüler Üs Duvarları her zaman sonsuz akar
     for (let i = 0; i < this.stars.length; i++) {
       const s = this.stars[i];
       s.y += s.speed * dt;
@@ -383,7 +372,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       }
     }
 
-    // Sonsuz Modüler Metalik Üs Duvarlarını Kaydır ve Alttan Çıkınca Üstten Geri Dönüştür
     const leftFrames = ['wall_left_radar', 'wall_left_reactor'];
     const rightFrames = ['wall_right_tower', 'wall_right_coil'];
     this.wallPool.updateAll(dt, (w) => {
@@ -402,13 +390,11 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
     if (this.state !== 'PLAYING') return;
 
-    // Ekran Titremesi (Screen Shake)
     if (this.shakeTime > 0) {
       this.shakeTime = Math.max(0, this.shakeTime - dt);
       if (this.shakeTime === 0) this.shakeIntensity = 0;
     }
 
-    // Kombo zamanlayıcısı
     if (this.combo > 1) {
       this.comboTimer -= dt;
       if (this.comboTimer <= 0) {
@@ -416,11 +402,9 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       }
     }
 
-    // 1) Oyuncu ve Dalga Yöneticisi
     this.player.update(dt);
     this.waveDirector.update(dt);
 
-    // 2) Oyuncu Mermileri & Düşman Çarpışma Kontrolü
     const enemies = this.enemyPool.activeList;
     this.playerBulletPool.updateAll(dt, (b) => {
       b.x += b.vx * dt;
@@ -442,7 +426,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return true;
     });
 
-    // 3) Düşman Hareketleri, Ateşleri ve Oyuncuyla Gövde Çarpışması
     this.enemyPool.updateAll(dt, (e) => {
       if (e.hitFlash > 0) e.hitFlash = Math.max(0, e.hitFlash - dt * 6.5);
 
@@ -455,7 +438,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         }
       }
 
-      // Oyuncu ile çarpışma
       if (!this.player.dead) {
         const dx = e.x - this.player.x;
         const dy = e.y - this.player.y;
@@ -472,7 +454,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return e.y < this.H + 120;
     });
 
-    // 4) Düşman Mermileri & Oyuncu Çarpışması
     this.enemyBulletPool.updateAll(dt, (b) => {
       b.x += b.vx * dt;
       b.y += b.vy * dt;
@@ -490,23 +471,17 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return true;
     });
 
-    // 5) Konserve ve Altın Toplanabilirleri (Mıknatıs Çekimi + Toplama)
-    const pCfg = window.GAME_CONFIG.PICKUPS;
+    // 5) Konserve ve Altın Toplanabilirleri:
+    // Sağa-sola kaçmadan kendi dikey çizgisinde sabit iner, uçak değdiği anda alınır
+    const touchR = window.GAME_CONFIG.PICKUPS.TOUCH_RADIUS || 54;
     this.pickupPool.updateAll(dt, (p) => {
       p.age += dt;
       p.y += p.vy * dt;
-      p.x = p.startX + Math.sin(p.age * 3.0) * 18;
 
       if (!this.player.dead) {
         const dx = this.player.x - p.x;
         const dy = this.player.y - p.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < pCfg.MAGNET_RADIUS) {
-          p.x += (dx / Math.max(1, dist)) * pCfg.MAGNET_SPEED * dt;
-          p.y += (dy / Math.max(1, dist)) * pCfg.MAGNET_SPEED * dt;
-          p.startX = p.x;
-        }
-        if (dist < 42) {
+        if (dx * dx + dy * dy <= touchR * touchR) {
           this.applyPickup(p);
           return false;
         }
@@ -514,7 +489,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return p.y < this.H + 60;
     });
 
-    // 6) VFX ve 4 Kareli Patlama Animasyonu
     this.vfxPool.updateAll(dt, (v) => {
       v.age += dt;
       if (v.age >= v.duration) return false;
@@ -528,7 +502,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return true;
     });
 
-    // 7) Uçuşan Yazılar
     this.floatTextPool.updateAll(dt, (ft) => {
       ft.age += dt;
       ft.y -= 48 * dt;
@@ -541,7 +514,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     ctx.save();
     ctx.scale(this.dpr, this.dpr);
 
-    // 1) Derin Uzay Arka Planı
     const grad = ctx.createLinearGradient(0, 0, 0, this.H);
     grad.addColorStop(0, '#071426');
     grad.addColorStop(0.5, '#0b1e36');
@@ -549,14 +521,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, this.W, this.H);
 
-    // Ekran Titremesi (Screen Shake) Uygulaması
     if (this.shakeTime > 0 && this.shakeIntensity > 0) {
       const sx = (Math.random() - 0.5) * this.shakeIntensity * 2;
       const sy = (Math.random() - 0.5) * this.shakeIntensity * 2;
       ctx.translate(sx, sy);
     }
 
-    // 2) Paralaks Yıldız Katmanları
     for (let i = 0; i < this.stars.length; i++) {
       const s = this.stars[i];
       ctx.fillStyle = s.color;
@@ -567,32 +537,26 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     }
     ctx.globalAlpha = 1;
 
-    // 3) Sonsuz Modüler Metalik Üs Duvarları (Sol ve Sağ Kenar Paralaks)
     const walls = this.wallPool.activeList;
     for (let i = 0; i < walls.length; i++) {
       const w = walls[i];
       window.Atlas.draw(ctx, w.frame, w.x, w.y, w.w, w.h);
     }
 
-    // 4) Toplanabilir Konserveler ve Altınlar
     const pickups = this.pickupPool.activeList;
     for (let i = 0; i < pickups.length; i++) {
       const p = pickups[i];
       const isCoin = p.type === 'coin_gold';
       const sz = isCoin ? 34 : 52;
-      window.Atlas.draw(ctx, p.type, p.x, p.y, sz, sz, {
-        rotation: Math.sin(p.age * 4.5) * 0.16
-      });
+      window.Atlas.draw(ctx, p.type, p.x, p.y, sz, sz);
     }
 
-    // 5) Oyuncu Mermileri
     const pBullets = this.playerBulletPool.activeList;
     for (let i = 0; i < pBullets.length; i++) {
       const b = pBullets[i];
       window.Atlas.draw(ctx, b.frame, b.x, b.y, b.w, b.h, { rotation: b.rot });
     }
 
-    // 6) Düşman Gemileri ve Dev Boss
     const enemies = this.enemyPool.activeList;
     for (let i = 0; i < enemies.length; i++) {
       const e = enemies[i];
@@ -602,17 +566,14 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       });
     }
 
-    // 7) Oyuncu Uçağı ve Wingman'ler
     this.player.draw(ctx);
 
-    // 8) Düşman Mermileri
     const eBullets = this.enemyBulletPool.activeList;
     for (let i = 0; i < eBullets.length; i++) {
       const b = eBullets[i];
       window.Atlas.draw(ctx, b.frame, b.x, b.y, b.w, b.h, { rotation: b.rot });
     }
 
-    // 9) VFX, Kıvılcımlar ve Patlamalar
     const vfxs = this.vfxPool.activeList;
     for (let i = 0; i < vfxs.length; i++) {
       const v = vfxs[i];
@@ -625,7 +586,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       });
     }
 
-    // 10) Uçuşan Puan ve Güçlendirme Yazıları
     const fTexts = this.floatTextPool.activeList;
     for (let i = 0; i < fTexts.length; i++) {
       const ft = fTexts[i];
@@ -636,7 +596,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       ctx.restore();
     }
 
-    // 11) Üst HUD ve Arayüz
     this.ui.draw(ctx);
 
     ctx.restore();

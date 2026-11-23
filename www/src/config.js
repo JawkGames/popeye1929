@@ -1,13 +1,13 @@
 // Popeye 1929: Vertical Arcade SHMUP — Yapılandırma ve Sürüm Bilgisi
 window.GAME_CONFIG = {
-  VERSION: 'v0.001',
+  VERSION: 'v0.002',
   TITLE: 'POPEYE 1929: IRON ARMADA',
 
   // 9:16 Dikey Mobil Referans Çözünürlük (Tüm ekranlara responsive ölçeklenir)
   WIDTH: 540,
   HEIGHT: 960,
 
-  //Varsayılan Dil ('TR' konsept görsele birebir uygun, sağ üstten TR/EN değiştirilebilir)
+  // Varsayılan Dil ('TR' konsept görsele birebir uygun, sağ üstten TR/EN değiştirilebilir)
   DEFAULT_LANG: 'TR',
 
   // Oyuncu Ayarları
@@ -40,20 +40,22 @@ window.GAME_CONFIG = {
     ]
   },
 
-  // Silah Seviyeleri (1x, 2x, 3x, 4x, 6x Konserve Yükseltmeleri)
+  // Silah Seviyeleri (1x..8x Mermi Sayısı ve Hasar Tablosu)
   WEAPONS: {
-    1: { level: 1, label: '1X', count: 1, spreadDeg: 0, damage: 18, speed: 880 },
-    2: { level: 2, label: '2X', count: 2, spreadDeg: 0, spacing: 20, damage: 17, speed: 900 },
-    3: { level: 3, label: '3X', count: 3, spreadDeg: 11, spacing: 14, damage: 16, speed: 920 },
-    4: { level: 4, label: '4X', count: 4, spreadDeg: 7, spacing: 14, damage: 15, speed: 940 },
-    6: { level: 6, label: '6X', count: 6, spreadDeg: 9, spacing: 11, damage: 15, speed: 960 }
+    1: { level: 1, label: '1X', count: 1, spreadDeg: 0,  damage: 22, speed: 890 },
+    2: { level: 2, label: '2X', count: 2, spreadDeg: 0,  damage: 19, speed: 900 },
+    3: { level: 3, label: '3X', count: 3, spreadDeg: 10, damage: 18, speed: 920 },
+    4: { level: 4, label: '4X', count: 4, spreadDeg: 7,  damage: 17, speed: 940 },
+    5: { level: 5, label: '5X', count: 5, spreadDeg: 8,  damage: 17, speed: 950 },
+    6: { level: 6, label: '6X', count: 6, spreadDeg: 8,  damage: 17, speed: 960 },
+    7: { level: 7, label: '7X', count: 7, spreadDeg: 7,  damage: 18, speed: 970 },
+    8: { level: 8, label: '8X', count: 8, spreadDeg: 7,  damage: 19, speed: 980 }
   },
 
   // Konserve & Güçlendirme Ayarları
   PICKUPS: {
-    FALL_SPEED: 135,
-    MAGNET_RADIUS: 115,
-    MAGNET_SPEED: 420,
+    FALL_SPEED: 130,
+    TOUCH_RADIUS: 54,
     SPINACH_HEAL: 35,
     BOMB_DAMAGE: 420,
     SCORE_BONUS: 250,

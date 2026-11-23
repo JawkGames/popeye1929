@@ -1,7 +1,8 @@
 # Popeye 1929: Iron Armada (Vertical Arcade SHMUP) — Proje Notları
 
-- **Sürüm:** `v0.001` (`src/config.js` & `www/src/config.js`)
-- **Değişiklik Notu (v0.001):** İlk tam sürüm oluşturuldu. 4 adet toplu Sprite Sheet / Texture Atlas (`ships_atlas.png`, `items_ui_atlas.png`, `vfx_atlas.png`, `env_atlas.png`), göreceli dokunmatik sürükleme (Relative Touch Drag), 1x/2x/3x/4x/6x konserve silah yükseltmeleri, yumuşak takipli Wingman yardımcı uçaklar, matematiksel formasyon motoru (Bezier, V-formasyonu, çapraz makas, loop-the-loop, taktiksel duruş, intihar dalışı), 150 saniyelik kademeli Bölüm 1 dalga akışı ve 3 fazlı Kabasakal (Bluto) Demir Dretnotu Boss savaşı eklendi.
+- **Sürüm:** `v0.002` (`src/config.js` & `www/src/config.js`)
+- **Değişiklik Notu (v0.002):** Konserve ve altınların sağa-sola kayıp oyuncudan kaçmasına yol açan yatay salınım/mıknatıs hatası kaldırıldı; nesneler artık kendi dikey hizasında sabit iniyor ve değdiğin anda alınıyor. Başlangıç ateşi 1 mermiye (`1X`) çekildi ve alınan her `2X` (veya diğer silah konserveleri) mermi sayısını kademeli olarak (`1X -> 2X -> 3X -> 4X -> 5X -> 6X -> 7X -> 8X`) artıracak şekilde güncellendi.
+- **Değişiklik Notu (v0.001):** İlk tam sürüm oluşturuldu.
 - **Altyapı:** HTML5 Canvas (60 FPS Object-Pooled) + Mobil 9:16 Responsive + Capacitor / AdMob uyumlu modüler mimari (`index.html` & `www/index.html`).
 - **Önemli Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
 
