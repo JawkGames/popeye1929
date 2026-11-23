@@ -137,7 +137,7 @@ window.PlayerController = class PlayerController {
     if (this.wingmen.length >= wCfg.MAX_COUNT) {
       return false;
     }
-    const toAdd = Math.min(2, wCfg.MAX_COUNT - this.wingmen.length);
+    const toAdd = 1; // Her konserve 1 uçak: sırayla sol, sağ, sol, sağ (OFFSETS sırası)
     for (let i = 0; i < toAdd; i++) {
       const slotIdx = this.wingmen.length;
       const offset = wCfg.OFFSETS[slotIdx];
