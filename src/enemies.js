@@ -15,27 +15,13 @@ window.WaveDirector = class WaveDirector {
     this.bossWarningTimer = 0;
     this.bossActive = null;
 
-    // Bölüm 1'de garantili sırayla düşecek güçlendirme konserveleri
-    // Zamanlı konserve yok; sadece ilk 20 sn'de 1 garantili ıspanak
-    this.scheduledCans = [
-      { time: 20, type: 'can_hp', spawned: false }
-    ];
+    // Uçaklardan veya zamandan konserve/altın düşmez; yalnızca öldürülen uçaklardan XP kristali çıkar
+    this.scheduledCans = [];
   }
 
-  // Düşman öldürünce: %CAN_DROP_CHANCE konserve (CAN_TABLE ağırlıklı), değilse altın ihtimali
+  // Düşman öldürünce konserve/altın düşmez, yalnızca XP kristali (xp_gem) düşer
   rollDrop() {
-    const cfg = window.GAME_CONFIG;
-    const r = Math.random();
-    if (r < cfg.CAN_DROP_CHANCE) {
-      let table = cfg.CAN_TABLE;
-      if (this.stage === 1) table = table.filter(t => t.type !== 'can_6x');
-      const total = table.reduce((a, t) => a + t.w, 0);
-      let x = Math.random() * total;
-      for (const t of table) { x -= t.w; if (x <= 0) return t.type; }
-      return table[0].type;
-    }
-    if (r < cfg.CAN_DROP_CHANCE + cfg.COIN_DROP_CHANCE) return 'coin_gold';
-    return null;
+    return 'xp_gem';
   }
 
   getDifficultyMult() {
@@ -473,8 +459,8 @@ window.WaveDirector = class WaveDirector {
       this.game.addScreenShake(14, 0.55);
       this.game.spawnExplosion(b.x - 55, b.y + 20, 95);
       this.game.spawnExplosion(b.x + 55, b.y + 20, 95);
-      // Faz geçişinde oyuncuya destek konservesi düşür
-      this.game.spawnPickup(b.x, b.y + 60, b.phase === 2 ? 'can_hp' : 'can_shield');
+      // Faz geçişinde XP kristali düşür
+      this.game.spawnPickup(b.x, b.y + 60, 'xp_gem', 45);
     }
 
     // Faz hızına göre sağ-sol devriye hareketi
@@ -569,15 +555,13 @@ window.WaveDirector = class WaveDirector {
     b._active = false;
     this.bossActive = null;
 
-    // Büyük final patlaması ve ödül yağmuru
-    for (let i = 0; i < 12; i++) {
-      const ang = (i / 12) * Math.PI * 2;
+    // Büyük final patlaması ve XP kristali yağmuru (konserve/altın düşmez)
+    for (let i = 0; i < 10; i++) {
+      const ang = (i / 10) * Math.PI * 2;
       const dist = 35 + (i % 3) * 35;
       this.game.spawnExplosion(bx + Math.cos(ang) * dist, by + Math.sin(ang) * dist, 125);
-      this.game.spawnPickup(bx + Math.cos(ang) * dist * 0.8, by + Math.sin(ang) * dist * 0.5, 'coin_gold');
+      this.game.spawnPickup(bx + Math.cos(ang) * dist * 0.8, by + Math.sin(ang) * dist * 0.5, 'xp_gem', 35);
     }
-    this.game.spawnPickup(bx - 45, by, 'can_hp');
-    this.game.spawnPickup(bx + 45, by, 'can_4x'); // Boss sonrası tek 4X
 
     this.game.addScore(b.score, bx, by);
     this.game.addFloatText(window.I18N.t('STAGE_CLEAR') + ' +10,000', bx, by - 40, '#ffe047', 28);

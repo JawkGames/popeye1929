@@ -2,8 +2,13 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.008`
+- **Güncel Sürüm:** `v0.009`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.009
+- Oyun durduğunda (seviye atlama, pause, game over) ekran sarsılma/deprem efektinin takılı kalması engellendi; sarsıntı yalnızca aktif oynanışta (`PLAYING`) uygulanır ve duraklatmalarda sıfırlanır.
+- Uçaklardan ve zamandan konserve/altın düşmesi tamamen kaldırıldı; vurulan uçaklardan yalnızca seviye atlamak için XP kristali (`xp_gem`) çıkar.
+- Seviye atlama hızı 2 kat yavaşlatıldı (`START_NEEDED: 180`, `STEP_INC: 95` ve hem ölümde hem kristalde çifte XP verilmesi kaldırılıp yalnızca düşen XP kristaline bağlandı).
 
 ## v0.008 — Archero Tarzı 50 Yetenek, XP Barı ve 3'lü Ispanak Seçim Ekranı
 - **HUD XP Barı:** Sol üstteki `KOMBO` barı kaldırıldı, yerine `SV / LV` göstergeli zümrüt yeşili **XP Barı** eklendi. Düşman öldürdükçe, altın/konserve ve düşen `xp_gem` kristallerini topladıkça XP barı dolar.

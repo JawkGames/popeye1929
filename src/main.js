@@ -129,12 +129,13 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     );
 
     this.pickupPool = new window.ObjectPool(
-      () => ({ x: 0, y: 0, vy: 130, type: 'can_hp', age: 0 }),
-      (p, x, y, type) => {
+      () => ({ x: 0, y: 0, vy: 130, type: 'xp_gem', xpVal: 22, age: 0 }),
+      (p, x, y, type, xpVal) => {
         p.x = Math.max(46, Math.min(this.W - 46, x));
         p.y = y;
         p.vy = window.GAME_CONFIG.PICKUPS.FALL_SPEED;
-        p.type = type || 'can_hp';
+        p.type = 'xp_gem';
+        p.xpVal = xpVal || window.GAME_CONFIG.XP.GEM_VALUE;
         p.age = 0;
       },
       32
@@ -220,13 +221,16 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   togglePause() {
+    this.shakeTime = 0;
+    this.shakeIntensity = 0;
     if (this.state === 'PLAYING') this.state = 'PAUSED';
     else if (this.state === 'PAUSED') this.state = 'PLAYING';
   }
 
   onPlayerDeath() {
     this.spawnExplosion(this.player.x, this.player.y, 130);
-    this.addScreenShake(16, 0.7);
+    this.shakeTime = 0;
+    this.shakeIntensity = 0;
     this.state = 'GAMEOVER';
   }
 
@@ -280,6 +284,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     if (this.pendingLevelUps <= 0) return;
     this.pendingLevelUps--;
     this.player.dragging = false;
+    this.shakeTime = 0;
+    this.shakeIntensity = 0;
     this.levelUpChoices = window.SkillSystem.rollThreeChoices(this.player);
     this.state = 'LEVELUP';
   }
@@ -314,8 +320,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.enemyBulletPool.acquire(x, y, vx, vy, dmg, frame, w, h, rot);
   }
 
-  spawnPickup(x, y, type) {
-    this.pickupPool.acquire(x, y, type);
+  spawnPickup(x, y, type, xpVal) {
+    this.pickupPool.acquire(x, y, 'xp_gem', xpVal);
   }
 
   spawnVfx(x, y, frame, size = 48, duration = 0.18) {
@@ -416,16 +422,10 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         this.player.hp = Math.min(this.player.maxHp, this.player.hp + vampLvl * 1.8);
       }
 
-      // Doğrudan XP + Konserve/Altın/XP Kristali Düşüşü
+      // Uçaklardan konserve veya altın çıkmaz; yalnızca level için XP kristali (xp_gem) çıkar
       const eCfg = window.GAME_CONFIG.ENEMIES[e.type];
-      this.addXp((eCfg && eCfg.xp) || 22);
-
-      const drop = this.waveDirector.rollDrop();
-      if (drop) {
-        this.spawnPickup(e.x, e.y, drop);
-      } else if (Math.random() < 0.38) {
-        this.spawnPickup(e.x, e.y, 'xp_gem');
-      }
+      const xpVal = (eCfg && eCfg.xp) || window.GAME_CONFIG.XP.GEM_VALUE;
+      this.spawnPickup(e.x, e.y, 'xp_gem', xpVal);
     }
   }
 
@@ -503,65 +503,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   applyPickup(p) {
-    const player = this.player;
-    const cfg = window.GAME_CONFIG.PICKUPS;
-    const xpCfg = window.GAME_CONFIG.XP;
-
-    switch (p.type) {
-      case 'xp_gem':
-        this.addXp(xpCfg.GEM_VALUE);
-        this.addScore(40);
-        break;
-
-      case 'coin_gold':
-        this.addScore(cfg.COIN_SCORE, p.x, p.y);
-        this.addXp(xpCfg.COIN_XP);
-        break;
-
-      case 'can_hp':
-        player.hp = Math.min(player.maxHp, player.hp + cfg.SPINACH_HEAL);
-        this.addScore(cfg.SCORE_BONUS);
-        this.addXp(xpCfg.CAN_XP);
-        this.addFloatText(window.I18N.t('PICKUP_HP'), player.x, player.y - 45, '#6dff5c', 20);
-        break;
-
-      case 'can_2x':
-        this.applyWeaponCan('2x', '#57e2ff');
-        break;
-
-      case 'can_3x':
-        this.applyWeaponCan('3x', '#57e2ff');
-        break;
-
-      case 'can_4x':
-        this.applyWeaponCan('4x', '#ffa834');
-        break;
-
-      case 'can_6x':
-        this.applyWeaponCan('6x', '#ff4d6d');
-        break;
-
-      case 'can_wingman':
-        this.addXp(xpCfg.CAN_XP);
-        if (player.addWingmen()) {
-          this.addFloatText(window.I18N.t('PICKUP_WINGMAN'), player.x, player.y - 45, '#70f0ff', 20);
-        } else {
-          this.addScore(600);
-          this.addFloatText(window.I18N.t('MAX_POWER'), player.x, player.y - 45, '#ffe047', 18);
-        }
-        break;
-
-      case 'can_shield':
-        player.shieldTimer = window.GAME_CONFIG.PLAYER.SHIELD_DURATION;
-        this.addXp(xpCfg.CAN_XP);
-        this.addFloatText(window.I18N.t('PICKUP_SHIELD'), player.x, player.y - 45, '#57ffda', 20);
-        break;
-
-      case 'can_bomb':
-        this.addXp(xpCfg.CAN_XP);
-        this.triggerSuperSpinachBomb(true);
-        break;
-    }
+    const xpVal = p.xpVal || window.GAME_CONFIG.XP.GEM_VALUE;
+    this.addXp(xpVal);
   }
 
   update(dt) {
@@ -826,7 +769,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, this.W, this.H);
 
-    if (this.shakeTime > 0 && this.shakeIntensity > 0) {
+    if (this.state === 'PLAYING' && this.shakeTime > 0 && this.shakeIntensity > 0) {
       const sx = (Math.random() - 0.5) * this.shakeIntensity * 2;
       const sy = (Math.random() - 0.5) * this.shakeIntensity * 2;
       ctx.translate(sx, sy);
