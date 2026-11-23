@@ -1,6 +1,7 @@
 # Popeye 1929: Iron Armada (Vertical Arcade SHMUP) — Proje Notları
 
-- **Sürüm:** `v0.002` (`src/config.js` & `www/src/config.js`)
+- **Sürüm:** `v0.008` (`src/config.js` & `www/src/config.js`)
+- **Değişiklik Notu (v0.008):** Kombo barı kaldırılarak yerine XP ve Seviye Atlama barı eklendi. Seviye atlandığında oyun durur ve 3'lü ıspanak kutusu yetenek seçim ekranı açılır. Çoklu/çapraz/yan/arka atış, seri ikili yaylım (Multishot), içinden geçen delici atış, duvardan/düşmandan seken mermi, sürekli lazer ışınları, güdümlü füzeler, döner testere disk, bumerang çapa, sonik dalga, ateş/buz/asit/yıldırım elementleri, yörünge kalkan küreleri ve savunma/can güçlendirmelerinden oluşan **50 çeşit Archero tarzı yetenek** (`src/skills.js`) ile yeni silah/mermi/kart çerçevesi görsel atlası (`assets/skills_weapons_atlas.png`) eklendi.
 - **Değişiklik Notu (v0.002):** Konserve ve altınların sağa-sola kayıp oyuncudan kaçmasına yol açan yatay salınım/mıknatıs hatası kaldırıldı; nesneler artık kendi dikey hizasında sabit iniyor ve değdiğin anda alınıyor. Başlangıç ateşi 1 mermiye (`1X`) çekildi ve alınan her `2X` (veya diğer silah konserveleri) mermi sayısını kademeli olarak (`1X -> 2X -> 3X -> 4X -> 5X -> 6X -> 7X -> 8X`) artıracak şekilde güncellendi.
 - **Değişiklik Notu (v0.001):** İlk tam sürüm oluşturuldu.
 - **Altyapı:** HTML5 Canvas (60 FPS Object-Pooled) + Mobil 9:16 Responsive + Capacitor / AdMob uyumlu modüler mimari (`index.html` & `www/index.html`).

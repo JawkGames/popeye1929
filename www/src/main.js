@@ -1,4 +1,4 @@
-// Ana Oyun Motoru: Sonsuz Paralaks Arka Plan, Object Pool Güncellemeleri, Çarpışma ve Vuruş Hissi (Game Juice)
+// Ana Oyun Motoru: Sonsuz Paralaks, Object Pool, XP/Seviye Atlama, 50 Archero Yetenek Fiziği ve Çarpışma Motoru
 window.PopeyeShmupGame = class PopeyeShmupGame {
   constructor() {
     this.canvas = document.getElementById('game-canvas');
@@ -7,10 +7,16 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.W = window.GAME_CONFIG.WIDTH;
     this.H = window.GAME_CONFIG.HEIGHT;
 
-    this.state = 'LOADING'; // LOADING, MENU, PLAYING, PAUSED, GAMEOVER
+    this.state = 'LOADING'; // LOADING, MENU, PLAYING, LEVELUP, PAUSED, GAMEOVER
     this.score = 0;
-    this.combo = 1;
-    this.comboTimer = 0;
+
+    // XP ve Seviye Sistemi (Kombo barı yerine)
+    this.level = 1;
+    this.xp = 0;
+    this.xpToNext = window.GAME_CONFIG.XP.START_NEEDED;
+    this.pendingLevelUps = 0;
+    this.levelUpChoices = [];
+
     this.shakeTime = 0;
     this.shakeIntensity = 0;
     this.lastTimestamp = 0;
@@ -38,7 +44,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const winW = Math.max(1, window.innerWidth);
     const winH = Math.max(1, window.innerHeight);
 
-    // Genişlik sabit (540), yükseklik telefon oranına göre uzar/kısalır -> üst/alt kesilmez, boşluk kalmaz
     let virtH = Math.round(cfg.WIDTH * winH / winW);
     virtH = Math.max(cfg.MIN_HEIGHT, Math.min(cfg.MAX_HEIGHT, virtH));
     const oldH = this.H || virtH;
@@ -70,14 +75,35 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   initPools() {
+    // 1) Oyuncu Mermi Havuzu (Delici, Seken, Güdümlü, Bumerang, Şarapnel destekli)
     this.playerBulletPool = new window.ObjectPool(
-      () => ({ x: 0, y: 0, vx: 0, vy: 0, dmg: 10, frame: 'bullet_player', w: 20, h: 42, rot: 0 }),
-      (b, x, y, vx, vy, dmg, frame, w, h, rot) => {
+      () => ({
+        x: 0, y: 0, vx: 0, vy: 0, dmg: 10, frame: 'bullet_player', w: 20, h: 42, rot: 0,
+        pierce: 0, wallBounces: 0, ricochets: 0, homing: 0, split: false, explosive: false,
+        knockback: 0, burn: 0, chill: 0, lightning: 0, boomerang: false, spinSpeed: 0, growRate: 0,
+        age: 0, lastHitEnemy: null
+      }),
+      (b, x, y, vx, vy, dmg, frame, w, h, rot, opts) => {
         b.x = x; b.y = y; b.vx = vx; b.vy = vy;
         b.dmg = dmg; b.frame = frame || 'bullet_player';
         b.w = w || 20; b.h = h || 42; b.rot = rot || 0;
+        b.pierce = (opts && opts.pierce) || 0;
+        b.wallBounces = (opts && opts.wallBounces) || 0;
+        b.ricochets = (opts && opts.ricochets) || 0;
+        b.homing = (opts && opts.homing) || 0;
+        b.split = Boolean(opts && opts.split);
+        b.explosive = Boolean(opts && opts.explosive);
+        b.knockback = (opts && opts.knockback) || 0;
+        b.burn = (opts && opts.burn) || 0;
+        b.chill = (opts && opts.chill) || 0;
+        b.lightning = (opts && opts.lightning) || 0;
+        b.boomerang = Boolean(opts && opts.boomerang);
+        b.spinSpeed = (opts && opts.spinSpeed) || 0;
+        b.growRate = (opts && opts.growRate) || 0;
+        b.age = 0;
+        b.lastHitEnemy = null;
       },
-      80
+      120
     );
 
     this.enemyBulletPool = new window.ObjectPool(
@@ -95,13 +121,13 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         type: 'scout_pod', x: 0, y: 0, w: 64, h: 64, radius: 26,
         hp: 30, maxHp: 30, score: 100, damage: 15,
         fireRate: 2.0, fireTimer: 1.0, bulletSpeed: 300,
-        hitFlash: 0, rotation: 0, isBoss: false
+        hitFlash: 0, rotation: 0, isBoss: false,
+        burnTimer: 0, burnDps: 0, chillTimer: 0
       }),
       null,
       36
     );
 
-    // Konserve ve Altın Havuzu (Sağa sola kaçmadan sabit dikey hattında iner, değince alınır)
     this.pickupPool = new window.ObjectPool(
       () => ({ x: 0, y: 0, vy: 130, type: 'can_hp', age: 0 }),
       (p, x, y, type) => {
@@ -111,7 +137,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         p.type = type || 'can_hp';
         p.age = 0;
       },
-      24
+      32
     );
 
     this.vfxPool = new window.ObjectPool(
@@ -174,8 +200,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
   startGame() {
     this.score = 0;
-    this.combo = 1;
-    this.comboTimer = 0;
+    this.level = 1;
+    this.xp = 0;
+    this.xpToNext = window.GAME_CONFIG.XP.START_NEEDED;
+    this.pendingLevelUps = 0;
+    this.levelUpChoices = [];
+
     this.playerBulletPool.clear();
     this.enemyBulletPool.clear();
     this.enemyPool.clear();
@@ -213,27 +243,71 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   addScore(basePoints, x, y) {
-    const mult = Math.min(25, this.combo);
-    const total = Math.round(basePoints * (1 + (mult - 1) * 0.15));
+    const total = Math.round(basePoints);
     this.score += total;
-    this.combo++;
-    this.comboTimer = 3.8;
     if (x !== undefined && y !== undefined) {
-      this.addFloatText(`+${total}`, x, y, this.combo > 5 ? '#ffe047' : '#ffffff', 16);
+      this.addFloatText(`+${total}`, x, y, '#ffffff', 15);
     }
   }
 
   resetCombo() {
-    this.combo = 1;
-    this.comboTimer = 0;
+    // Kombo kaldırıldı, yerine XP ve Seviye Atlama sistemi eklendi
+  }
+
+  // =========================================================================
+  // XP KAZANMA VE 3'LÜ ISPANAK KUTUSU SEVİYE ATLAMA SİSTEMİ
+  // =========================================================================
+  addXp(amount) {
+    if (this.player.dead) return;
+    const xpMult = 1 + this.player.hasSkill('xp_overdrive') * 0.35;
+    this.xp += amount * xpMult;
+
+    while (this.xp >= this.xpToNext) {
+      this.xp -= this.xpToNext;
+      this.level++;
+      this.xpToNext = Math.round(
+        window.GAME_CONFIG.XP.START_NEEDED + (this.level - 1) * window.GAME_CONFIG.XP.STEP_INC
+      );
+      this.pendingLevelUps++;
+    }
+
+    if (this.pendingLevelUps > 0 && this.state === 'PLAYING') {
+      this.openLevelUpModal();
+    }
+  }
+
+  openLevelUpModal() {
+    if (this.pendingLevelUps <= 0) return;
+    this.pendingLevelUps--;
+    this.player.dragging = false;
+    this.levelUpChoices = window.SkillSystem.rollThreeChoices(this.player);
+    this.state = 'LEVELUP';
+  }
+
+  selectLevelUpSkill(index) {
+    if (this.state !== 'LEVELUP') return;
+    const chosen = this.levelUpChoices[index];
+    if (!chosen) return;
+
+    window.SkillSystem.applySkill(this.player, chosen.id);
+    const isTr = window.I18N.lang === 'TR';
+    const info = isTr ? chosen.tr : chosen.en;
+    this.addFloatText(info.name + '!', this.player.x, this.player.y - 50, chosen.color || '#ffe047', 20);
+    this.player.invulnTimer = Math.max(this.player.invulnTimer, 0.85);
+
+    if (this.pendingLevelUps > 0) {
+      this.openLevelUpModal();
+    } else {
+      this.state = 'PLAYING';
+    }
   }
 
   addFloatText(text, x, y, color = '#ffe047', size = 18) {
     this.floatTextPool.acquire(text, x, y, color, size);
   }
 
-  spawnPlayerBullet(x, y, vx, vy, dmg, frame, w, h, rot = 0) {
-    this.playerBulletPool.acquire(x, y, vx, vy, dmg, frame, w, h, rot);
+  spawnPlayerBullet(x, y, vx, vy, dmg, frame, w, h, rot = 0, opts = null) {
+    this.playerBulletPool.acquire(x, y, vx, vy, dmg, frame, w, h, rot, opts);
   }
 
   spawnEnemyBullet(x, y, vx, vy, dmg, frame, w, h, rot = 0) {
@@ -250,6 +324,24 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
   spawnExplosion(x, y, size = 84) {
     this.vfxPool.acquire(x, y, 'explosion', 'exp_1', size, 0.42);
+  }
+
+  findNearestEnemy(x, y, excludeEnemy = null, maxDist = 9999) {
+    const enemies = this.enemyPool.activeList;
+    let best = null;
+    let bestDistSq = maxDist * maxDist;
+    for (let i = 0; i < enemies.length; i++) {
+      const e = enemies[i];
+      if (!e._active || e === excludeEnemy || e.y < 0) continue;
+      const dx = e.x - x;
+      const dy = e.y - y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < bestDistSq) {
+        bestDistSq = d2;
+        best = e;
+      }
+    }
+    return best;
   }
 
   triggerSuperSpinachBomb(showLabel = true) {
@@ -278,14 +370,38 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     }
   }
 
-  damageEnemy(e, dmg) {
-    if (e.isBoss && e.dying) return;
-    e.hp -= dmg;
+  damageEnemy(e, dmg, isDot = false) {
+    if (!e._active || (e.isBoss && e.dying)) return;
+
+    let finalDmg = dmg;
+
+    // Boss & Elit Kruvazör Avcısı (boss_hunter)
+    if ((e.isBoss || e.type === 'elite_cruiser') && this.player.hasSkill('boss_hunter') > 0) {
+      finalDmg *= (1 + this.player.hasSkill('boss_hunter') * 0.35);
+    }
+
+    // Kritik Vuruş Hesabı
+    if (!isDot && Math.random() < this.player.critChance) {
+      finalDmg *= this.player.critMult;
+      this.spawnVfx(e.x, e.y, 'spark_crit', 52, 0.16);
+    }
+
+    e.hp -= finalDmg;
     e.hitFlash = 1.0;
+
+    // İnfazcı / Headshot (headshot_kill): Canı %20 altına inen normal düşmanı anında yok eder
+    const hsLvl = this.player.hasSkill('headshot_kill');
+    if (hsLvl > 0 && !e.isBoss && e.type !== 'elite_cruiser' && e.hp > 0) {
+      if (e.hp / e.maxHp <= 0.14 + hsLvl * 0.04) {
+        e.hp = 0;
+        this.addFloatText(window.I18N.t('HEADSHOT_TXT'), e.x, e.y - 20, '#ff4d6d', 16);
+      }
+    }
 
     if (e.hp <= 0) {
       if (e.isBoss) {
         this.waveDirector.onBossKilled(e);
+        this.addXp(window.GAME_CONFIG.ENEMIES.boss_dreadnought.xp || 350);
         return;
       }
 
@@ -294,8 +410,79 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.addScreenShake(5, 0.14);
       this.addScore(e.score, e.x, e.y);
 
+      // Vampirik Can Çalma (vampiric_leech)
+      const vampLvl = this.player.hasSkill('vampiric_leech');
+      if (vampLvl > 0 && !this.player.dead) {
+        this.player.hp = Math.min(this.player.maxHp, this.player.hp + vampLvl * 1.8);
+      }
+
+      // Doğrudan XP + Konserve/Altın/XP Kristali Düşüşü
+      const eCfg = window.GAME_CONFIG.ENEMIES[e.type];
+      this.addXp((eCfg && eCfg.xp) || 22);
+
       const drop = this.waveDirector.rollDrop();
-      if (drop) this.spawnPickup(e.x, e.y, drop);
+      if (drop) {
+        this.spawnPickup(e.x, e.y, drop);
+      } else if (Math.random() < 0.38) {
+        this.spawnPickup(e.x, e.y, 'xp_gem');
+      }
+    }
+  }
+
+  onBulletHitEnemy(b, e) {
+    // 1) Geri İtme (knockback_impact)
+    if (b.knockback > 0 && !e.isBoss) {
+      e.y = Math.max(-40, e.y - b.knockback * 11);
+    }
+
+    // 2) Yakıcı Napalm (fire_rounds)
+    if (b.burn > 0) {
+      e.burnTimer = 3.0;
+      e.burnDps = b.dmg * 0.35 * b.burn;
+    }
+
+    // 3) Buzul Dondurma (ice_rounds)
+    if (b.chill > 0) {
+      e.chillTimer = 2.8 + b.chill * 0.5;
+    }
+
+    // 4) Patlayıcı Çekirdek (explosive_shots veya füze)
+    if (b.explosive) {
+      this.spawnExplosion(e.x, e.y, 76);
+      const enemies = this.enemyPool.activeList;
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const other = enemies[i];
+        if (!other._active || other === e) continue;
+        const dx = other.x - e.x;
+        const dy = other.y - e.y;
+        if (dx * dx + dy * dy <= 95 * 95) {
+          this.damageEnemy(other, b.dmg * 0.55, true);
+        }
+      }
+    }
+
+    // 5) Zincirleme Yıldırım (chain_lightning)
+    if (b.lightning > 0) {
+      const nextTarget = this.findNearestEnemy(e.x, e.y, e, 220);
+      if (nextTarget) {
+        this.spawnVfx((e.x + nextTarget.x) * 0.5, (e.y + nextTarget.y) * 0.5, 'proj_lightning', 72, 0.18);
+        this.damageEnemy(nextTarget, b.dmg * (0.45 + b.lightning * 0.15), true);
+      }
+    }
+
+    // 6) Şarapnel Bölünmesi (split_shrapnel)
+    if (b.split) {
+      b.split = false;
+      const angles = [-0.55, 0, 0.55];
+      for (let i = 0; i < angles.length; i++) {
+        const ang = -Math.PI * 0.5 + angles[i];
+        this.spawnPlayerBullet(
+          e.x, e.y,
+          Math.cos(ang) * 720, Math.sin(ang) * 720,
+          b.dmg * 0.38, 'bullet_player', 14, 28, angles[i],
+          { pierce: 0 }
+        );
+      }
     }
   }
 
@@ -312,20 +499,29 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     else label = `${player.weaponLevel}X ${tr ? 'ATIŞ!' : 'SHOT!'}`;
     this.addFloatText(label, player.x, player.y - 45, res === 'score' ? '#ffe047' : color, 20);
     this.addScore(res === 'score' ? 600 : 300);
+    this.addXp(window.GAME_CONFIG.XP.CAN_XP);
   }
 
   applyPickup(p) {
     const player = this.player;
     const cfg = window.GAME_CONFIG.PICKUPS;
+    const xpCfg = window.GAME_CONFIG.XP;
 
     switch (p.type) {
+      case 'xp_gem':
+        this.addXp(xpCfg.GEM_VALUE);
+        this.addScore(40);
+        break;
+
       case 'coin_gold':
         this.addScore(cfg.COIN_SCORE, p.x, p.y);
+        this.addXp(xpCfg.COIN_XP);
         break;
 
       case 'can_hp':
         player.hp = Math.min(player.maxHp, player.hp + cfg.SPINACH_HEAL);
         this.addScore(cfg.SCORE_BONUS);
+        this.addXp(xpCfg.CAN_XP);
         this.addFloatText(window.I18N.t('PICKUP_HP'), player.x, player.y - 45, '#6dff5c', 20);
         break;
 
@@ -346,6 +542,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         break;
 
       case 'can_wingman':
+        this.addXp(xpCfg.CAN_XP);
         if (player.addWingmen()) {
           this.addFloatText(window.I18N.t('PICKUP_WINGMAN'), player.x, player.y - 45, '#70f0ff', 20);
         } else {
@@ -356,10 +553,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
       case 'can_shield':
         player.shieldTimer = window.GAME_CONFIG.PLAYER.SHIELD_DURATION;
+        this.addXp(xpCfg.CAN_XP);
         this.addFloatText(window.I18N.t('PICKUP_SHIELD'), player.x, player.y - 45, '#57ffda', 20);
         break;
 
       case 'can_bomb':
+        this.addXp(xpCfg.CAN_XP);
         this.triggerSuperSpinachBomb(true);
         break;
     }
@@ -398,46 +597,138 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       if (this.shakeTime === 0) this.shakeIntensity = 0;
     }
 
-    if (this.combo > 1) {
-      this.comboTimer -= dt;
-      if (this.comboTimer <= 0) {
-        this.combo = 1;
-      }
-    }
-
     this.player.update(dt);
     this.waveDirector.update(dt);
 
     const enemies = this.enemyPool.activeList;
+
+    // Oyuncu Mermileri: Güdümlü, Bumerang, Duvar Sekmesi, Delici ve Ricochet Fiziği
     this.playerBulletPool.updateAll(dt, (b) => {
+      b.age += dt;
+      if (b.spinSpeed !== 0) b.rot += b.spinSpeed * dt;
+      if (b.growRate > 0) b.w += b.growRate * dt;
+
+      // Bumerang Çapa Geri Dönüş Fiziği
+      if (b.boomerang) {
+        b.vy += 980 * dt;
+        const dx = this.player.x - b.x;
+        b.vx += dx * 3.5 * dt;
+        if (b.age > 0.6 && Math.hypot(this.player.x - b.x, this.player.y - b.y) < 38) {
+          return false;
+        }
+      }
+
+      // Güdümlü Mermi / Füze Kavis Fiziği
+      if (b.homing > 0) {
+        const target = this.findNearestEnemy(b.x, b.y, b.lastHitEnemy, 420);
+        if (target) {
+          const spd = Math.hypot(b.vx, b.vy) || 700;
+          const desiredAng = Math.atan2(target.y - b.y, target.x - b.x);
+          const curAng = Math.atan2(b.vy, b.vx);
+          let diff = desiredAng - curAng;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          const newAng = curAng + Math.max(-b.homing * dt, Math.min(b.homing * dt, diff));
+          b.vx = Math.cos(newAng) * spd;
+          b.vy = Math.sin(newAng) * spd;
+          if (b.spinSpeed === 0) b.rot = newAng + Math.PI * 0.5;
+        }
+      }
+
       b.x += b.vx * dt;
       b.y += b.vy * dt;
-      if (b.y < -40 || b.x < -40 || b.x > this.W + 40) return false;
+
+      // Duvardan Seken Mermi (bouncy_walls)
+      if (b.wallBounces > 0) {
+        if (b.x < 18 && b.vx < 0) {
+          b.x = 18;
+          b.vx = -b.vx;
+          b.rot = -b.rot;
+          b.wallBounces--;
+        } else if (b.x > this.W - 18 && b.vx > 0) {
+          b.x = this.W - 18;
+          b.vx = -b.vx;
+          b.rot = -b.rot;
+          b.wallBounces--;
+        }
+      }
+
+      if (b.y < -60 || b.y > this.H + 80 || b.x < -60 || b.x > this.W + 60) return false;
 
       for (let i = enemies.length - 1; i >= 0; i--) {
         const e = enemies[i];
-        if (!e._active) continue;
+        if (!e._active || e === b.lastHitEnemy) continue;
         const dx = b.x - e.x;
         const dy = b.y - e.y;
-        const hitR = e.radius + 12;
+        const hitR = e.radius + Math.max(12, b.w * 0.35);
         if (dx * dx + dy * dy <= hitR * hitR) {
           this.spawnVfx(b.x, b.y, 'spark_small', 40, 0.14);
+          this.onBulletHitEnemy(b, e);
           this.damageEnemy(e, b.dmg);
+
+          // Zincirleme Sekme (ricochet_shot)
+          if (b.ricochets > 0) {
+            const nextE = this.findNearestEnemy(e.x, e.y, e, 260);
+            if (nextE) {
+              b.ricochets--;
+              b.lastHitEnemy = e;
+              const spd = Math.hypot(b.vx, b.vy) || 820;
+              const ang = Math.atan2(nextE.y - b.y, nextE.x - b.x);
+              b.vx = Math.cos(ang) * spd;
+              b.vy = Math.sin(ang) * spd;
+              if (b.spinSpeed === 0) b.rot = ang + Math.PI * 0.5;
+              return true;
+            }
+          }
+
+          // İçinden Geçen Delici Atış (piercing_shot)
+          if (b.pierce > 0) {
+            b.pierce--;
+            b.lastHitEnemy = e;
+            return true;
+          }
+
           return false;
         }
       }
       return true;
     });
 
+    // Yörünge Küreleri ve Döner Çapalar Çarpışma Kontrolü
+    const orbitals = this.player.getOrbitalPositions();
+
     this.enemyPool.updateAll(dt, (e) => {
       if (e.hitFlash > 0) e.hitFlash = Math.max(0, e.hitFlash - dt * 6.5);
 
+      // Yanma (Napalm DoT)
+      if (e.burnTimer > 0) {
+        e.burnTimer -= dt;
+        this.damageEnemy(e, e.burnDps * dt, true);
+        if (!e._active) return false;
+      }
+
+      // Buzul Yavaşlatma (chillTimer)
+      const moveDt = e.chillTimer > 0 ? dt * 0.58 : dt;
+      if (e.chillTimer > 0) e.chillTimer -= dt;
+
       if (!e.isBoss) {
-        window.Formations.updateEnemyPath(e, dt, this.player);
-        e.fireTimer -= dt;
+        window.Formations.updateEnemyPath(e, moveDt, this.player);
+        e.fireTimer -= moveDt;
         if (e.fireTimer <= 0) {
           e.fireTimer = e.fireRate;
           this.waveDirector.fireEnemyWeapon(e);
+        }
+      }
+
+      // Yörünge birimlerinin düşmanlara teması
+      for (let o = 0; o < orbitals.length; o++) {
+        const ob = orbitals[o];
+        const odx = e.x - ob.x;
+        const ody = e.y - ob.y;
+        const orSum = e.radius + ob.r;
+        if (odx * odx + ody * ody <= orSum * orSum) {
+          this.damageEnemy(e, ob.dmg * dt * 8, true);
+          if (!e._active) return false;
         }
       }
 
@@ -462,6 +753,18 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       b.y += b.vy * dt;
       if (b.y > this.H + 40 || b.y < -40 || b.x < -40 || b.x > this.W + 40) return false;
 
+      // Yörünge Kalkan Küreleri düşman mermilerini yok eder
+      for (let o = 0; o < orbitals.length; o++) {
+        const ob = orbitals[o];
+        if (!ob.blocksBullets) continue;
+        const odx = b.x - ob.x;
+        const ody = b.y - ob.y;
+        if (odx * odx + ody * ody <= (ob.r + 10) * (ob.r + 10)) {
+          this.spawnVfx(b.x, b.y, 'spark_small', 28, 0.12);
+          return false;
+        }
+      }
+
       if (!this.player.dead) {
         const dx = b.x - this.player.x;
         const dy = b.y - this.player.y;
@@ -474,8 +777,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return true;
     });
 
-    // 5) Konserve ve Altın Toplanabilirleri:
-    // Sağa-sola kaçmadan kendi dikey çizgisinde sabit iner, uçak değdiği anda alınır
+    // Konserve, Altın ve XP Kristalleri (Sabit dikey hattında iner, değince alınır)
     const touchR = window.GAME_CONFIG.PICKUPS.TOUCH_RADIUS || 54;
     this.pickupPool.updateAll(dt, (p) => {
       p.age += dt;
@@ -549,8 +851,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const pickups = this.pickupPool.activeList;
     for (let i = 0; i < pickups.length; i++) {
       const p = pickups[i];
-      const isCoin = p.type === 'coin_gold';
-      const sz = isCoin ? 34 : 52;
+      const isSmall = (p.type === 'coin_gold' || p.type === 'xp_gem');
+      const sz = isSmall ? 34 : 52;
       window.Atlas.draw(ctx, p.type, p.x, p.y, sz, sz);
     }
 

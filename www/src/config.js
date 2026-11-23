@@ -1,6 +1,6 @@
 // Popeye 1929: Vertical Arcade SHMUP — Yapılandırma ve Sürüm Bilgisi
 window.GAME_CONFIG = {
-  VERSION: 'v0.007',
+  VERSION: 'v0.008',
   TITLE: 'POPEYE 1929: IRON ARMADA',
 
   // 9:16 Dikey Mobil Referans Çözünürlük (Tüm ekranlara responsive ölçeklenir)
@@ -17,6 +17,15 @@ window.GAME_CONFIG = {
 
   // Varsayılan Dil ('TR' konsept görsele birebir uygun, sağ üstten TR/EN değiştirilebilir)
   DEFAULT_LANG: 'TR',
+
+  // XP ve Seviye Atlama Ayarları (Kombo barı yerine XP barı)
+  XP: {
+    START_NEEDED: 85,     // İlk seviye atlama için gereken XP
+    STEP_INC: 45,         // Her seviyede gereken XP artışı
+    GEM_VALUE: 24,        // Düşen XP kristali başına XP
+    COIN_XP: 12,          // Altın toplama XP katkısı
+    CAN_XP: 25            // Konserve toplama XP katkısı
+  },
 
   // Oyuncu Ayarları
   PLAYER: {
@@ -94,40 +103,40 @@ window.GAME_CONFIG = {
 
   // Bölüm 1 Zaman Çizelgesi (Kurula kurula gelen 150 sn + Boss Savaşı)
   TIMELINE: {
-    PHASE_1_END: 30,   // 0-30 sn: Başlangıç (Keşif düşmanları, V formasyonları, ilk 2x konservesi)
-    PHASE_2_END: 90,   // 30-90 sn: Gelişme (Zırhlı avcılar, kalamar meka, ağır taretler, Wingman, 3x/4x)
-    PHASE_3_END: 150,  // 90-150 sn: Tırmanış (Yoğun kombo dalgaları, elit kruvazör, intihar dalışları, 6x)
+    PHASE_1_END: 30,   // 0-30 sn: Başlangıç
+    PHASE_2_END: 90,   // 30-90 sn: Gelişme
+    PHASE_3_END: 150,  // 90-150 sn: Tırmanış
     BOSS_WARNING_DURATION: 3.6
   },
 
-  // Düşman Tipleri ve İstatistikleri
+  // Düşman Tipleri ve İstatistikleri (xp = öldürünce kazandırdığı doğrudan XP)
   ENEMIES: {
     scout_pod: {
-      hp: 34, score: 120, radius: 26, w: 62, h: 66,
+      hp: 34, score: 120, xp: 20, radius: 26, w: 62, h: 66,
       fireRate: 2.2, bulletSpeed: 290, damage: 14
     },
     fang_fighter: {
-      hp: 68, score: 220, radius: 30, w: 72, h: 78,
+      hp: 68, score: 220, xp: 30, radius: 30, w: 72, h: 78,
       fireRate: 1.7, bulletSpeed: 340, damage: 16
     },
     squid_mech: {
-      hp: 95, score: 310, radius: 34, w: 82, h: 90,
+      hp: 95, score: 310, xp: 40, radius: 34, w: 82, h: 90,
       fireRate: 1.5, bulletSpeed: 320, damage: 18
     },
     heavy_gunship: {
-      hp: 155, score: 450, radius: 38, w: 88, h: 88,
+      hp: 155, score: 450, xp: 55, radius: 38, w: 88, h: 88,
       fireRate: 1.35, bulletSpeed: 310, damage: 20
     },
     kamikaze_dart: {
-      hp: 42, score: 180, radius: 22, w: 54, h: 68,
+      hp: 42, score: 180, xp: 24, radius: 22, w: 54, h: 68,
       fireRate: 99, bulletSpeed: 0, damage: 24
     },
     elite_cruiser: {
-      hp: 340, score: 900, radius: 48, w: 108, h: 112,
+      hp: 340, score: 900, xp: 110, radius: 48, w: 108, h: 112,
       fireRate: 1.1, bulletSpeed: 350, damage: 22
     },
     boss_dreadnought: {
-      hp: 4200, score: 10000, radius: 95, w: 250, h: 210,
+      hp: 4200, score: 10000, xp: 350, radius: 95, w: 250, h: 210,
       damage: 28
     }
   },

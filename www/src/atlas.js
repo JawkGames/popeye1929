@@ -5,12 +5,13 @@ window.Atlas = {
   flashCanvas: null,
   flashCtx: null,
 
-  // 4 Toplu Sprite Sheet Dosyası
+  // 5 Toplu Sprite Sheet Dosyası
   SHEET_PATHS: {
     ships: 'assets/ships_atlas.png',
     items: 'assets/items_ui_atlas.png',
     vfx: 'assets/vfx_atlas.png',
-    env: 'assets/env_atlas.png'
+    env: 'assets/env_atlas.png',
+    skills: 'assets/skills_weapons_atlas.png'
   },
 
   // Koordinat Dilimleme Tablosu (x, y, w, h)
@@ -64,7 +65,25 @@ window.Atlas = {
     env_asteroid:      { sheet: 'env', x: 682, y: 0,   w: 341, h: 342 },
     wall_right_tower:  { sheet: 'env', x: 0,   y: 342, w: 341, h: 342 },
     wall_right_coil:   { sheet: 'env', x: 341, y: 342, w: 341, h: 342 },
-    env_girder:        { sheet: 'env', x: 682, y: 342, w: 341, h: 342 }
+    env_girder:        { sheet: 'env', x: 682, y: 342, w: 341, h: 342 },
+
+    // 5. Archero Yetenek Silahları, Özel Konserveler, XP Kristali ve 3'lü Kart Çerçevesi (skills_weapons_atlas.png)
+    proj_laser:        { sheet: 'skills', x: 0,   y: 0,   w: 256, h: 256 },
+    proj_missile:      { sheet: 'skills', x: 256, y: 0,   w: 256, h: 256 },
+    proj_sawblade:     { sheet: 'skills', x: 512, y: 0,   w: 256, h: 256 },
+    proj_anchor:       { sheet: 'skills', x: 768, y: 0,   w: 256, h: 256 },
+    proj_fireball:     { sheet: 'skills', x: 0,   y: 256, w: 256, h: 256 },
+    proj_ice:          { sheet: 'skills', x: 256, y: 256, w: 256, h: 256 },
+    proj_acid:         { sheet: 'skills', x: 512, y: 256, w: 256, h: 256 },
+    proj_lightning:    { sheet: 'skills', x: 768, y: 256, w: 256, h: 256 },
+    can_skill_red:     { sheet: 'skills', x: 0,   y: 512, w: 256, h: 256 },
+    can_skill_purple:  { sheet: 'skills', x: 256, y: 512, w: 256, h: 256 },
+    can_skill_gold:    { sheet: 'skills', x: 512, y: 512, w: 256, h: 256 },
+    orb_drone:         { sheet: 'skills', x: 768, y: 512, w: 256, h: 256 },
+    ui_skill_card:     { sheet: 'skills', x: 0,   y: 768, w: 256, h: 256 },
+    xp_gem:            { sheet: 'skills', x: 256, y: 768, w: 256, h: 256 },
+    proj_wave:         { sheet: 'skills', x: 512, y: 768, w: 256, h: 256 },
+    badge_levelup:     { sheet: 'skills', x: 768, y: 768, w: 256, h: 256 }
   },
 
   loadAll(onProgress) {
@@ -117,7 +136,6 @@ window.Atlas = {
 
     ctx.drawImage(img, f.x, f.y, f.w, f.h, -dw * 0.5, -dh * 0.5, dw, dh);
 
-    // Mermi isabetinde gerçek silüet bazlı beyaz parlama (Hit Flash)
     if (flash > 0.02 && this.flashCtx) {
       const fw = Math.min(256, Math.max(32, Math.ceil(dw)));
       const fh = Math.min(256, Math.max(32, Math.ceil(dh)));
