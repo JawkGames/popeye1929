@@ -16,6 +16,14 @@ window.UIManager = class UIManager {
     // Modal butonları
     this.btnPrimary = { x: 270, y: 540, w: 280, h: 68 };
     this.btnSecondary = { x: 270, y: 630, w: 280, h: 64 };
+    this.layout();
+  }
+
+  // Ekran yüksekliği değişince orta menü öğelerini dikeyde ortalar (üst butonlar köşede kalır)
+  layout() {
+    this.midOff = Math.round((window.GAME_CONFIG.HEIGHT - window.GAME_CONFIG.BASE_HEIGHT) * 0.5);
+    this.btnPrimary.y = 540 + this.midOff;
+    this.btnSecondary.y = 630 + this.midOff;
   }
 
   hitRect(px, py, b) {
@@ -235,6 +243,7 @@ window.UIManager = class UIManager {
       const pulse = 0.55 + Math.sin(wd.bossWarningTimer * 14) * 0.45;
       ctx.save();
       ctx.fillStyle = `rgba(190, 18, 28, ${0.75 * pulse})`;
+      ctx.translate(0, this.midOff);
       ctx.fillRect(0, 390, window.GAME_CONFIG.WIDTH, 96);
       ctx.fillStyle = '#ffe047';
       ctx.fillRect(0, 390, window.GAME_CONFIG.WIDTH, 6);
@@ -280,6 +289,8 @@ window.UIManager = class UIManager {
     ctx.save();
     ctx.fillStyle = 'rgba(4, 12, 24, 0.72)';
     ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(0, this.midOff);
 
     // Üst konsept boss & konserve vitrini
     window.Atlas.draw(ctx, 'boss_dreadnought', W * 0.5, 210, 210, 175);
@@ -295,6 +306,7 @@ window.UIManager = class UIManager {
       this.drawTextOutlined(ctx, lines[i], W * 0.5, 438 + i * 24, 13, '#dbeeff', 'center', 3.5);
     }
 
+    ctx.restore();
     // Başla Butonu (Sprite tabanlı)
     this.drawSpriteButton(ctx, this.btnPrimary, window.I18N.t('START_BTN'), '#ffe047', 21);
 
@@ -318,9 +330,12 @@ window.UIManager = class UIManager {
     ctx.save();
     ctx.fillStyle = 'rgba(4, 12, 24, 0.78)';
     ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(0, this.midOff);
 
     window.Atlas.draw(ctx, 'hud_portrait', W * 0.5, 320, 110, 126);
     this.drawTextOutlined(ctx, window.I18N.t('PAUSED'), W * 0.5, 430, 30, '#ffe047', 'center', 6);
+    ctx.restore();
 
     this.drawSpriteButton(ctx, this.btnPrimary, window.I18N.t('RESUME_BTN'), '#6dff5c', 20);
     this.drawSpriteButton(ctx, this.btnSecondary, window.I18N.t('RESTART_BTN'), '#ffffff', 18);
@@ -335,6 +350,8 @@ window.UIManager = class UIManager {
     ctx.save();
     ctx.fillStyle = 'rgba(14, 6, 14, 0.82)';
     ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(0, this.midOff);
 
     window.Atlas.draw(ctx, 'can_hp', W * 0.5, 305, 96, 108);
     this.drawTextOutlined(ctx, window.I18N.t('GAME_OVER'), W * 0.5, 405, 32, '#ff5c4d', 'center', 6);
@@ -348,6 +365,7 @@ window.UIManager = class UIManager {
       'center',
       5
     );
+    ctx.restore();
 
     this.drawSpriteButton(ctx, this.btnPrimary, window.I18N.t('REVIVE_AD_BTN'), '#6dff5c', 15);
     this.drawSpriteButton(ctx, this.btnSecondary, window.I18N.t('RESTART_BTN'), '#ffffff', 18);

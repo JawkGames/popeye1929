@@ -17,17 +17,23 @@ window.WaveDirector = class WaveDirector {
 
     // Bölüm 1'de garantili sırayla düşecek güçlendirme konserveleri
     this.scheduledCans = [
-      { time: 8,   type: 'can_2x',      spawned: false },
+      // Silah konserveleri azaltıldı: bölümde garantili sadece 1 adet 2X (sakin gelişim)
       { time: 22,  type: 'can_hp',      spawned: false },
       { time: 35,  type: 'can_wingman', spawned: false },
-      { time: 52,  type: 'can_3x',      spawned: false },
+      { time: 60,  type: 'can_2x',      spawned: false },
       { time: 68,  type: 'can_shield',  spawned: false },
-      { time: 82,  type: 'can_4x',      spawned: false },
       { time: 98,  type: 'can_wingman', spawned: false },
-      { time: 112, type: 'can_6x',      spawned: false },
       { time: 128, type: 'can_bomb',    spawned: false },
       { time: 142, type: 'can_hp',      spawned: false }
     ];
+  }
+
+  // Silah konservesi ise WEAPON_CAN_RATE ihtimalle bırakır, değilse altın paraya çevirir
+  filterCan(type) {
+    if (/^can_\d+x$/.test(type) && Math.random() > window.GAME_CONFIG.WEAPON_CAN_RATE) {
+      return 'coin_gold';
+    }
+    return type;
   }
 
   getDifficultyMult() {
@@ -67,7 +73,7 @@ window.WaveDirector = class WaveDirector {
       this.canTimer = 11.5 + Math.random() * 4.5;
       const rx = 75 + Math.random() * (window.GAME_CONFIG.WIDTH - 150);
       const canPool = this.getAvailableCanPool();
-      const chosen = canPool[Math.floor(Math.random() * canPool.length)];
+      const chosen = this.filterCan(canPool[Math.floor(Math.random() * canPool.length)]);
       this.game.spawnPickup(rx, -40, chosen);
     }
 
@@ -425,10 +431,10 @@ window.WaveDirector = class WaveDirector {
     boss.w = base.w;
     boss.h = base.h;
     boss.radius = base.radius;
-    boss.maxHp = Math.round(base.hp * mult);
+    boss.maxHp = Math.round(base.hp * mult * window.GAME_CONFIG.BOSS_POWER);
     boss.hp = boss.maxHp;
     boss.score = base.score;
-    boss.damage = base.damage;
+    boss.damage = base.damage * window.GAME_CONFIG.BOSS_POWER;
     boss.hitFlash = 0;
     boss.rotation = 0;
 
@@ -499,12 +505,12 @@ window.WaveDirector = class WaveDirector {
           this.game.spawnEnemyBullet(
             leftBarrelX, barrelY,
             Math.cos(ang) * 300, Math.sin(ang) * 300,
-            20, 'bullet_enemy_dart', 22, 38, i * 0.19
+            20 * window.GAME_CONFIG.BOSS_POWER, 'bullet_enemy_dart', 22, 38, i * 0.19
           );
           this.game.spawnEnemyBullet(
             rightBarrelX, barrelY,
             Math.cos(ang) * 300, Math.sin(ang) * 300,
-            20, 'bullet_enemy_dart', 22, 38, i * 0.19
+            20 * window.GAME_CONFIG.BOSS_POWER, 'bullet_enemy_dart', 22, 38, i * 0.19
           );
         }
       } else if (b.phase === 2) {
@@ -516,7 +522,7 @@ window.WaveDirector = class WaveDirector {
           this.game.spawnEnemyBullet(
             bx, barrelY,
             Math.cos(ang) * 330, Math.sin(ang) * 330,
-            22, 'bullet_enemy_orb', 26, 26, 0
+            22 * window.GAME_CONFIG.BOSS_POWER, 'bullet_enemy_orb', 26, 26, 0
           );
         }
       } else {
@@ -527,12 +533,12 @@ window.WaveDirector = class WaveDirector {
           this.game.spawnEnemyBullet(
             leftBarrelX, barrelY,
             Math.cos(ang) * 355, Math.sin(ang) * 355,
-            24, 'bullet_enemy_dart', 22, 38, ang - Math.PI * 0.5
+            24 * window.GAME_CONFIG.BOSS_POWER, 'bullet_enemy_dart', 22, 38, ang - Math.PI * 0.5
           );
           this.game.spawnEnemyBullet(
             rightBarrelX, barrelY,
             Math.cos(ang) * 355, Math.sin(ang) * 355,
-            24, 'bullet_enemy_orb', 24, 24, 0
+            24 * window.GAME_CONFIG.BOSS_POWER, 'bullet_enemy_orb', 24, 24, 0
           );
         }
       }

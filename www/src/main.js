@@ -33,12 +33,21 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   setupCanvasScaling() {
+    const cfg = window.GAME_CONFIG;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const winW = window.innerWidth;
-    const winH = window.innerHeight;
-    const targetRatio = this.W / this.H;
-    const winRatio = winW / Math.max(1, winH);
+    const winW = Math.max(1, window.innerWidth);
+    const winH = Math.max(1, window.innerHeight);
 
+    // Genişlik sabit (540), yükseklik telefon oranına göre uzar/kısalır -> üst/alt kesilmez, boşluk kalmaz
+    let virtH = Math.round(cfg.WIDTH * winH / winW);
+    virtH = Math.max(cfg.MIN_HEIGHT, Math.min(cfg.MAX_HEIGHT, virtH));
+    const oldH = this.H || virtH;
+    cfg.HEIGHT = virtH;
+    this.H = virtH;
+    cfg.PLAYER.START_Y = virtH - 145;
+
+    const targetRatio = this.W / this.H;
+    const winRatio = winW / winH;
     let cssW, cssH;
     if (winRatio < targetRatio) {
       cssW = winW;
@@ -53,6 +62,11 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.canvas.width = Math.round(this.W * dpr);
     this.canvas.height = Math.round(this.H * dpr);
     this.dpr = dpr;
+
+    if (this.ui && this.ui.layout) this.ui.layout();
+    if (this.player && oldH !== virtH) {
+      this.player.y = Math.max(110, Math.min(virtH - 55, this.player.y + (virtH - oldH)));
+    }
   }
 
   initPools() {
@@ -281,12 +295,13 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.addScore(e.score, e.x, e.y);
 
       if (e.guaranteedCan) {
-        this.spawnPickup(e.x, e.y, e.guaranteedCan);
+        this.spawnPickup(e.x, e.y, this.waveDirector.filterCan(e.guaranteedCan));
       } else {
         const roll = Math.random();
         if (roll < 0.14) {
           const cans = this.waveDirector.getAvailableCanPool();
-          this.spawnPickup(e.x, e.y, cans[Math.floor(Math.random() * cans.length)]);
+          const pick = this.waveDirector.filterCan(cans[Math.floor(Math.random() * cans.length)]);
+          this.spawnPickup(e.x, e.y, pick);
         } else if (roll < 0.48) {
           this.spawnPickup(e.x, e.y, 'coin_gold');
         }

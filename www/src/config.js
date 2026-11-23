@@ -1,11 +1,19 @@
 // Popeye 1929: Vertical Arcade SHMUP — Yapılandırma ve Sürüm Bilgisi
 window.GAME_CONFIG = {
-  VERSION: 'v0.002',
+  VERSION: 'v0.003',
   TITLE: 'POPEYE 1929: IRON ARMADA',
 
   // 9:16 Dikey Mobil Referans Çözünürlük (Tüm ekranlara responsive ölçeklenir)
   WIDTH: 540,
-  HEIGHT: 960,
+  HEIGHT: 960,      // Çalışırken ekran oranına göre otomatik güncellenir (BASE_HEIGHT referanstır)
+  BASE_HEIGHT: 960,
+  MIN_HEIGHT: 800,
+  MAX_HEIGHT: 1400,
+
+  // Silah konservesi (2X/3X/4X/6X) çıkma oranı (1 = eski, 0.2 = 5 kat az)
+  WEAPON_CAN_RATE: 0.2,
+  // Boss güç çarpanı (can ve mermi hasarı)
+  BOSS_POWER: 2,
 
   // Varsayılan Dil ('TR' konsept görsele birebir uygun, sağ üstten TR/EN değiştirilebilir)
   DEFAULT_LANG: 'TR',
