@@ -2,8 +2,11 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.015`
+- **Güncel Sürüm:** `v0.016`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.016
+- **Anında Açılış & Atlas Yükleme Güvenliği (`src/main.js`, `src/atlas.js`, `src/ui.js`):** `DOMContentLoaded` yarış durumu (betikler geç yüklendiğinde oyunun hiç başlamaması) ve 8 büyük PNG atlasının tamamı inene kadar oyun döngüsünün/menünün kilitli kalması düzeltildi. Oyun döngüsü ve menü artık ilk karede anında açılır; görseller arka planda indikçe kesintisiz çizilir.
 
 ## v0.015
 - **Stage 11 Uzuv / Ahtapot Kolu & Sarmaşık Nesnesi:** Stage 11'deki dikdörtgen ekran kesiti kaldırıldı; yerine soldan ve sağdan uzanan izole ahtapot kolu, dikenli sarmaşık ve parlayan spor kesesi (`env2_bioroot` -> `assets/stage_env_atlas.png`) üretilip gömüldü.

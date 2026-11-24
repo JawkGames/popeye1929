@@ -7,7 +7,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.W = window.GAME_CONFIG.WIDTH;
     this.H = window.GAME_CONFIG.HEIGHT;
 
-    this.state = 'LOADING'; // LOADING, MENU, PLAYING, LEVELUP, PAUSED, GAMEOVER
+    this.state = 'MENU'; // LOADING, MENU, PLAYING, LEVELUP, PAUSED, GAMEOVER
+    this.loadProgress = 0;
     this.score = 0;
 
     // XP ve Seviye Sistemi
@@ -31,10 +32,11 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.waveDirector = new window.WaveDirector(this);
     this.ui = new window.UIManager(this);
 
-    window.Atlas.loadAll().then(() => {
-      this.state = 'MENU';
-      this.resetParallaxWalls();
-      requestAnimationFrame((ts) => this.loop(ts));
+    this.resetParallaxWalls();
+    requestAnimationFrame((ts) => this.loop(ts));
+
+    window.Atlas.loadAll((prog) => {
+      this.loadProgress = prog;
     });
   }
 
@@ -1002,6 +1004,14 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
-  window.gameInstance = new window.PopeyeShmupGame();
-});
+const bootPopeye1929 = () => {
+  if (!window.gameInstance) {
+    window.gameInstance = new window.PopeyeShmupGame();
+  }
+};
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', bootPopeye1929);
+} else {
+  bootPopeye1929();
+}

@@ -225,7 +225,21 @@ window.UIManager = class UIManager {
   }
 
   drawSpriteButton(ctx, rect, label, textColor = '#ffffff', fontSize = 18) {
-    window.Atlas.draw(ctx, 'ui_button', rect.x, rect.y, rect.w, rect.h);
+    const drawn = window.Atlas.draw(ctx, 'ui_button', rect.x, rect.y, rect.w, rect.h);
+    if (!drawn) {
+      this.drawSlantedBar(
+        ctx,
+        rect.x - rect.w * 0.5,
+        rect.y - rect.h * 0.5,
+        rect.w,
+        rect.h,
+        6,
+        'rgba(18, 46, 82, 0.94)',
+        'rgba(38, 96, 158, 0.85)',
+        1,
+        '#8fd2ff'
+      );
+    }
     if (label) {
       this.drawTextOutlined(ctx, label, rect.x, rect.y, fontSize, textColor, 'center', 4);
     }

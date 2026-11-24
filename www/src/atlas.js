@@ -168,17 +168,18 @@ window.Atlas = {
     return Promise.all(keys.map((key) => {
       return new Promise((resolve) => {
         const img = new Image();
-        img.onload = () => {
-          this.sheets[key] = img;
+        img.decoding = 'async';
+        let settled = false;
+        const finish = (ok) => {
+          if (settled) return;
+          settled = true;
+          if (ok) this.sheets[key] = img;
           doneCount++;
           if (onProgress) onProgress(doneCount / keys.length);
           resolve();
         };
-        img.onerror = () => {
-          doneCount++;
-          if (onProgress) onProgress(doneCount / keys.length);
-          resolve();
-        };
+        img.onload = () => finish(true);
+        img.onerror = () => finish(false);
         img.src = this.SHEET_PATHS[key];
       });
     })).then(() => {
@@ -188,9 +189,9 @@ window.Atlas = {
 
   draw(ctx, frameKey, cx, cy, dw, dh, opts = null) {
     const f = this.FRAMES[frameKey];
-    if (!f) return;
+    if (!f) return false;
     const img = this.sheets[f.sheet];
-    if (!img) return;
+    if (!img || !img.complete || !img.naturalWidth) return false;
 
     const rot = (opts && opts.rotation) || 0;
     const alpha = (opts && opts.alpha !== undefined) ? opts.alpha : 1;
@@ -222,5 +223,6 @@ window.Atlas = {
     }
 
     ctx.restore();
+    return true;
   }
 };
