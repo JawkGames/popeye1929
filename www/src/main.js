@@ -278,6 +278,44 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     else if (this.state === 'PAUSED') this.state = 'PLAYING';
   }
 
+  // 1..5 Tuşları veya Üst Butonlarla Doğrudan İlgili Bölümün Boss Savaşına Işınlanma
+  warpToBoss(stageNum) {
+    const st = Math.max(1, Math.floor(stageNum));
+    this.shakeTime = 0;
+    this.shakeIntensity = 0;
+    this.pendingLevelUps = 0;
+
+    this.enemyPool.clear();
+    this.enemyBulletPool.clear();
+    this.pickupPool.clear();
+
+    if (this.player.dead || this.state === 'MENU' || this.state === 'GAMEOVER') {
+      this.player.reset();
+    } else {
+      this.player.hp = this.player.maxHp;
+      this.player.invulnTimer = 1.5;
+    }
+
+    // Arka plan temasını o bölüme geçir
+    this.themeIdx = (st - 1) % this.cosmicThemes.length;
+    this.targetThemeIdx = this.themeIdx;
+    this.themeBlend = 0;
+
+    // İlgili bölümün Boss'unu anında sahneye indir
+    this.waveDirector.stage = st;
+    this.waveDirector.stageTime = window.GAME_CONFIG.TIMELINE.PHASE_3_END;
+    this.waveDirector.bossSpawned = true;
+    this.waveDirector.bossWarningTimer = 0;
+    this.waveDirector.bossActive = null;
+    this.waveDirector.spawnBoss();
+    if (this.waveDirector.bossActive) {
+      this.waveDirector.bossActive.y = 120;
+    }
+
+    this.state = 'PLAYING';
+    this.addFloatText(`STAGE ${st} BOSS!`, this.W * 0.5, 240, '#ffe047', 22);
+  }
+
   onPlayerDeath() {
     this.spawnExplosion(this.player.x, this.player.y, 130);
     this.shakeTime = 0;

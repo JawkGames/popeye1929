@@ -13,6 +13,15 @@ window.UIManager = class UIManager {
     this.btnLang  = { x: 446, y: 38, w: 46, h: 46 };
     this.btnFull  = { x: 500, y: 92, w: 46, h: 46 };
 
+    // Üst orta 1..5 Boss Işınlanma Butonları (Hem dokunmatik hem fare ile tıklanabilir)
+    this.bossWarpBtns = [
+      { stage: 1, x: 252, y: 38, w: 33, h: 34 },
+      { stage: 2, x: 288, y: 38, w: 33, h: 34 },
+      { stage: 3, x: 324, y: 38, w: 33, h: 34 },
+      { stage: 4, x: 360, y: 38, w: 33, h: 34 },
+      { stage: 5, x: 396, y: 38, w: 33, h: 34 }
+    ];
+
     // Modal butonları
     this.btnPrimary = { x: 270, y: 540, w: 280, h: 68 };
     this.btnSecondary = { x: 270, y: 630, w: 280, h: 64 };
@@ -56,6 +65,15 @@ window.UIManager = class UIManager {
     if (!this.isNativeAndroid && this.hitRect(px, py, this.btnFull)) {
       this.toggleFullscreen();
       return true;
+    }
+
+    // 2b) 1..5 Boss Işınlanma Butonları
+    for (let i = 0; i < this.bossWarpBtns.length; i++) {
+      const wb = this.bossWarpBtns[i];
+      if (this.hitRect(px, py, wb)) {
+        this.game.warpToBoss(wb.stage);
+        return true;
+      }
     }
 
     // 3) Seviye Atlama (3'lü Ispanak Kutusu Seçimi)
@@ -272,8 +290,14 @@ window.UIManager = class UIManager {
     this.drawTextOutlined(ctx, weaponBadge, 102, 114, 13, '#57e2ff', 'left', 3.5);
 
     // =========================================================================
-    // 2) SAĞ ÜST BUTONLAR (Duraklatma, Dil TR/EN, Web Tam Ekran)
+    // 2) SAĞ ÜST BUTONLAR VE ÜST ORTA 1..5 BOSS IŞINLANMA BUTONLARI
     // =========================================================================
+    for (let i = 0; i < this.bossWarpBtns.length; i++) {
+      const wb = this.bossWarpBtns[i];
+      const isCur = (wd.stage === wb.stage && wd.bossActive);
+      this.drawSpriteButton(ctx, wb, String(wb.stage), isCur ? '#6dff5c' : '#ffe047', 14);
+    }
+
     this.drawSpriteButton(ctx, this.btnPause, '||', '#eaf4ff', 17);
     this.drawSpriteButton(ctx, this.btnLang, window.I18N.lang, '#ffe066', 14);
 

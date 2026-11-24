@@ -133,11 +133,16 @@ window.PlayerController = class PlayerController {
     window.addEventListener('pointercancel', endDrag);
 
     window.addEventListener('keydown', (e) => {
-      // Seviye atlama ekranında 1, 2, 3 tuşlarıyla hızlı seçim
+      // Seviye atlama ekranında 1, 2, 3 tuşlarıyla hızlı yetenek seçimi
       if (this.game.state === 'LEVELUP') {
         if (e.key === '1') this.game.selectLevelUpSkill(0);
         else if (e.key === '2') this.game.selectLevelUpSkill(1);
         else if (e.key === '3') this.game.selectLevelUpSkill(2);
+        return;
+      }
+      // 1, 2, 3, 4, 5 tuşlarıyla doğrudan ilgili bölümün Boss'una ışınlanma
+      if (e.key >= '1' && e.key <= '5') {
+        this.game.warpToBoss(parseInt(e.key, 10));
         return;
       }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') this.keys.left = true;

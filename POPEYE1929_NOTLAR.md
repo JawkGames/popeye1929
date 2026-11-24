@@ -2,8 +2,14 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.011`
+- **Güncel Sürüm:** `v0.013`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.013
+- 1, 2, 3, 4, 5 numaralı bölümlerin Boss savaşına doğrudan ışınlanma (`warpToBoss`) eklendi. Hem ekranın üst kısmındaki `1 2 3 4 5` dokunmatik butonlarına basarak hem de klavyeden `1..5` tuşlarına basarak ilgili bölümün arka plan temasıyla birlikte Boss savaşı doğrudan açılır.
+
+## v0.012
+- Gerçek AdMob birimleri (`src/ads.js` — ödüllü canlanma ve bölüm/yeniden başlatma geçiş reklamı) entegre edildi.
 
 ## v0.011
 - Arka plandaki aydınlık gezegen görselleri kaldırıldı.
