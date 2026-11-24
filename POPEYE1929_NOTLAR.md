@@ -2,8 +2,28 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.013`
+- **Güncel Sürüm:** `v0.014`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.014 — 15 Farklı Zeminli/Zeminsiz Bölüm Çevresi, 15 Kademeli Heybetlenen Boss ve Sol-Sağ Alt Oklarla Geçiş
+- **15 Bölümlü Çevre ve Zemin Motoru (`src/stages.js` & `assets/stage_env_atlas.png`):** Tek sayfada 16 yeni modüler bölüm kenar nesnesi üretildi ve 15 farklı bölüme bağlandı:
+  1. Uzay Üssü & Asteroitler (Zeminsiz)
+  2. Hurda Tersanesi & Paslı Güverte (Zeminli — ikaz şeritli paslı plakalar)
+  3. Buhar & Boru Fabrikası (Zeminli — çelik boru ızgaraları ve buhar kazanları)
+  4. Maden Kuyusu & Dev Matkap (Zeminsiz — zincirli maden uçurumu ve sarı matkaplı vinçler)
+  5. Karlı & Buzullu Kutup Vadisi (Zeminli — kar yağışlı, buz çatlaklı vadi ve sarkıtlı buzul kayalıkları)
+  6. Uydu & Hologram Gözlemevi (Zeminli — radar çanakları ve hologram ekranlar)
+  7. Neon Siber Gece Şehri (Zeminsiz — cyan/magenta neon gökdelenler ve reklam kuleleri)
+  8. Erimiş Bakır & Tesla Reaktörü (Zeminli — kızgın bakır borular ve elektrik bobinleri)
+  9. Mor Nebula & Kozmik Asteroit Boşluğu (Zeminsiz — mor kristalli meteorlar ve nebula)
+  10. Zümrüt Kristal Mağarası (Zeminli — parlayan kuvars kristalleri ve ışık huzmeleri)
+  11. Biyo-Organik Asit Ormanı (Zeminli — dev kökler, spor keseleri ve asit göletleri)
+  12. Boyutlar Arası Mor Damarlı Geçit (Zeminsiz — mor enerji damarlı monolitler)
+  13. Antik Rünlü Taş Tapınak (Zeminli — rün çemberli taş zemin ve parlayan dikilitaşlar)
+  14. Volkanik Lav & Magma Kanyonu (Zeminli — akan lav nehri ve bazalt lav kayalıkları)
+  15. Omega Karadelik & Karanlık Kuleler (Zeminsiz — merkezde dönen karadelik girdabı ve tesla kuleleri)
+- **15 Kademeli Heybetlenen Boss (`assets/bosses_atlas.png`):** Yeni üretilen Boss sayfasıyla toplam 15 farklı Boss (`boss_dreadnought` + `boss_1`..`boss_14`) bölümlere bağlandı. Kabasakal'ın yüz/sakal renginin maviye dönmesi tamamen engellendi (Bölüm 5 Buzul Boss'u ve Bölüm 15 Omega İmparator Boss'unda Kabasakal doğal ten ve kahverengi sakal rengindedir). Boss boyutları ve canları Bölüm 1'den (`206x182`) Bölüm 5'e (`228x208`) ve Bölüm 15'e (`312x282`) doğru kademeli olarak büyür ve heybetlenir.
+- **Sol Alt (`◀`) ve Sağ Alt (`▶`) Bölüm/Boss Geçiş Okları:** Üstteki `1..5` butonları kaldırıldı; ekranın sol altına `◀` ve sağ altına `▶` ok butonları eklendi. Bastıkça 1'den 15'e kadar tüm bölümlerin çevresi ve Boss savaşı arasında ileri/geri geçiş yapılır.
 
 ## v0.013
 - 1, 2, 3, 4, 5 numaralı bölümlerin Boss savaşına doğrudan ışınlanma (`warpToBoss`) eklendi. Hem ekranın üst kısmındaki `1 2 3 4 5` dokunmatik butonlarına basarak hem de klavyeden `1..5` tuşlarına basarak ilgili bölümün arka plan temasıyla birlikte Boss savaşı doğrudan açılır.

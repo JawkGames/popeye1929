@@ -140,9 +140,13 @@ window.PlayerController = class PlayerController {
         else if (e.key === '3') this.game.selectLevelUpSkill(2);
         return;
       }
-      // 1, 2, 3, 4, 5 tuşlarıyla doğrudan ilgili bölümün Boss'una ışınlanma
-      if (e.key >= '1' && e.key <= '5') {
-        this.game.warpToBoss(parseInt(e.key, 10));
+      // Sol / Sağ Köşeli Parantez veya PageUp/PageDown ile Bölüm Bossları Arasında Geçiş
+      if (e.key === '[' || e.key === 'PageUp') {
+        this.game.stepBossStage(-1);
+        return;
+      }
+      if (e.key === ']' || e.key === 'PageDown') {
+        this.game.stepBossStage(1);
         return;
       }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') this.keys.left = true;

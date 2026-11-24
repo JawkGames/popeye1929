@@ -164,85 +164,63 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     );
 
     this.wallPool = new window.ObjectPool(
-      () => ({ side: 'left', frame: 'wall_left_radar', x: 0, y: 0, w: 180, h: 200, speed: 95 }),
-      (w, side, frame, x, y, width, height, speed) => {
+      () => ({ side: 'left', frame: 'wall_left_radar', x: 0, y: 0, w: 180, h: 200, speed: 95, flipX: false }),
+      (w, side, frame, x, y, width, height, speed, flipX) => {
         w.side = side; w.frame = frame;
         w.x = x; w.y = y; w.w = width; w.h = height; w.speed = speed;
+        w.flipX = Boolean(flipX);
       },
       14
     );
   }
 
   // =========================================================================
-  // BOSS SONRASI DEĞİŞEN KARANLIK UZAY ATMOSFERİ VE YILDIZ MODLARI (Gezegenler kaldırıldı)
+  // 15 BÖLÜMLÜ ZEMİNLİ VE ZEMİNSİZ ÇEVRE, ATMOSFER VE NESNE MOTORU
   // =========================================================================
   initCosmicBackground() {
-    this.cosmicThemes = [
-      // Stage 1: Klasik Derin Karanlık Lacivert Uzay
-      { top: [5, 14, 28],   mid: [9, 24, 46],   bot: [4, 11, 22],   nebula: 'rgba(0, 150, 220, 0.09)',  starColors: ['#ffffff', '#9be8ff', '#d0e8ff'] },
-      // Stage 2 (Boss 1 Sonrası): Karanlık Kızıl Kıyamet Uzayı
-      { top: [24, 5, 12],   mid: [42, 9, 22],   bot: [16, 3, 9],    nebula: 'rgba(210, 40, 30, 0.10)',  starColors: ['#ffd2b4', '#ff758f', '#ffffff'] },
-      // Stage 3 (Boss 2 Sonrası): Karanlık Zümrüt Biyo-Boşluk
-      { top: [4, 20, 16],   mid: [9, 38, 30],   bot: [3, 14, 11],   nebula: 'rgba(30, 190, 120, 0.10)', starColors: ['#a8ffd2', '#64e8ff', '#ffffff'] },
-      // Stage 4 (Boss 3 Sonrası): Karanlık Ametist Hiçlik Sektörü
-      { top: [16, 5, 30],   mid: [32, 11, 56],  bot: [10, 3, 20],   nebula: 'rgba(155, 50, 220, 0.11)', starColors: ['#e2b8ff', '#ff85e0', '#9be8ff'] },
-      // Stage 5 (Boss 4 Sonrası): Karanlık Kehribar Korona
-      { top: [24, 14, 4],   mid: [44, 26, 8],   bot: [16, 9, 2],    nebula: 'rgba(215, 140, 20, 0.10)', starColors: ['#ffe89e', '#ffa652', '#ffffff'] },
-      // Stage 6 (Boss 5 Sonrası): Karanlık Kutup Buzul Boşluğu
-      { top: [4, 18, 32],   mid: [9, 40, 64],   bot: [3, 12, 24],   nebula: 'rgba(60, 195, 235, 0.11)', starColors: ['#c8f8ff', '#6ee0ff', '#ffffff'] },
-      // Stage 7+ (Boss 6+ Sonrası): Karanlık Siber-Kızıl Çatlak
-      { top: [22, 4, 26],   mid: [42, 9, 48],   bot: [14, 2, 18],   nebula: 'rgba(205, 40, 155, 0.10)', starColors: ['#ffb0eb', '#68f0ff', '#ffe066'] }
-    ];
+    this.groundScrollY = 0;
 
-    this.themeIdx = 0;
-    this.targetThemeIdx = 0;
-    this.themeBlend = 0;
-
-    // Çok renkli paralaks yıldızlar
+    // Çok renkli paralaks yıldızlar / kar / kıvılcım / spor parçacıkları
     this.stars = [];
     for (let i = 0; i < 95; i++) {
       const layer = (i % 3) + 1;
       this.stars.push({
         x: Math.random() * this.W,
         y: Math.random() * this.H,
-        r: layer === 1 ? 1.2 : (layer === 2 ? 1.8 : 2.5),
-        speed: layer * 40,
+        r: layer === 1 ? 1.3 : (layer === 2 ? 2.0 : 2.8),
+        speed: layer * 42,
         alpha: 0.38 + layer * 0.2,
         colorIdx: i % 3,
         twinklePhase: Math.random() * Math.PI * 2
       });
     }
 
-    // Süzülen Karanlık Atmosferik Nebula Bulutları
     this.nebulae = [
-      { x: 140, y: 240, r: 190, speed: 16 },
-      { x: 400, y: 650, r: 220, speed: 21 }
+      { x: 140, y: 240, r: 190, speed: 18 },
+      { x: 400, y: 650, r: 220, speed: 22 }
     ];
   }
 
-  // Yalnızca Boss yenildiğinde çağrılır ve arka planı yeni bölüm moduna geçirir
-  advanceCosmicTheme() {
-    this.themeIdx = this.targetThemeIdx;
-    this.targetThemeIdx = (this.themeIdx + 1) % this.cosmicThemes.length;
-    this.themeBlend = 0;
+  // Bölüm değiştiğinde o bölümün özel kenar nesnelerini (buzul, vinç, neon bina, kristal, lav, obelisk vb.) diz
+  applyStageEnvironment(stageNum) {
+    this.resetParallaxWalls(stageNum);
   }
 
-  lerpRgb(c1, c2, t) {
-    const r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
-    const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
-    const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
-    return `rgb(${r},${g},${b})`;
-  }
-
-  resetParallaxWalls() {
+  resetParallaxWalls(stageNum) {
     this.wallPool.clear();
-    const leftFrames = ['wall_left_radar', 'wall_left_reactor'];
-    const rightFrames = ['wall_right_tower', 'wall_right_coil'];
+    const stNum = stageNum || (this.waveDirector ? this.waveDirector.stage : 1);
+    const st = window.StageThemes ? window.StageThemes.getStage(stNum) : null;
+    const leftFrames = (st && st.leftProps) || ['wall_left_radar', 'wall_left_reactor'];
+    const rightFrames = (st && st.rightProps) || ['wall_right_tower', 'wall_right_coil'];
 
     for (let i = 0; i < 4; i++) {
       const yPos = this.H - i * 290;
-      this.wallPool.acquire('left', leftFrames[i % 2], 78, yPos, 175, 220, 92);
-      this.wallPool.acquire('right', rightFrames[i % 2], this.W - 78, yPos - 135, 175, 220, 92);
+      const lf = leftFrames[i % leftFrames.length];
+      const rf = rightFrames[i % rightFrames.length];
+      // Sağ kenardaki yeni çevre nesnelerini (stageEnv) yatay aynalayarak koy ki merkeze doğru uyumlu baksın
+      const flipRight = rf.indexOf('env2_') === 0;
+      this.wallPool.acquire('left', lf, 66, yPos, 155, 200, 92, false);
+      this.wallPool.acquire('right', rf, this.W - 66, yPos - 135, 155, 200, 92, flipRight);
     }
     this.wallStep = 0;
   }
@@ -278,9 +256,18 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     else if (this.state === 'PAUSED') this.state = 'PLAYING';
   }
 
-  // 1..5 Tuşları veya Üst Butonlarla Doğrudan İlgili Bölümün Boss Savaşına Işınlanma
+  // Sol Alt (◀) ve Sağ Alt (▶) Ok Butonlarıyla 15 Bölüm ve Boss Arasında İleri/Geri Geçiş
+  stepBossStage(dir) {
+    const cur = (this.waveDirector && this.waveDirector.stage) || 1;
+    let nextStage = cur + dir;
+    if (nextStage < 1) nextStage = 15;
+    if (nextStage > 15) nextStage = 1;
+    this.warpToBoss(nextStage);
+  }
+
+  // Doğrudan İlgili Bölümün (1..15) Çevresine ve Boss Savaşına Işınlanma
   warpToBoss(stageNum) {
-    const st = Math.max(1, Math.floor(stageNum));
+    const st = ((Math.max(1, Math.floor(stageNum)) - 1) % 15) + 1;
     this.shakeTime = 0;
     this.shakeIntensity = 0;
     this.pendingLevelUps = 0;
@@ -296,24 +283,23 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.player.invulnTimer = 1.5;
     }
 
-    // Arka plan temasını o bölüme geçir
-    this.themeIdx = (st - 1) % this.cosmicThemes.length;
-    this.targetThemeIdx = this.themeIdx;
-    this.themeBlend = 0;
-
-    // İlgili bölümün Boss'unu anında sahneye indir
+    // İlgili bölümün Boss'unu ve özel çevre nesnelerini sahneye yükle
     this.waveDirector.stage = st;
     this.waveDirector.stageTime = window.GAME_CONFIG.TIMELINE.PHASE_3_END;
     this.waveDirector.bossSpawned = true;
     this.waveDirector.bossWarningTimer = 0;
     this.waveDirector.bossActive = null;
+    this.resetParallaxWalls(st);
     this.waveDirector.spawnBoss();
     if (this.waveDirector.bossActive) {
-      this.waveDirector.bossActive.y = 120;
+      this.waveDirector.bossActive.y = 125;
     }
 
     this.state = 'PLAYING';
-    this.addFloatText(`STAGE ${st} BOSS!`, this.W * 0.5, 240, '#ffe047', 22);
+    const stInfo = window.StageThemes ? window.StageThemes.getStage(st) : null;
+    const isTr = window.I18N.lang === 'TR';
+    const stTitle = stInfo ? (isTr ? stInfo.nameTR : stInfo.nameEN) : '';
+    this.addFloatText(`STAGE ${st}: ${stTitle}`, this.W * 0.5, 250, '#ffe047', 20);
   }
 
   onPlayerDeath() {
@@ -577,13 +563,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     // Oyun durduğunda (LEVELUP skill seçim ekranı, PAUSED, GAMEOVER) arka akan plan da tamamen durur
     if (this.state !== 'PLAYING') return;
 
-    // Boss sonrası yeni arka plan moduna yumuşak geçiş
-    if (this.themeIdx !== this.targetThemeIdx) {
-      this.themeBlend = Math.min(1, this.themeBlend + dt * 0.45);
-      if (this.themeBlend >= 1) {
-        this.themeIdx = this.targetThemeIdx;
-      }
-    }
+    this.groundScrollY += 92 * dt;
 
     for (let i = 0; i < this.stars.length; i++) {
       const s = this.stars[i];
@@ -604,8 +584,9 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       }
     }
 
-    const leftFrames = ['wall_left_radar', 'wall_left_reactor'];
-    const rightFrames = ['wall_right_tower', 'wall_right_coil'];
+    const st = window.StageThemes ? window.StageThemes.getStage(this.waveDirector.stage) : null;
+    const leftFrames = (st && st.leftProps) || ['wall_left_radar', 'wall_left_reactor'];
+    const rightFrames = (st && st.rightProps) || ['wall_right_tower', 'wall_right_coil'];
     this.wallPool.updateAll(dt, (w) => {
       w.y += w.speed * dt;
       if (w.y > this.H + 160) {
@@ -613,8 +594,10 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         w.y = -150;
         if (w.side === 'left') {
           w.frame = leftFrames[this.wallStep % leftFrames.length];
+          w.flipX = false;
         } else {
           w.frame = rightFrames[this.wallStep % rightFrames.length];
+          w.flipX = w.frame.indexOf('env2_') === 0;
         }
       }
       return true;
@@ -856,15 +839,16 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     ctx.save();
     ctx.scale(this.dpr, this.dpr);
 
-    // 1) Boss Sonrası Değişen Karanlık Uzay Gökyüzü Gradyanı
-    const thA = this.cosmicThemes[this.themeIdx % this.cosmicThemes.length];
-    const thB = this.cosmicThemes[this.targetThemeIdx % this.cosmicThemes.length];
-    const blend = this.themeIdx === this.targetThemeIdx ? 0 : this.themeBlend;
+    // 1) Aktif Bölümün (1..15) Gökyüzü veya Zemin Gradyanı
+    const st = window.StageThemes ? window.StageThemes.getStage(this.waveDirector.stage) : null;
+    const topC = (st && st.skyTop) || [6, 16, 32];
+    const midC = (st && st.skyMid) || [11, 28, 54];
+    const botC = (st && st.skyBot) || [5, 13, 26];
 
     const grad = ctx.createLinearGradient(0, 0, 0, this.H);
-    grad.addColorStop(0,   this.lerpRgb(thA.top, thB.top, blend));
-    grad.addColorStop(0.5, this.lerpRgb(thA.mid, thB.mid, blend));
-    grad.addColorStop(1,   this.lerpRgb(thA.bot, thB.bot, blend));
+    grad.addColorStop(0,   `rgb(${topC[0]},${topC[1]},${topC[2]})`);
+    grad.addColorStop(0.5, `rgb(${midC[0]},${midC[1]},${midC[2]})`);
+    grad.addColorStop(1,   `rgb(${botC[0]},${botC[1]},${botC[2]})`);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, this.W, this.H);
 
@@ -875,35 +859,53 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       ctx.translate(sx, sy);
     }
 
-    // 2) Karanlık Atmosferik Nebula Bulutları
-    for (let i = 0; i < this.nebulae.length; i++) {
-      const nb = this.nebulae[i];
-      const nGrad = ctx.createRadialGradient(nb.x, nb.y, 10, nb.x, nb.y, nb.r);
-      nGrad.addColorStop(0, blend < 0.5 ? thA.nebula : thB.nebula);
-      nGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = nGrad;
-      ctx.beginPath();
-      ctx.arc(nb.x, nb.y, nb.r, 0, Math.PI * 2);
-      ctx.fill();
+    // 2) Bölümün Zeminli/Zeminsiz Özel Dokusu (Hurda Güverte, Fabrika Boruları, Karlı Vadi, Lav Nehri, Karadelik vb.)
+    if (window.StageThemes) {
+      window.StageThemes.drawStageBackdrop(ctx, this.W, this.H, this.waveDirector.stage, this.groundScrollY);
     }
 
-    // 3) Çok Renkli Parıldayan Yıldızlar
-    const activeStarColors = blend < 0.5 ? thA.starColors : thB.starColors;
+    // 3) Zeminsiz / Nebula Bölümlerde Atmosferik Nebula Bulutları
+    if (st && st.nebula) {
+      for (let i = 0; i < this.nebulae.length; i++) {
+        const nb = this.nebulae[i];
+        const nGrad = ctx.createRadialGradient(nb.x, nb.y, 10, nb.x, nb.y, nb.r);
+        nGrad.addColorStop(0, st.nebula);
+        nGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = nGrad;
+        ctx.beginPath();
+        ctx.arc(nb.x, nb.y, nb.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 4) Bölüme Uygun Atmosfer Parçacıkları (Yıldızlar, Kar Taneleri, Kıvılcımlar, Kristal/Spor Parıltıları)
+    const pType = (st && st.particleType) || 'stars';
+    const starCols = (st && st.starColors) || ['#ffffff', '#9be8ff', '#ffe066'];
     for (let i = 0; i < this.stars.length; i++) {
       const s = this.stars[i];
-      ctx.fillStyle = activeStarColors[s.colorIdx % activeStarColors.length];
-      ctx.globalAlpha = Math.max(0.2, Math.min(1, s.alpha + Math.sin(s.twinklePhase) * 0.18));
+      if (pType === 'snow') {
+        ctx.fillStyle = '#e8faff';
+      } else if (pType === 'sparks') {
+        ctx.fillStyle = (i % 2 === 0) ? '#ff942e' : '#ffe066';
+      } else if (pType === 'spores') {
+        ctx.fillStyle = (i % 2 === 0) ? '#9dff2e' : '#d580ff';
+      } else if (pType === 'crystals') {
+        ctx.fillStyle = (i % 2 === 0) ? '#26ffc9' : '#70f8ff';
+      } else {
+        ctx.fillStyle = starCols[s.colorIdx % starCols.length];
+      }
+      ctx.globalAlpha = Math.max(0.2, Math.min(0.95, s.alpha + Math.sin(s.twinklePhase) * 0.18));
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.arc(s.x, s.y, pType === 'snow' ? s.r * 1.25 : s.r, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
 
-    // 4) Sonsuz Modüler Metalik Üs Duvarları
+    // 5) Bölümün Özel Sol ve Sağ Kenar Çevre Nesneleri
     const walls = this.wallPool.activeList;
     for (let i = 0; i < walls.length; i++) {
       const w = walls[i];
-      window.Atlas.draw(ctx, w.frame, w.x, w.y, w.w, w.h);
+      window.Atlas.draw(ctx, w.frame, w.x, w.y, w.w, w.h, w.flipX ? { scaleX: -1 } : null);
     }
 
     // 6) XP Kristalleri

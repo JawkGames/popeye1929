@@ -5,7 +5,7 @@ window.Atlas = {
   flashCanvas: null,
   flashCtx: null,
 
-  // 7 Toplu Sprite Sheet Dosyası (Tek tek görsel yok, tamamı toplu atlas)
+  // 8 Toplu Sprite Sheet Dosyası (Tek tek görsel yok, tamamı toplu atlas)
   SHEET_PATHS: {
     ships: 'assets/ships_atlas.png',
     items: 'assets/items_ui_atlas.png',
@@ -13,7 +13,8 @@ window.Atlas = {
     env: 'assets/env_atlas.png',
     skills: 'assets/skills_weapons_atlas.png',
     enemies2: 'assets/enemies_bullets_atlas.png',
-    bosses2: 'assets/bosses_atlas.png'
+    bosses2: 'assets/bosses_atlas.png',
+    stageEnv: 'assets/stage_env_atlas.png'
   },
 
   // Koordinat Dilimleme Tablosu (x, y, w, h)
@@ -61,7 +62,7 @@ window.Atlas = {
     exp_3:             { sheet: 'vfx', x: 512, y: 512, w: 256, h: 256 },
     exp_4:             { sheet: 'vfx', x: 768, y: 512, w: 256, h: 256 },
 
-    // 4. Modüler Çevre ve Arka Plan Üs Parçaları (env_atlas.png)
+    // 4. Bölüm 1 Modüler Çevre Parçaları (env_atlas.png)
     wall_left_radar:   { sheet: 'env', x: 0,   y: 0,   w: 341, h: 342 },
     wall_left_reactor: { sheet: 'env', x: 341, y: 0,   w: 341, h: 342 },
     env_asteroid:      { sheet: 'env', x: 682, y: 0,   w: 341, h: 342 },
@@ -69,7 +70,25 @@ window.Atlas = {
     wall_right_coil:   { sheet: 'env', x: 341, y: 342, w: 341, h: 342 },
     env_girder:        { sheet: 'env', x: 682, y: 342, w: 341, h: 342 },
 
-    // 5. Archero Yetenek Silahları, Özel Konserveler, XP Kristali ve 3'lü Kart Çerçevesi (skills_weapons_atlas.png)
+    // 5. 15 Bölüm İçin Yeni Çevre Nesneleri (stage_env_atlas.png, 4x4 = 16 nesne)
+    env2_scrap:        { sheet: 'stageEnv', x: 0,   y: 0,   w: 256, h: 256 },
+    env2_furnace:      { sheet: 'stageEnv', x: 256, y: 0,   w: 256, h: 256 },
+    env2_drill:        { sheet: 'stageEnv', x: 512, y: 0,   w: 256, h: 256 },
+    env2_glacier:      { sheet: 'stageEnv', x: 768, y: 0,   w: 256, h: 256 },
+    env2_satellite:    { sheet: 'stageEnv', x: 0,   y: 256, w: 256, h: 256 },
+    env2_neon1:        { sheet: 'stageEnv', x: 256, y: 256, w: 256, h: 256 },
+    env2_neon2:        { sheet: 'stageEnv', x: 512, y: 256, w: 256, h: 256 },
+    env2_copper:       { sheet: 'stageEnv', x: 768, y: 256, w: 256, h: 256 },
+    env2_meteor:       { sheet: 'stageEnv', x: 0,   y: 512, w: 256, h: 256 },
+    env2_crystal:      { sheet: 'stageEnv', x: 256, y: 512, w: 256, h: 256 },
+    env2_bioroot:      { sheet: 'stageEnv', x: 512, y: 512, w: 256, h: 256 },
+    env2_tendril:      { sheet: 'stageEnv', x: 768, y: 512, w: 256, h: 256 },
+    env2_obelisk:      { sheet: 'stageEnv', x: 0,   y: 768, w: 256, h: 256 },
+    env2_lava:         { sheet: 'stageEnv', x: 256, y: 768, w: 256, h: 256 },
+    env2_blackhole:    { sheet: 'stageEnv', x: 512, y: 768, w: 256, h: 256 },
+    env2_teslaspire:   { sheet: 'stageEnv', x: 768, y: 768, w: 256, h: 256 },
+
+    // 6. Archero Yetenek Silahları, Özel Konserveler, XP Kristali ve 3'lü Kart Çerçevesi (skills_weapons_atlas.png)
     proj_laser:        { sheet: 'skills', x: 0,   y: 0,   w: 256, h: 256 },
     proj_missile:      { sheet: 'skills', x: 256, y: 0,   w: 256, h: 256 },
     proj_sawblade:     { sheet: 'skills', x: 512, y: 0,   w: 256, h: 256 },
@@ -87,33 +106,28 @@ window.Atlas = {
     proj_wave:         { sheet: 'skills', x: 512, y: 768, w: 256, h: 256 },
     badge_levelup:     { sheet: 'skills', x: 768, y: 768, w: 256, h: 256 },
 
-    // 6. 20 Yeni Düşman + 10 Yeni Düşman Mermisi (enemies_bullets_atlas.png)
-    // Grup 1 (Bölüm 2: Kızıl Mars Filosu, e2_1..e2_5)
+    // 7. 20 Yeni Düşman + 10 Yeni Düşman Mermisi (enemies_bullets_atlas.png)
     e2_1:  { sheet: 'enemies2', x: 0,   y: 0,   w: 200, h: 220 },
     e2_2:  { sheet: 'enemies2', x: 200, y: 0,   w: 200, h: 220 },
     e2_3:  { sheet: 'enemies2', x: 400, y: 0,   w: 200, h: 220 },
     e2_4:  { sheet: 'enemies2', x: 600, y: 0,   w: 200, h: 220 },
     e2_5:  { sheet: 'enemies2', x: 800, y: 0,   w: 200, h: 220 },
-    // Grup 2 (Bölüm 3: Zümrüt Biyo-Siber Filo, e2_6..e2_10)
     e2_6:  { sheet: 'enemies2', x: 0,   y: 220, w: 200, h: 220 },
     e2_7:  { sheet: 'enemies2', x: 200, y: 220, w: 200, h: 220 },
     e2_8:  { sheet: 'enemies2', x: 400, y: 220, w: 200, h: 220 },
     e2_9:  { sheet: 'enemies2', x: 600, y: 220, w: 200, h: 220 },
     e2_10: { sheet: 'enemies2', x: 800, y: 220, w: 200, h: 220 },
-    // Grup 3 (Bölüm 4: Ametist Hiçlik Filosu, e2_11..e2_15)
     e2_11: { sheet: 'enemies2', x: 0,   y: 440, w: 200, h: 220 },
     e2_12: { sheet: 'enemies2', x: 200, y: 440, w: 200, h: 220 },
     e2_13: { sheet: 'enemies2', x: 400, y: 440, w: 200, h: 220 },
     e2_14: { sheet: 'enemies2', x: 600, y: 440, w: 200, h: 220 },
     e2_15: { sheet: 'enemies2', x: 800, y: 440, w: 200, h: 220 },
-    // Grup 4 (Bölüm 5+: Altın İmparatorluk Filosu, e2_16..e2_20)
     e2_16: { sheet: 'enemies2', x: 0,   y: 660, w: 200, h: 220 },
     e2_17: { sheet: 'enemies2', x: 200, y: 660, w: 200, h: 220 },
     e2_18: { sheet: 'enemies2', x: 400, y: 660, w: 200, h: 220 },
     e2_19: { sheet: 'enemies2', x: 600, y: 660, w: 200, h: 220 },
     e2_20: { sheet: 'enemies2', x: 800, y: 660, w: 200, h: 220 },
 
-    // 10 Yeni Düşman Mermisi (ebul_1..ebul_10)
     ebul_1:  { sheet: 'enemies2', x: 0,   y: 880,  w: 200, h: 120 },
     ebul_2:  { sheet: 'enemies2', x: 200, y: 880,  w: 200, h: 120 },
     ebul_3:  { sheet: 'enemies2', x: 400, y: 880,  w: 200, h: 120 },
@@ -125,7 +139,7 @@ window.Atlas = {
     ebul_9:  { sheet: 'enemies2', x: 600, y: 1000, w: 200, h: 120 },
     ebul_10: { sheet: 'enemies2', x: 800, y: 1000, w: 200, h: 120 },
 
-    // 7. 10 Dev Boss (5 Üst + 5 Alt, bosses_atlas.png)
+    // 8. 14 Yeni Kademeli Boss (Bölüm 2..15 için boss_1..boss_14, bosses_atlas.png 5x3 grid)
     boss_1:  { sheet: 'bosses2', x: 0,    y: 0,   w: 256, h: 280 },
     boss_2:  { sheet: 'bosses2', x: 256,  y: 0,   w: 256, h: 280 },
     boss_3:  { sheet: 'bosses2', x: 512,  y: 0,   w: 256, h: 280 },
@@ -135,7 +149,11 @@ window.Atlas = {
     boss_7:  { sheet: 'bosses2', x: 256,  y: 280, w: 256, h: 280 },
     boss_8:  { sheet: 'bosses2', x: 512,  y: 280, w: 256, h: 280 },
     boss_9:  { sheet: 'bosses2', x: 768,  y: 280, w: 256, h: 280 },
-    boss_10: { sheet: 'bosses2', x: 1024, y: 280, w: 256, h: 280 }
+    boss_10: { sheet: 'bosses2', x: 1024, y: 280, w: 256, h: 280 },
+    boss_11: { sheet: 'bosses2', x: 0,    y: 560, w: 256, h: 280 },
+    boss_12: { sheet: 'bosses2', x: 256,  y: 560, w: 256, h: 280 },
+    boss_13: { sheet: 'bosses2', x: 512,  y: 560, w: 256, h: 280 },
+    boss_14: { sheet: 'bosses2', x: 768,  y: 560, w: 256, h: 280 }
   },
 
   loadAll(onProgress) {

@@ -45,10 +45,14 @@ window.WaveDirector = class WaveDirector {
     };
   }
 
-  // Her bölümde farklı bir Dev Boss seçer (boss_dreadnought + boss_1..boss_10)
+  // Her bölümde (1..15) o bölüme özel Dev Boss'u seçer
   getStageBossKey() {
+    if (window.StageThemes) {
+      const st = window.StageThemes.getStage(this.stage);
+      if (st && st.bossKey) return st.bossKey;
+    }
     if (this.stage === 1) return 'boss_dreadnought';
-    const bIdx = ((this.stage - 2) % 10) + 1;
+    const bIdx = ((this.stage - 2) % 14) + 1;
     return `boss_${bIdx}`;
   }
 
@@ -589,13 +593,13 @@ window.WaveDirector = class WaveDirector {
     if (window.Ads) window.Ads.showInterstitial();
     this.game.addFloatText(window.I18N.t('STAGE_CLEAR') + ' +10,000', bx, by - 40, '#ffe047', 28);
 
-    // Yeni Bölüme Geçiş: Yeni 5'li düşman grubu, yeni gezegenli arka plan teması ve yeni Boss!
-    this.stage++;
+    // Yeni Bölüme Geçiş (1..15): Yeni çevre nesneleri, yeni zemin/atmosfer ve yeni Boss!
+    this.stage = (this.stage % 15) + 1;
     this.stageTime = 0;
     this.bossSpawned = false;
     this.waveTimer = 2.8;
-    if (this.game.advanceCosmicTheme) {
-      this.game.advanceCosmicTheme();
+    if (this.game.applyStageEnvironment) {
+      this.game.applyStageEnvironment(this.stage);
     }
   }
 };
