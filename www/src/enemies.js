@@ -81,6 +81,7 @@ window.WaveDirector = class WaveDirector {
       this.bossSpawned = true;
       this.bossWarningTimer = tl.BOSS_WARNING_DURATION;
       this.game.addScreenShake(12, 1.2);
+      if (window.AudioManager) window.AudioManager.playBossWarning();
       return;
     }
 
@@ -499,6 +500,7 @@ window.WaveDirector = class WaveDirector {
 
     b.attackTimer -= dt;
     if (b.attackTimer <= 0) {
+      if (window.AudioManager) window.AudioManager.playBossShoot();
       const leftBarrelX = b.x - 52;
       const rightBarrelX = b.x + 52;
       const barrelY = b.y + 76;

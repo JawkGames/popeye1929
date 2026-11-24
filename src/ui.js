@@ -11,6 +11,7 @@ window.UIManager = class UIManager {
     // Sağ üst buton alanları (ui_button sprite'ı ile çizilir)
     this.btnPause = { x: 500, y: 38, w: 46, h: 46 };
     this.btnLang  = { x: 446, y: 38, w: 46, h: 46 };
+    this.btnMute  = { x: 446, y: 92, w: 46, h: 46 };
     this.btnFull  = { x: 500, y: 92, w: 46, h: 46 };
 
     // Sol Alt ve Sağ Alt Bölüm/Boss Atlama Ok Butonları (1..15 Bölümler Arası Geçiş)
@@ -55,6 +56,12 @@ window.UIManager = class UIManager {
     // 1) Dil Değiştirme Butonu (TR / EN)
     if (this.hitRect(px, py, this.btnLang)) {
       window.I18N.toggleLang();
+      return true;
+    }
+
+    // 1b) Ses Açma/Kapatma Butonu
+    if (this.hitRect(px, py, this.btnMute)) {
+      if (window.AudioManager) window.AudioManager.toggleMute();
       return true;
     }
 
@@ -269,8 +276,8 @@ window.UIManager = class UIManager {
       3
     );
 
-    // Popeye Konserve Portresi
-    window.Atlas.draw(ctx, 'hud_portrait', 40, 54, 72, 84, { rotation: -0.09 });
+    // Popeye 3D Profil Avatar Portresi
+    window.Atlas.draw(ctx, 'hud_portrait', 40, 54, 72, 72);
 
     // STAGE 1 & Aktif Silah Rozeti
     this.drawTextOutlined(
@@ -295,6 +302,8 @@ window.UIManager = class UIManager {
 
     this.drawSpriteButton(ctx, this.btnPause, '||', '#eaf4ff', 17);
     this.drawSpriteButton(ctx, this.btnLang, window.I18N.lang, '#ffe066', 14);
+    const isMuted = window.AudioManager && window.AudioManager.muted;
+    this.drawSpriteButton(ctx, this.btnMute, isMuted ? '🔇' : '🔊', isMuted ? '#ff6b5b' : '#6dff5c', 16);
 
     if (!this.isNativeAndroid) {
       window.Atlas.draw(ctx, 'ui_button', this.btnFull.x, this.btnFull.y, this.btnFull.w, this.btnFull.h);

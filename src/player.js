@@ -85,6 +85,7 @@ window.PlayerController = class PlayerController {
     };
 
     canvas.addEventListener('pointerdown', (e) => {
+      if (window.AudioManager) window.AudioManager.init();
       const pt = toVirtualCoords(e.clientX, e.clientY);
       if (this.game.ui && this.game.ui.handlePointerDown(pt.x, pt.y)) {
         return;
@@ -384,6 +385,9 @@ window.PlayerController = class PlayerController {
     const sizeScale = 1 + this.hasSkill('giant_bullets') * 0.22;
     const spdScale = 1 + this.hasSkill('bullet_speed_up') * 0.25;
     const bOpts = this.buildBulletOpts();
+    if (window.AudioManager) {
+      window.AudioManager.playShoot(this.weaponLevel >= 3 || this.hasSkill('fire_rounds') > 0);
+    }
 
     // 1) Ana Silah Merdiveni Şeritleri
     for (let i = 0; i < n; i++) {
@@ -689,6 +693,7 @@ window.PlayerController = class PlayerController {
   takeDamage(amount) {
     if (this.dead || this.invulnTimer > 0) return false;
     if (this.shieldTimer > 0) {
+      if (window.AudioManager) window.AudioManager.playPlayerHit(true);
       this.game.spawnVfx(this.x, this.y - 10, 'spark_crit', 70, 0.22);
       return false;
     }
@@ -700,6 +705,8 @@ window.PlayerController = class PlayerController {
       this.game.addFloatText(window.I18N.t('DODGE_TXT'), this.x, this.y - 40, '#70f0ff', 20);
       return false;
     }
+
+    if (window.AudioManager) window.AudioManager.playPlayerHit(false);
 
     this.hp = Math.max(0, this.hp - amount);
     this.invulnTimer = this.cfg.INVULN_TIME;

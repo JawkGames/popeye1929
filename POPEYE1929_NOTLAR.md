@@ -2,8 +2,14 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.014`
+- **Güncel Sürüm:** `v0.015`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.015
+- **Stage 11 Uzuv / Ahtapot Kolu & Sarmaşık Nesnesi:** Stage 11'deki dikdörtgen ekran kesiti kaldırıldı; yerine soldan ve sağdan uzanan izole ahtapot kolu, dikenli sarmaşık ve parlayan spor kesesi (`env2_bioroot` -> `assets/stage_env_atlas.png`) üretilip gömüldü.
+- **Stage 3 Fabrika İç Beyazlık Temizliği:** `env2_furnace` (buhar kazanı/fabrika) görselindeki vana tekerlekleri ve boru kıvrımları arasında kalan kapalı beyaz boşluklar tamamen şeffaflaştırıldı.
+- **3D Popeye Profil Portresi (`hud_portrait` -> `assets/items_ui_atlas.png`):** Konserve üzerindeki düz Popeye görseli kaldırılarak yerine altın-lacivert madalyon çerçeveli 3D görünümlü Popeye profil portresi üretildi ve sol üst HUD ile duraklatma ekranına bağlandı.
+- **Ses Efektleri ve Bölüm/Boss Müzikleri (`src/audio.js`):** Shuffle-bag (karışık torba) ton varyasyonlu ateş, mermi vuruş/kritik, düşman/Boss patlama, XP kristali toplama, seviye atlama fanfarı, yetenek seçimi, Boss uyarı sireni, Boss top ateşi, kalkan/hasar sesleri ve 15 bölüme göre değişen dinamik bölüm müzikleri + hızlı Boss savaşı müziği eklendi. Sağ üste ses açma/kapatma (`🔊 / 🔇`) butonu eklendi.
 
 ## v0.014 — 15 Farklı Zeminli/Zeminsiz Bölüm Çevresi, 15 Kademeli Heybetlenen Boss ve Sol-Sağ Alt Oklarla Geçiş
 - **15 Bölümlü Çevre ve Zemin Motoru (`src/stages.js` & `assets/stage_env_atlas.png`):** Tek sayfada 16 yeni modüler bölüm kenar nesnesi üretildi ve 15 farklı bölüme bağlandı:

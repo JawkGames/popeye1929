@@ -366,6 +366,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       this.addScore(1000, this.player.x, this.player.y - 40);
       return;
     }
+    if (window.AudioManager) window.AudioManager.playLevelUp();
     this.state = 'LEVELUP';
   }
 
@@ -374,6 +375,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const chosen = this.levelUpChoices[index];
     if (!chosen) return;
 
+    if (window.AudioManager) window.AudioManager.playSkillPick();
     window.SkillSystem.applySkill(this.player, chosen.id);
     const isTr = window.I18N.lang === 'TR';
     const info = isTr ? chosen.tr : chosen.en;
@@ -464,9 +466,14 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       finalDmg *= 1.40;
     }
 
+    let isCrit = false;
     if (!isDot && Math.random() < this.player.critChance) {
       finalDmg *= this.player.critMult;
+      isCrit = true;
       this.spawnVfx(e.x, e.y, 'spark_crit', 52, 0.16);
+    }
+    if (!isDot && window.AudioManager) {
+      window.AudioManager.playHit(isCrit);
     }
 
     e.hp -= finalDmg;
@@ -482,11 +489,15 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
     if (e.hp <= 0) {
       if (e.isBoss) {
+        if (window.AudioManager) window.AudioManager.playExplosion(true);
         this.waveDirector.onBossKilled(e);
         return;
       }
 
       e._active = false;
+      if (window.AudioManager) {
+        window.AudioManager.playExplosion(e.w >= 95);
+      }
       this.spawnExplosion(e.x, e.y, Math.max(72, e.w * 1.1));
       this.addScreenShake(5, 0.14);
       this.addScore(e.score, e.x, e.y);
@@ -556,12 +567,19 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
   applyPickup(p) {
     const xpVal = p.xpVal || window.GAME_CONFIG.XP.GEM_VALUE;
+    if (window.AudioManager) {
+      window.AudioManager.playXp(this.xp / Math.max(1, this.xpToNext));
+    }
     this.addXp(xpVal);
   }
 
   update(dt) {
-    // Oyun durduğunda (LEVELUP skill seçim ekranı, PAUSED, GAMEOVER) arka akan plan da tamamen durur
+    // Oyun durduğunda (LEVELUP skill seçim ekranı, PAUSED, GAMEOVER) arka akan plan ve müzik tamamen durur
     if (this.state !== 'PLAYING') return;
+
+    if (window.AudioManager) {
+      window.AudioManager.updateMusic(dt, this.waveDirector.stage, Boolean(this.waveDirector.bossActive));
+    }
 
     this.groundScrollY += 92 * dt;
 
