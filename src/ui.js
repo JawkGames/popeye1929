@@ -14,10 +14,6 @@ window.UIManager = class UIManager {
     this.btnMute  = { x: 446, y: 92, w: 46, h: 46 };
     this.btnFull  = { x: 500, y: 92, w: 46, h: 46 };
 
-    // Sol Alt ve Sağ Alt Bölüm/Boss Atlama Ok Butonları (1..15 Bölümler Arası Geçiş)
-    this.btnPrevStage = { x: 42,  y: 916, w: 48, h: 48 };
-    this.btnNextStage = { x: 498, y: 916, w: 48, h: 48 };
-
     // Modal butonları
     this.btnPrimary = { x: 270, y: 540, w: 280, h: 68 };
     this.btnSecondary = { x: 270, y: 630, w: 280, h: 64 };
@@ -39,8 +35,6 @@ window.UIManager = class UIManager {
     for (let i = 0; i < this.skillCards.length; i++) {
       this.skillCards[i].y = 495 + this.midOff;
     }
-    this.btnPrevStage.y = window.GAME_CONFIG.HEIGHT - 44;
-    this.btnNextStage.y = window.GAME_CONFIG.HEIGHT - 44;
   }
 
   hitRect(px, py, b) {
@@ -68,16 +62,6 @@ window.UIManager = class UIManager {
     // 2) Tam Ekran Butonu (Sadece Web sürümünde görünür ve çalışır, Android AAB'de gizli)
     if (!this.isNativeAndroid && this.hitRect(px, py, this.btnFull)) {
       this.toggleFullscreen();
-      return true;
-    }
-
-    // 2b) Sol Alt ve Sağ Alt Ok Butonları (Bölüm 1..15 ve Bosslar Arası Geçiş)
-    if (this.hitRect(px, py, this.btnPrevStage)) {
-      this.game.stepBossStage(-1);
-      return true;
-    }
-    if (this.hitRect(px, py, this.btnNextStage)) {
-      this.game.stepBossStage(1);
       return true;
     }
 
@@ -309,11 +293,8 @@ window.UIManager = class UIManager {
     this.drawTextOutlined(ctx, weaponBadge, 102, 114, 13, '#57e2ff', 'left', 3.5);
 
     // =========================================================================
-    // 2) SAĞ ÜST BUTONLAR VE SOL-SAĞ ALT BÖLÜM/BOSS GEÇİŞ OKLARI
+    // 2) SAĞ ÜST BUTONLAR
     // =========================================================================
-    this.drawSpriteButton(ctx, this.btnPrevStage, '◀', '#ffe047', 20);
-    this.drawSpriteButton(ctx, this.btnNextStage, '▶', '#ffe047', 20);
-
     this.drawSpriteButton(ctx, this.btnPause, '||', '#eaf4ff', 17);
     this.drawSpriteButton(ctx, this.btnLang, window.I18N.lang, '#ffe066', 14);
     const isMuted = window.AudioManager && window.AudioManager.muted;

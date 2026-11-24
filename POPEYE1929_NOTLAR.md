@@ -2,8 +2,11 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.016`
+- **Güncel Sürüm:** `v0.017`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.017
+- Ekranın sol ve sağ altındaki bölüm/Boss atlama ok butonları (`◀` / `▶`) kaldırıldı.
 
 ## v0.016
 - **Anında Açılış & Atlas Yükleme Güvenliği (`src/main.js`, `src/atlas.js`, `src/ui.js`):** `DOMContentLoaded` yarış durumu (betikler geç yüklendiğinde oyunun hiç başlamaması) ve 8 büyük PNG atlasının tamamı inene kadar oyun döngüsünün/menünün kilitli kalması düzeltildi. Oyun döngüsü ve menü artık ilk karede anında açılır; görseller arka planda indikçe kesintisiz çizilir.
