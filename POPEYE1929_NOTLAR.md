@@ -2,8 +2,12 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.019`
+- **Güncel Sürüm:** `v0.020`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.020 — Yeni Kokpit Oyun İkonu (Köşe Beyazlıkları Silinmiş) ve Soldan Sağa Renklenen 9:16 Loading Ekranı
+- **Oyun İkonu (`magaza/icon-512.png`, `android/app/src/main/res/mipmap-*`, `www/favicon.png`, `www/apple-touch-icon.png`):** Kullanıcının gönderdiği kokpit içi Popeye oyun ikonunun 4 dış köşesindeki beyazlıklar flood-fill + 4 geçişli defringe ile sıfır kenar beyazlığı kalacak şekilde şeffaflaştırıldı ve tüm mağaza/Android ikonlarına uygulandı.
+- **Soldan Sağa Renklenen 9:16 Loading Ekranı (`index.html`, `src/main.js`, `assets/acilis.jpg`):** Kullanıcının gönderdiği 9:16 açılış görseli (`#acilis` + `#ac_gri`) oyuna eklendi. Yükleme boşken görsel tamamen siyah-beyaz (`grayscale(1)`) başlar, yükleme doldukça `--p` maskesiyle soldan sağa doğru renklenir ve tamamlandığında yumuşakça açılarak menüye geçer.
 
 ## v0.019 — Ortak Keyli (`com.jawk.popeye1929`) Android / AAB Kurulumu ve Oyun İkonu
 - **Capacitor & Ortak Keyli AAB Derleme Sistemi (`android/`, `.github/workflows/android.yml`, `capacitor.config.json`):** Paket adı `com.jawk.popeye1929`, JawkGames ortak upload key (`secrets.UPLOAD_KEYSTORE_BASE64` + `secrets.UPLOAD_KEY_PASSWORD`, alias: `upload`), R8 kod ve kaynak küçültme (`minifyEnabled true`, `shrinkResources true`, `proguard-rules.pro`), opsiyonel donanım özellikleri (`android:required="false"`), gerçek AdMob App ID (`ca-app-pub-7983529419004158~9792828487`), dikey immersive tam ekran (`MainActivity.java`), Android geri tuşu (`window.geriTus()`) ve arka plana geçince otomatik duraklatma eklendi.

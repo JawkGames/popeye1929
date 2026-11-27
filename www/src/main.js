@@ -44,9 +44,49 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.resetParallaxWalls();
     requestAnimationFrame((ts) => this.loop(ts));
 
+    this.atlasDone = false;
     window.Atlas.loadAll((prog) => {
       this.loadProgress = prog;
+    }).then(() => {
+      this.loadProgress = 1;
+      this.atlasDone = true;
     });
+
+    this.initLoadingScreen();
+  }
+
+  // 9:16 Açılış Görseli: Başta siyah-beyaz, yükleme doldukça soldan sağa renklenir (--p: -6% -> 106%)
+  initLoadingScreen() {
+    const el = document.getElementById('acilis');
+    const cub = document.getElementById('ac_gri');
+    if (!el || !cub) return;
+
+    const t0 = performance.now();
+    const minDur = 1900; // Soldan sağa renklenme geçişinin net görünmesi için minimum süre (ms)
+
+    const tickLoad = () => {
+      const elapsed = performance.now() - t0;
+      const timeProg = Math.min(1, elapsed / minDur);
+      const assetProg = this.atlasDone ? 1 : Math.max(0.15, this.loadProgress || 0);
+      const p = Math.min(timeProg, assetProg);
+
+      cub.style.setProperty('--p', (p * 112 - 6).toFixed(1) + '%');
+
+      if (p < 1 || (!this.atlasDone && elapsed < 12000)) {
+        setTimeout(tickLoad, 40);
+        return;
+      }
+
+      cub.style.setProperty('--p', '106%');
+      setTimeout(() => {
+        el.classList.add('bit');
+        setTimeout(() => {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 500);
+      }, 280);
+    };
+
+    tickLoad();
   }
 
   setupCanvasScaling() {
@@ -78,6 +118,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.canvas.width = Math.round(this.W * dpr);
     this.canvas.height = Math.round(this.H * dpr);
     this.dpr = dpr;
+
+    const acilisEl = document.getElementById('acilis');
+    if (acilisEl) {
+      acilisEl.style.width = `${cssW}px`;
+      acilisEl.style.height = `${cssH}px`;
+    }
 
     if (this.ui && this.ui.layout) this.ui.layout();
     if (this.player && oldH !== virtH) {
