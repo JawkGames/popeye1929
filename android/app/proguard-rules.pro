@@ -1,0 +1,11 @@
+# --- R8 keep kuralları (Capacitor köprüsü + eklentiler + AdMob + Popeye 1929) ---
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,SourceFile,LineNumberTable
+-keep class com.getcapacitor.** { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-keep class * extends com.getcapacitor.Plugin { *; }
+-keep class com.getcapacitor.community.admob.** { *; }
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.android.ump.** { *; }
+-keep class com.jawk.popeye1929.** { *; }
+-keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }
+-dontwarn com.google.android.gms.**

@@ -2,8 +2,12 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.018`
+- **Güncel Sürüm:** `v0.019`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.019 — Ortak Keyli (`com.jawk.popeye1929`) Android / AAB Kurulumu ve Oyun İkonu
+- **Capacitor & Ortak Keyli AAB Derleme Sistemi (`android/`, `.github/workflows/android.yml`, `capacitor.config.json`):** Paket adı `com.jawk.popeye1929`, JawkGames ortak upload key (`secrets.UPLOAD_KEYSTORE_BASE64` + `secrets.UPLOAD_KEY_PASSWORD`, alias: `upload`), R8 kod ve kaynak küçültme (`minifyEnabled true`, `shrinkResources true`, `proguard-rules.pro`), opsiyonel donanım özellikleri (`android:required="false"`), gerçek AdMob App ID (`ca-app-pub-7983529419004158~9792828487`), dikey immersive tam ekran (`MainActivity.java`), Android geri tuşu (`window.geriTus()`) ve arka plana geçince otomatik duraklatma eklendi.
+- **Oyun İkonu ve Açılış Görselleri (`magaza/icon-512.png`, `android/app/src/main/res/mipmap-*`, `drawable*/splash.png`, `www/favicon.png`):** 3D Popeye pilot portresi ve savaş uçağı rozetiyle 512x512 Play Store ikonu, tüm Android `mipmap-mdpi..xxxhdpi` ikonları, 1024x500 mağaza görseli ve dikey açılış ekranı (`splash.png`) oluşturuldu.
 
 ## v0.018 — Lineer Gelişim, 8X Silah Evrimi, Yetenek Dengesi, 3D Popeye Portre Tamamlaması ve AdMob Güçlendirmesi
 - **15 Bölümlü Lineer Düşman İlerlemesi (`src/enemies.js`):** Stage 5 sonrası Stage 6'da düşmanların tekrar Stage 2 seviyesine düşmesi düzeltildi. 26 düşman tipi Stage 1'den Stage 15'e kadar hiçbir bölümde geriye düşmeden kademeli olarak güçlenecek şekilde dağıtıldı.

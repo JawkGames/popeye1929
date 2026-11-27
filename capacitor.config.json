@@ -1,0 +1,8 @@
+{
+  "appId": "com.jawk.popeye1929",
+  "appName": "Popeye 1929",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#040b16"
+  }
+}

@@ -25,6 +25,15 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.setupCanvasScaling();
     window.addEventListener('resize', () => this.setupCanvasScaling());
 
+    // Uygulama arka plana atıldığında oyunu ve sesi otomatik duraklat
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this.state === 'PLAYING') {
+        this.state = 'PAUSED';
+        this.shakeTime = 0;
+        this.shakeIntensity = 0;
+      }
+    });
+
     this.initPools();
     this.initCosmicBackground();
 
@@ -1008,6 +1017,41 @@ const bootPopeye1929 = () => {
   if (!window.gameInstance) {
     window.gameInstance = new window.PopeyeShmupGame();
   }
+};
+
+// Android Geri Tuşu Yönetimi (MainActivity.java -> window.geriTus())
+window._lastBackPress = 0;
+window.geriTus = () => {
+  const g = window.gameInstance;
+  if (!g) return 'cik';
+  if (g.state === 'PLAYING') {
+    g.togglePause();
+    return 'dur';
+  }
+  if (g.state === 'PAUSED') {
+    g.togglePause();
+    return 'devam';
+  }
+  if (g.state === 'LEVELUP') {
+    return 'bekle';
+  }
+  if (g.state === 'GAMEOVER') {
+    g.state = 'MENU';
+    return 'menu';
+  }
+  const now = Date.now();
+  if (now - window._lastBackPress < 2000) {
+    return 'cik';
+  }
+  window._lastBackPress = now;
+  g.addFloatText(
+    window.I18N && window.I18N.lang === 'EN' ? 'PRESS BACK AGAIN TO EXIT' : 'ÇIKMAK İÇİN TEKRAR GERİ BASIN',
+    g.W * 0.5,
+    g.H - 110,
+    '#ffe047',
+    15
+  );
+  return 'uyari';
 };
 
 if (document.readyState === 'loading') {
