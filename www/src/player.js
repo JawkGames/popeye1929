@@ -141,15 +141,6 @@ window.PlayerController = class PlayerController {
         else if (e.key === '3') this.game.selectLevelUpSkill(2);
         return;
       }
-      // Sol / Sağ Köşeli Parantez veya PageUp/PageDown ile Bölüm Bossları Arasında Geçiş
-      if (e.key === '[' || e.key === 'PageUp') {
-        this.game.stepBossStage(-1);
-        return;
-      }
-      if (e.key === ']' || e.key === 'PageDown') {
-        this.game.stepBossStage(1);
-        return;
-      }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') this.keys.left = true;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this.keys.right = true;
       if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') this.keys.up = true;
@@ -214,13 +205,13 @@ window.PlayerController = class PlayerController {
 
   getTotalDamageMult() {
     let mult = 1 + this.powerBonus;
-    if (this.hasSkill('giant_bullets') > 0) mult += this.hasSkill('giant_bullets') * 0.20;
-    if (this.hasSkill('bullet_speed_up') > 0) mult += this.hasSkill('bullet_speed_up') * 0.15;
-    if (this.hasSkill('acid_rounds') > 0) mult += this.hasSkill('acid_rounds') * 0.22;
-    if (this.hasSkill('knockback_impact') > 0) mult += this.hasSkill('knockback_impact') * 0.15;
+    if (this.hasSkill('giant_bullets') > 0) mult += this.hasSkill('giant_bullets') * 0.25;
+    if (this.hasSkill('bullet_speed_up') > 0) mult += this.hasSkill('bullet_speed_up') * 0.20;
+    if (this.hasSkill('acid_rounds') > 0) mult += this.hasSkill('acid_rounds') * 0.30;
+    if (this.hasSkill('knockback_impact') > 0) mult += this.hasSkill('knockback_impact') * 0.20;
     if (this.hasSkill('berserker_rage') > 0) {
       const missingRatio = Math.max(0, 1 - this.hp / Math.max(1, this.maxHp));
-      mult += missingRatio * 0.35 * this.hasSkill('berserker_rage');
+      mult += missingRatio * 0.65 * this.hasSkill('berserker_rage');
     }
     return mult;
   }
@@ -229,7 +220,7 @@ window.PlayerController = class PlayerController {
     let mult = 1 + this.rateLvl * window.GAME_CONFIG.FIRE_RATE_STEP + this.bonusFireRate;
     if (this.hasSkill('berserker_rage') > 0) {
       const missingRatio = Math.max(0, 1 - this.hp / Math.max(1, this.maxHp));
-      mult += missingRatio * 0.30 * this.hasSkill('berserker_rage');
+      mult += missingRatio * 0.65 * this.hasSkill('berserker_rage');
     }
     return mult;
   }
@@ -271,10 +262,10 @@ window.PlayerController = class PlayerController {
     }
     if (this.hitFlash > 0) this.hitFlash = Math.max(0, this.hitFlash - dt * 5);
 
-    // Otomatik Gövde Onarımı (hull_regen)
+    // Otomatik Gövde Onarımı (hull_regen: saniyede +3 HP)
     const regenLvl = this.hasSkill('hull_regen');
     if (regenLvl > 0 && this.hp < this.maxHp) {
-      this.hp = Math.min(this.maxHp, this.hp + regenLvl * 2.2 * dt);
+      this.hp = Math.min(this.maxHp, this.hp + regenLvl * 3.0 * dt);
     }
 
     // Periyodik Otomatik Enerji Kalkanı (periodic_shield)
@@ -382,8 +373,8 @@ window.PlayerController = class PlayerController {
     const gap = n <= 2 ? 14 : 15;
 
     const dmgMult = this.getTotalDamageMult();
-    const sizeScale = 1 + this.hasSkill('giant_bullets') * 0.22;
-    const spdScale = 1 + this.hasSkill('bullet_speed_up') * 0.25;
+    const sizeScale = 1 + this.hasSkill('giant_bullets') * 0.35;
+    const spdScale = 1 + this.hasSkill('bullet_speed_up') * 0.40;
     const bOpts = this.buildBulletOpts();
     if (window.AudioManager) {
       window.AudioManager.playShoot(this.weaponLevel >= 3 || this.hasSkill('fire_rounds') > 0);
@@ -494,13 +485,13 @@ window.PlayerController = class PlayerController {
       }
     }
 
-    // 2) Güdümlü Füze Bataryası (homing_missiles)
+    // 2) Güdümlü Füze Bataryası (homing_missiles: ikili güdümlü mikro füze)
     const misLvl = this.hasSkill('homing_missiles');
     if (misLvl > 0) {
       this.missileTimer -= dt * rateMult;
       if (this.missileTimer <= 0) {
         this.missileTimer = Math.max(0.55, 1.35 - misLvl * 0.15);
-        const count = Math.min(4, 1 + Math.floor(misLvl / 2));
+        const count = 2;
         for (let i = 0; i < count; i++) {
           const side = (i % 2 === 0) ? -1 : 1;
           const vx = side * (75 + i * 30);
@@ -698,9 +689,9 @@ window.PlayerController = class PlayerController {
       return false;
     }
 
-    // Hayalet Manevra (dodge_cloak)
+    // Hayalet Manevra (dodge_cloak: %22 sıyrılma şansı)
     const dodgeLvl = this.hasSkill('dodge_cloak');
-    if (dodgeLvl > 0 && Math.random() < Math.min(0.48, dodgeLvl * 0.16)) {
+    if (dodgeLvl > 0 && Math.random() < Math.min(0.48, dodgeLvl * 0.22)) {
       this.invulnTimer = 0.45;
       this.game.addFloatText(window.I18N.t('DODGE_TXT'), this.x, this.y - 40, '#70f0ff', 20);
       return false;

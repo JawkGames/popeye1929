@@ -15,13 +15,12 @@ window.WaveDirector = class WaveDirector {
     this.bossActive = null;
   }
 
-  // Aktif bölüme göre 5'li düşman kadrosunu döndürür:
-  // Stage 1: Klasik kadro
-  // Stage 2: e2_1..e2_5 (Grup 1 - Kızıl Mars Filosu)
-  // Stage 3: e2_6..e2_10 (Grup 2 - Zümrüt Biyo-Siber Filo)
-  // Stage 4: e2_11..e2_15 (Grup 3 - Ametist Hiçlik Filosu)
-  // Stage 5: e2_16..e2_20 (Grup 4 - Altın İmparatorluk Filosu)
-  // Stage 6+: Grupları döngüsel olarak birleştirir
+  // Aktif bölüme (Stage 1..15) göre lineer güçlenen 5'li düşman kadrosunu döndürür (asla geriye düşmez):
+  // Stage 1: Klasik kadro (scout_pod..elite_cruiser)
+  // Stage 2..4: Grup 1 (e2_1..e2_5) -> Grup 2'ye kademeli geçiş
+  // Stage 5..7: Grup 2 (e2_6..e2_10) -> Grup 3'e kademeli geçiş
+  // Stage 8..10: Grup 3 (e2_11..e2_15) -> Grup 4'e kademeli geçiş
+  // Stage 11..15: Grup 4 (e2_16..e2_20) elit filo kombinasyonları
   getStageRoster() {
     if (this.stage === 1) {
       return {
@@ -33,16 +32,25 @@ window.WaveDirector = class WaveDirector {
         diver: 'kamikaze_dart'
       };
     }
-    const groupIdx = (this.stage - 2) % 4; // 0, 1, 2, 3
-    const baseNum = groupIdx * 5;
-    return {
-      tier1: `e2_${baseNum + 1}`,
-      tier2: `e2_${baseNum + 2}`,
-      tier3: `e2_${baseNum + 3}`,
-      tier4: `e2_${baseNum + 4}`,
-      tier5: `e2_${baseNum + 5}`,
-      diver: `e2_${baseNum + 3}`
+
+    const LINEAR_ROSTERS = {
+      2:  { tier1: 'e2_1',  tier2: 'e2_2',  tier3: 'e2_3',  tier4: 'e2_4',  tier5: 'e2_5',  diver: 'e2_3'  },
+      3:  { tier1: 'e2_6',  tier2: 'e2_2',  tier3: 'e2_3',  tier4: 'e2_4',  tier5: 'e2_5',  diver: 'e2_3'  },
+      4:  { tier1: 'e2_6',  tier2: 'e2_7',  tier3: 'e2_8',  tier4: 'e2_4',  tier5: 'e2_10', diver: 'e2_8'  },
+      5:  { tier1: 'e2_6',  tier2: 'e2_7',  tier3: 'e2_8',  tier4: 'e2_9',  tier5: 'e2_10', diver: 'e2_8'  },
+      6:  { tier1: 'e2_11', tier2: 'e2_7',  tier3: 'e2_8',  tier4: 'e2_9',  tier5: 'e2_10', diver: 'e2_8'  },
+      7:  { tier1: 'e2_11', tier2: 'e2_12', tier3: 'e2_13', tier4: 'e2_9',  tier5: 'e2_15', diver: 'e2_13' },
+      8:  { tier1: 'e2_11', tier2: 'e2_12', tier3: 'e2_13', tier4: 'e2_14', tier5: 'e2_15', diver: 'e2_13' },
+      9:  { tier1: 'e2_16', tier2: 'e2_12', tier3: 'e2_13', tier4: 'e2_14', tier5: 'e2_15', diver: 'e2_13' },
+      10: { tier1: 'e2_16', tier2: 'e2_17', tier3: 'e2_18', tier4: 'e2_14', tier5: 'e2_20', diver: 'e2_18' },
+      11: { tier1: 'e2_16', tier2: 'e2_17', tier3: 'e2_18', tier4: 'e2_19', tier5: 'e2_20', diver: 'e2_18' },
+      12: { tier1: 'e2_16', tier2: 'e2_17', tier3: 'e2_18', tier4: 'e2_19', tier5: 'e2_20', diver: 'e2_18' },
+      13: { tier1: 'e2_17', tier2: 'e2_18', tier3: 'e2_18', tier4: 'e2_19', tier5: 'e2_20', diver: 'e2_18' },
+      14: { tier1: 'e2_17', tier2: 'e2_18', tier3: 'e2_19', tier4: 'e2_19', tier5: 'e2_20', diver: 'e2_18' },
+      15: { tier1: 'e2_18', tier2: 'e2_18', tier3: 'e2_19', tier4: 'e2_19', tier5: 'e2_20', diver: 'e2_19' }
     };
+
+    return LINEAR_ROSTERS[Math.min(15, Math.max(2, this.stage))];
   }
 
   // Her bölümde (1..15) o bölüme özel Dev Boss'u seçer
@@ -443,6 +451,7 @@ window.WaveDirector = class WaveDirector {
     boss.maxHp = Math.round(base.hp * mult * window.GAME_CONFIG.BOSS_POWER);
     boss.hp = boss.maxHp;
     boss.score = base.score;
+    boss.xpReward = base.xp || 360;
     boss.damage = base.damage * window.GAME_CONFIG.BOSS_POWER;
     boss.bullet1 = base.bullet1 || 'bullet_enemy_dart';
     boss.bullet2 = base.bullet2 || 'bullet_enemy_orb';
@@ -491,7 +500,8 @@ window.WaveDirector = class WaveDirector {
       this.game.addScreenShake(14, 0.55);
       this.game.spawnExplosion(b.x - 55, b.y + 20, 95);
       this.game.spawnExplosion(b.x + 55, b.y + 20, 95);
-      this.game.spawnPickup(b.x, b.y + 60, 'xp_gem', 50);
+      const phaseXp = Math.round((b.xpReward || 360) * 0.22);
+      this.game.spawnPickup(b.x, b.y + 60, 'xp_gem', phaseXp);
     }
 
     const moveSpeed = b.phase === 1 ? 1.15 : (b.phase === 2 ? 1.65 : 2.25);
@@ -581,6 +591,7 @@ window.WaveDirector = class WaveDirector {
   completeBossDefeat(b) {
     const bx = b.x;
     const by = b.y;
+    const gemXp = Math.max(38, Math.round((b.xpReward || 380) / 10));
     b._active = false;
     this.bossActive = null;
 
@@ -588,12 +599,21 @@ window.WaveDirector = class WaveDirector {
       const ang = (i / 10) * Math.PI * 2;
       const dist = 35 + (i % 3) * 35;
       this.game.spawnExplosion(bx + Math.cos(ang) * dist, by + Math.sin(ang) * dist, 125);
-      this.game.spawnPickup(bx + Math.cos(ang) * dist * 0.8, by + Math.sin(ang) * dist * 0.5, 'xp_gem', 38);
+      this.game.spawnPickup(bx + Math.cos(ang) * dist * 0.8, by + Math.sin(ang) * dist * 0.5, 'xp_gem', gemXp);
+    }
+
+    // Her 2 Boss yenildiğinde ana silah merdivenini (1X -> 8X) +1 kademe yükselt
+    const p = this.game.player;
+    const maxWep = window.GAME_CONFIG.WEAPON_LADDER.length - 1;
+    if (p && !p.dead && p.weaponLevel < maxWep && this.stage % 2 === 1) {
+      p.weaponLevel++;
+      this.game.addFloatText(`${window.I18N.t('WEAPON_EVOLVE')} (${p.weaponLevel}X)`, p.x, p.y - 65, '#57e2ff', 21);
     }
 
     this.game.addScore(b.score, bx, by);
     if (window.Ads) window.Ads.showInterstitial();
-    this.game.addFloatText(window.I18N.t('STAGE_CLEAR') + ' +10,000', bx, by - 40, '#ffe047', 28);
+    const scoreTxt = this.game.ui ? this.game.ui.formatNumber(b.score) : b.score;
+    this.game.addFloatText(`${window.I18N.t('STAGE_CLEAR')} +${scoreTxt}`, bx, by - 40, '#ffe047', 26);
 
     // Yeni Bölüme Geçiş (1..15): Yeni çevre nesneleri, yeni zemin/atmosfer ve yeni Boss!
     this.stage = (this.stage % 15) + 1;
@@ -602,6 +622,12 @@ window.WaveDirector = class WaveDirector {
     this.waveTimer = 2.8;
     if (this.game.applyStageEnvironment) {
       this.game.applyStageEnvironment(this.stage);
+    }
+    const stInfo = window.StageThemes ? window.StageThemes.getStage(this.stage) : null;
+    if (stInfo) {
+      const isTr = window.I18N.lang === 'TR';
+      const stTitle = isTr ? stInfo.nameTR : stInfo.nameEN;
+      this.game.addFloatText(`STAGE ${this.stage}: ${stTitle}`, this.game.W * 0.5, 250, '#68e4ff', 20);
     }
   }
 };

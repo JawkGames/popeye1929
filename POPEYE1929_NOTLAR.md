@@ -2,8 +2,16 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.017`
+- **Güncel Sürüm:** `v0.018`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.018 — Lineer Gelişim, 8X Silah Evrimi, Yetenek Dengesi, 3D Popeye Portre Tamamlaması ve AdMob Güçlendirmesi
+- **15 Bölümlü Lineer Düşman İlerlemesi (`src/enemies.js`):** Stage 5 sonrası Stage 6'da düşmanların tekrar Stage 2 seviyesine düşmesi düzeltildi. 26 düşman tipi Stage 1'den Stage 15'e kadar hiçbir bölümde geriye düşmeden kademeli olarak güçlenecek şekilde dağıtıldı.
+- **Silah Merdiveninin (`1X` → `8X`) Tam Açılması (`src/skills.js`, `src/enemies.js`):** `fan_spread`, `side_shot`, `rapid_fire_2`, `damage_up_1` yeteneklerine ve her 2 Boss galibiyetine `+1` ana silah kademesi evrimi eklendi; böylece `8X (KKKKK)` maksimum silah kademesi ve `6X+` kalın Wingman atışı oyun içinde lineer olarak açılır.
+- **3D Popeye Portresinin Tüm Ekranlara Bağlanması (`src/ui.js`, `src/skills.js`):** Ana Menü, Game Over ekranı ve can/onarım yetenek kartlarında kalan eski `can_hp` (konserve üstü Popeye) referanslarının tamamı yeni 3D Popeye portresi (`hud_portrait`) ve yetenek konserveleriyle değiştirildi.
+- **Yetenek Açıklaması ve Kod Eşitlemesi (`src/player.js`):** Güdümlü füze bataryası (2'li füze), Dev Kalibre (`+%35 boyut / +%25 hasar`), Süpersonik Namlu (`+%40 hız / +%20 hasar`), Korozif Asit (`+%30 hasar`), Sarsıcı İtme (`+%20 hasar`), Temel Reis Öfkesi (`+%65'e kadar`), Otomatik Tamir Botları (`+3 HP/sn`) ve Hayalet Manevra (`%22 Dodge`) kod değerleri kart açıklamalarıyla birebir eşitlendi.
+- **Boss Ödülleri, Bölüm Başlığı ve Klavye Temizliği:** Boss skor yazısı gerçek Boss puanını (`+10,000`..`+40,000`) gösterecek ve Boss XP kristalleri bölüme göre artacak şekilde güncellendi. Yeni bölüme geçildiğinde ekranda bölüm adı (`STAGE 2: HURDA TERSANESİ` vb.) gösterilir. Klavyedeki `[` / `]` Boss atlama kısayolları kaldırıldı.
+- **AdMob Reklam Sistemi (`src/ads.js`, `src/config.js`):** Gerçek AdMob App ID (`ca-app-pub-7983529419004158~9792828487`), Ödüllü Canlanma (`ca-app-pub-7983529419004158/1726762511`) ve Bölüm Sonu/Yeniden Başlatma Geçiş Reklamı (`ca-app-pub-7983529419004158/8531717703`) aktif (`IS_TEST: false`). Reklam gösterimi sırasında oyun sesinin otomatik susturulup reklam kapanınca geri açılması, hazır olmayan reklamı anında yükleme (`on-demand prepare`) ve reklam yüklenemezse kullanıcıya bildirim gösterilmesi eklendi.
 
 ## v0.017
 - Ekranın sol ve sağ altındaki bölüm/Boss atlama ok butonları (`◀` / `▶`) kaldırıldı.

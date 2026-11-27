@@ -105,7 +105,11 @@ window.UIManager = class UIManager {
           this.adBusy = true;
           window.Ads.showRewarded().then((ok) => {
             this.adBusy = false;
-            if (ok && this.game.state === 'GAMEOVER') this.game.reviveWithAd();
+            if (ok && this.game.state === 'GAMEOVER') {
+              this.game.reviveWithAd();
+            } else if (!ok) {
+              this.game.addFloatText(window.I18N.t('AD_NOT_READY'), window.GAME_CONFIG.WIDTH * 0.5, this.btnPrimary.y - 48, '#ff6b5b', 18);
+            }
           });
         }
         return true;
@@ -417,9 +421,9 @@ window.UIManager = class UIManager {
       // 2) Üst Kategori Etiketi
       this.drawTextOutlined(ctx, info.tag, card.x, card.y - 114, 10, sk.color || '#ffe047', 'center', 3);
 
-      // 3) Ortada Özel Ispanak Konservesi + Üzerinde Yetenek Silah/Element İkonu
+      // 3) Ortada Özel Ispanak Konservesi / 3D Popeye Portresi + Üzerinde Yetenek Silah/Element İkonu
       const canY = card.y - 42;
-      window.Atlas.draw(ctx, sk.can || 'can_hp', card.x, canY, 92, 100);
+      window.Atlas.draw(ctx, sk.can || 'hud_portrait', card.x, canY, 92, 96);
       if (sk.badge && sk.badge !== sk.can) {
         window.Atlas.draw(ctx, sk.badge, card.x + 22, canY + 18, 44, 44);
       }
@@ -458,7 +462,7 @@ window.UIManager = class UIManager {
     ctx.translate(0, this.midOff);
 
     window.Atlas.draw(ctx, 'boss_dreadnought', W * 0.5, 210, 210, 175);
-    window.Atlas.draw(ctx, 'can_hp', W * 0.5 - 135, 345, 62, 68, { rotation: -0.18 });
+    window.Atlas.draw(ctx, 'hud_portrait', W * 0.5 - 135, 345, 68, 68);
     window.Atlas.draw(ctx, 'can_6x', W * 0.5 + 135, 345, 62, 68, { rotation: 0.18 });
 
     this.drawTextOutlined(ctx, 'POPEYE 1929', W * 0.5, 345, 36, '#ffe047', 'center', 7);
@@ -514,7 +518,7 @@ window.UIManager = class UIManager {
     ctx.save();
     ctx.translate(0, this.midOff);
 
-    window.Atlas.draw(ctx, 'can_hp', W * 0.5, 305, 96, 108);
+    window.Atlas.draw(ctx, 'hud_portrait', W * 0.5, 305, 104, 104);
     this.drawTextOutlined(ctx, window.I18N.t('GAME_OVER'), W * 0.5, 405, 32, '#ff5c4d', 'center', 6);
     this.drawTextOutlined(
       ctx,

@@ -150,7 +150,7 @@ window.SkillSystem = {
       en: { name: 'FROST CRYO SHARDS', tag: 'ICE ELEMENT', desc: 'Chills enemies on hit, slowing their movement and fire rate by 40%!' }
     },
     {
-      id: 'acid_rounds', can: 'can_hp', badge: 'proj_acid', color: '#7dff4d', max: 1,
+      id: 'acid_rounds', can: 'can_skill_purple', badge: 'proj_acid', color: '#7dff4d', max: 1,
       tr: { name: 'KOROZİF ASİT MERMİSİ', tag: 'ASİT ELEMENTİ', desc: 'Zehirli ıspanak asidi düşman zırhını eritir ve +%30 ekstra hasar verir!' },
       en: { name: 'VENOM ACID ROUNDS', tag: 'ACID ELEMENT', desc: 'Corrosive spinach acid melts enemy armor for +30% bonus damage!' }
     },
@@ -229,12 +229,12 @@ window.SkillSystem = {
 
     // --- 44..50: SAVUNMA, CAN, VAMPİRİK ONARIM VE XP ---
     {
-      id: 'max_hp_boost', can: 'can_hp', badge: 'hud_heart', color: '#6dff5c', max: 1,
+      id: 'max_hp_boost', can: 'hud_portrait', badge: 'hud_heart', color: '#6dff5c', max: 1,
       tr: { name: 'ÇELİK GÖVDE & CAN', tag: 'MAKSİMUM CAN', desc: 'Maksimum Canı +45 artırır ve anında +50 Can iyileştirir!' },
       en: { name: 'IRON HULL & VITALITY', tag: 'MAX HEALTH', desc: 'Increases Max HP by +45 and immediately restores +50 HP!' }
     },
     {
-      id: 'full_feast_heal', can: 'can_hp', badge: 'shield_ring', color: '#5fd82b', max: 1,
+      id: 'full_feast_heal', can: 'hud_portrait', badge: 'shield_ring', color: '#5fd82b', max: 1,
       tr: { name: 'ÇİFTE ISPANAK ZİYAFETİ', tag: 'TAM ONARIM', desc: 'Canı tamamen (%100) doldurur ve 6 saniyelik enerji kalkanı açar!' },
       en: { name: 'SPINACH POWER FEAST', tag: 'HEAL & SHIELD', desc: 'Fully restores 100% HP and activates a 6-second Energy Shield!' }
     },
@@ -244,7 +244,7 @@ window.SkillSystem = {
       en: { name: 'VAMPIRIC LEECH REPAIR', tag: 'LIFESTEAL', desc: 'Every enemy destroyed restores HP to your fighter!' }
     },
     {
-      id: 'hull_regen', can: 'can_hp', badge: 'can_hp', color: '#7dff4d', max: 1,
+      id: 'hull_regen', can: 'hud_portrait', badge: 'hud_heart', color: '#7dff4d', max: 1,
       tr: { name: 'OTOMATİK TAMİR BOTLARI', tag: 'SÜREKLİ ONARIM', desc: 'Uçak gövdesini saniyede +3 HP sürekli olarak kendiliğinden onarır!' },
       en: { name: 'NANO REPAIR DRONES', tag: 'HP REGEN', desc: 'Continuously regenerates +3 fighter hull HP every second!' }
     },
@@ -311,16 +311,23 @@ window.SkillSystem = {
         player.powerBonus += 0.20;
         break;
 
+      case 'fan_spread':
+      case 'side_shot':
+        if (player.weaponLevel < maxWep) player.weaponLevel++;
+        break;
+
       case 'rapid_fire_1':
         player.bonusFireRate += 0.25;
         break;
 
       case 'rapid_fire_2':
         player.bonusFireRate += 0.30;
+        if (player.weaponLevel < maxWep) player.weaponLevel++;
         break;
 
       case 'damage_up_1':
         player.powerBonus += 0.30;
+        if (player.weaponLevel < maxWep) player.weaponLevel++;
         break;
 
       case 'crit_chance':

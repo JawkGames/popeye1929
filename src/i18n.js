@@ -34,7 +34,9 @@ window.I18N = {
       MAX_POWER: 'MAKSİMUM GÜÇ +500!',
       CRIT_HIT: 'KRİTİK!',
       HEADSHOT_TXT: 'İNFAZ!',
-      DODGE_TXT: 'SIYRILDI!'
+      DODGE_TXT: 'SIYRILDI!',
+      WEAPON_EVOLVE: 'SİLAH EVRİMİ!',
+      AD_NOT_READY: 'REKLAM YÜKLENEMEDİ!'
     },
     EN: {
       SCORE: 'SCORE',
@@ -67,7 +69,9 @@ window.I18N = {
       MAX_POWER: 'MAX POWER +500!',
       CRIT_HIT: 'CRIT!',
       HEADSHOT_TXT: 'EXECUTE!',
-      DODGE_TXT: 'DODGE!'
+      DODGE_TXT: 'DODGE!',
+      WEAPON_EVOLVE: 'WEAPON UPGRADE!',
+      AD_NOT_READY: 'AD NOT READY!'
     }
   },
 
