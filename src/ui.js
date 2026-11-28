@@ -359,8 +359,30 @@ window.UIManager = class UIManager {
     // =========================================================================
     this.drawSpriteButton(ctx, this.btnPause, '||', '#eaf4ff', 17);
     this.drawSpriteButton(ctx, this.btnLang, window.I18N.lang, '#ffe066', 14);
-    const isMuted = window.AudioManager && window.AudioManager.muted;
-    this.drawSpriteButton(ctx, this.btnMute, isMuted ? '🔇' : '🔊', isMuted ? '#ff6b5b' : '#6dff5c', 16);
+
+    // 3 Kademeli Ses Butonu: 0 = Tümü Açık, 1 = Müzik Kapalı (Sağ Çapraz Kırmızı Çizgi /), 2 = Tümü Kapalı (Kırmızı Çarpı X)
+    const sMode = (window.AudioManager && window.AudioManager.soundMode) || 0;
+    this.drawSpriteButton(ctx, this.btnMute, '🔊', sMode === 0 ? '#6dff5c' : (sMode === 1 ? '#ffe066' : '#ff6b5b'), 16);
+    if (sMode >= 1) {
+      const mx = this.btnMute.x;
+      const my = this.btnMute.y;
+      const r = 13;
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#ff2b2b';
+      ctx.lineWidth = 4.2;
+      // 1. Kademe (Müzik Kapalı): Sağ çapraz kırmızı çizgi (/)
+      ctx.beginPath();
+      ctx.moveTo(mx - r, my + r);
+      ctx.lineTo(mx + r, my - r);
+      // 2. Kademe (Tüm Sesler Kapalı): Sol çapraz kırmızı çizgi (\) eklenip kırmızı çarpı (X) olur
+      if (sMode >= 2) {
+        ctx.moveTo(mx - r, my - r);
+        ctx.lineTo(mx + r, my + r);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
 
     if (!this.isNativeAndroid) {
       window.Atlas.draw(ctx, 'ui_button', this.btnFull.x, this.btnFull.y, this.btnFull.w, this.btnFull.h);

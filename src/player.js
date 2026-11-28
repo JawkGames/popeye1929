@@ -704,18 +704,19 @@ window.PlayerController = class PlayerController {
   draw(ctx) {
     if (this.dead) return;
 
-    // 1) Sürekli Lazer Işınlarını Çiz (laser_beam & twin_laser)
+    // 1) Sürekli Lazer Işınlarını Çiz (laser_beam & twin_laser — ek yersiz tek parça kesintisiz ışın)
     const centerLaser = this.hasSkill('laser_beam');
     const twinLaser = this.hasSkill('twin_laser');
     const overLaser = this.hasSkill('laser_overcharge');
     if (centerLaser > 0 || twinLaser > 0) {
-      const pulse = 0.85 + Math.sin(this.thrusterPulse * 1.8) * 0.18;
+      const pulse = 0.88 + Math.sin(this.thrusterPulse * 1.8) * 0.14;
       const bScale = (1 + overLaser * 0.35) * pulse;
       const drawBeam = (bx, bw) => {
-        const segH = 140;
-        for (let by = this.y - 45; by > -70; by -= segH * 0.85) {
-          window.Atlas.draw(ctx, 'proj_laser', bx, by, bw, segH, { alpha: 0.92 });
-        }
+        const beamBottom = this.y - 34;
+        const beamTop = -12;
+        const beamH = Math.max(20, beamBottom - beamTop);
+        const beamCy = beamTop + beamH * 0.5;
+        window.Atlas.draw(ctx, 'proj_laser', bx, beamCy, bw, beamH, { alpha: 0.94 });
       };
       if (centerLaser > 0) drawBeam(this.x, (32 + centerLaser * 6) * bScale);
       if (twinLaser > 0) {

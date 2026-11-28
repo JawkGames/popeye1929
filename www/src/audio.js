@@ -1,7 +1,11 @@
 // Arcade Ses Efektleri (Shuffle-Bag Varyasyonlu Vuruş, Ateş, Patlama, XP, Boss) ve Dinamik Bölüm/Boss Müzik Motoru
 window.AudioManager = {
   ctx: null,
-  muted: false,
+  // 3 Kademeli Ses Modu: 0 = Tümü Açık, 1 = Müzik Kapalı (Sağ Çapraz /), 2 = Tüm Sesler Kapalı (Kırmızı Çarpı X)
+  soundMode: 0,
+  muted: false,      // SFX kapalı mı (soundMode === 2 veya reklam açıkken)
+  musicMuted: false, // Müzik kapalı mı (soundMode >= 1 veya reklam açıkken)
+  adPaused: false,
   noiseBuffer: null,
   lastShootTime: 0,
   lastHitTime: 0,
@@ -74,8 +78,18 @@ window.AudioManager = {
 
   toggleMute() {
     this.init();
-    this.muted = !this.muted;
-    return this.muted;
+    this.soundMode = (this.soundMode + 1) % 3;
+    this.musicMuted = this.soundMode >= 1;
+    this.muted = this.soundMode >= 2;
+    return this.soundMode;
+  },
+
+  isSfxMuted() {
+    return this.adPaused || this.muted || this.soundMode >= 2;
+  },
+
+  isMusicMuted() {
+    return this.adPaused || this.musicMuted || this.soundMode >= 1;
   },
 
   // 1) Oyuncu Ateş Sesi
@@ -318,7 +332,7 @@ window.AudioManager = {
 
   // 10) Dinamik Bölüm ve Boss Arka Plan Müziği (Oyun PLAYING durumundayken akar, durunca durur)
   updateMusic(dt, stageNum, isBossActive) {
-    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    if (this.isMusicMuted() || !this.ctx || this.ctx.state !== 'running') return;
 
     const theme = isBossActive
       ? this.bossTheme

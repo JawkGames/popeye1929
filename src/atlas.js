@@ -95,7 +95,7 @@ window.Atlas = {
     env2_teslaspire:   { sheet: 'stageEnv', x: 768, y: 768, w: 256, h: 256 },
 
     // 6. Archero Yetenek Silahları, Özel Konserveler, XP Kristali ve 3'lü Kart Çerçevesi (Yeni weapons_vfx_new_atlas.png + skills_weapons_atlas.png)
-    proj_laser:        { sheet: 'weaponsVfxNew', x: 512, y: 0,   w: 256, h: 256 },
+    proj_laser:        { sheet: 'weaponsVfxNew', x: 512, y: 48,  w: 256, h: 160 },
     proj_missile:      { sheet: 'weaponsVfxNew', x: 768, y: 0,   w: 256, h: 256 },
     proj_sawblade:     { sheet: 'weaponsVfxNew', x: 0,   y: 256, w: 256, h: 256 },
     proj_anchor:       { sheet: 'skillCans',     x: 0,   y: 0,   w: 256, h: 256 },
@@ -108,7 +108,7 @@ window.Atlas = {
     can_skill_gold:    { sheet: 'skills', x: 512, y: 512, w: 256, h: 256 },
     orb_drone:         { sheet: 'weaponsVfxNew', x: 512, y: 512, w: 256, h: 256 },
     ui_skill_card:     { sheet: 'skills', x: 0,   y: 768, w: 256, h: 256 },
-    xp_gem:            { sheet: 'weaponsVfxNew', x: 768, y: 512, w: 256, h: 256 },
+    xp_gem:            { sheet: 'skills', x: 256, y: 768, w: 256, h: 256 },
     proj_wave:         { sheet: 'weaponsVfxNew', x: 256, y: 512, w: 256, h: 256 },
     badge_levelup:     { sheet: 'skills', x: 768, y: 768, w: 256, h: 256 },
 

@@ -62,15 +62,18 @@ window.Ads = {
   pauseAudioForAd() {
     const am = window.AudioManager;
     if (!am) return false;
-    const wasMuted = am.muted;
+    const prev = Boolean(am.adPaused);
+    am.adPaused = true;
     am.muted = true;
-    return wasMuted;
+    return prev;
   },
 
-  restoreAudioAfterAd(wasMuted) {
+  restoreAudioAfterAd(prev) {
     const am = window.AudioManager;
     if (!am) return;
-    am.muted = Boolean(wasMuted);
+    am.adPaused = Boolean(prev);
+    am.muted = (am.soundMode >= 2);
+    am.musicMuted = (am.soundMode >= 1);
   },
 
   // Ödüllü reklam: ödül kazanılırsa true döner. Tarayıcıda direkt true.

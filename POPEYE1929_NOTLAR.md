@@ -2,9 +2,18 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.027`
+- **Güncel Sürüm:** `v0.028`
 - **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.028 — Tek Parça Kesintisiz Lazer Işını, Eski Turkuaz XP Kristali ve 3 Kademeli Ses/Müzik Butonu
+- **Tek Parça Kesintisiz Lazer Işını (`src/atlas.js`, `src/player.js`):** Lazer ışınının uç ek yerleri (`y: 48, h: 160`) kesildi ve üst üste binen parçalar yerine uçaktan ekranın tepesine tek parça pürüzsüz ışın olarak çizilmesi sağlandı.
+- **Eski Turkuaz XP Kristali (`src/atlas.js`):** `xp_gem` eski turkuaz/mavi kristal görseline geri döndürüldü.
+- **3 Kademeli Ses & Müzik Butonu (`src/audio.js`, `src/ui.js`):**
+  - 0 (Başlangıç): Müzik + Efektler açık (`🔊`).
+  - 1. Basış: Yalnızca müzik kapanır, vuruş/efekt sesleri açık kalır (`🔊` üzerine sağ çapraz kırmızı çizgi `/`).
+  - 2. Basış: Tüm sesler kapanır (`🔊` üzerine sol çapraz çizgi de eklenerek kırmızı çarpı `X`).
+  - 3. Basış: Müzik ve tüm sesler yeniden açılır.
 
 ## v0.027 — Yenilenen 16'lı Parlak Silah, Mermi ve Vuruş Efekti Atlası (`assets/weapons_vfx_new_atlas.png`)
 - Oyuncunun tüm mermileri (`bullet_player`, `bullet_super`), sarı halkasız kesintisiz cyan lazer ışını (`proj_laser`), güdümlü füze (`proj_missile`), çelik testere diski (`proj_sawblade`), ejder ateşi (`proj_fireball`), buzul kristali (`proj_ice`), korozif asit (`proj_acid`), yıldırım arkı (`proj_lightning`), yukarı bakan sonik hilal dalgası (`proj_wave`), yörünge kalkan küresi (`orb_drone`), zümrüt XP kristali (`xp_gem`), vuruş/kritik kıvılcımları (`spark_small`, `spark_crit`), motor alevi (`thruster_blue`) ve şeffaf merkezli altıgen enerji kalkanı (`shield_ring`) siyah arka plan parlama-alfa ayrıştırmasıyla yeni atlasa geçirildi.
