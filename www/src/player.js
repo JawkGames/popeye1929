@@ -520,22 +520,7 @@ window.PlayerController = class PlayerController {
       }
     }
 
-    // 4) Bumerang Savaş Çapası (boomerang_anchor)
-    const ancLvl = this.hasSkill('boomerang_anchor');
-    if (ancLvl > 0) {
-      this.anchorTimer -= dt * rateMult;
-      if (this.anchorTimer <= 0) {
-        this.anchorTimer = Math.max(0.95, 2.0 - ancLvl * 0.18);
-        this.game.spawnPlayerBullet(
-          this.x, this.y - 34, 0, -760,
-          36 * dmgMult * (1 + ancLvl * 0.22),
-          'proj_anchor', 52, 52, 0,
-          this.buildBulletOpts({ pierce: 99, boomerang: true, spinSpeed: 11 })
-        );
-      }
-    }
-
-    // 5) Sonik Hilal Dalgası (sonic_wave)
+    // 4) Sonik Hilal Dalgası (sonic_wave)
     const waveLvl = this.hasSkill('sonic_wave');
     if (waveLvl > 0) {
       this.waveTimer -= dt * rateMult;
@@ -661,20 +646,25 @@ window.PlayerController = class PlayerController {
       }
     }
 
+    // Döner Çapa (orbital_anchors): Tek başlar, aldıkça artar (1..8)
+    // Sıralama: +90° (Sağ), -90° (Sol), 0° (Üst), 180° (Alt), +45° (Sağ-Üst), -135° (Karşısı Sol-Alt), -45° (Sol-Üst), +135° (Karşısı Sağ-Alt)
     const ancLvl = this.hasSkill('orbital_anchors');
     if (ancLvl > 0) {
-      const count = 2;
+      const ANCHOR_ANGLES_DEG = [90, -90, 0, 180, 45, -135, -45, 135];
+      const count = Math.min(ANCHOR_ANGLES_DEG.length, ancLvl);
+      const orbitDist = 128; // Uçaktan biraz daha uzakta geniş koruma yörüngesi
       for (let i = 0; i < count; i++) {
-        const ang = -this.orbitAngle * 1.25 + (i / count) * Math.PI * 2;
+        const offsetRad = (ANCHOR_ANGLES_DEG[i] - 90) * (Math.PI / 180);
+        const ang = this.orbitAngle * 1.35 + offsetRad;
         res.push({
-          x: this.x + Math.cos(ang) * 96,
-          y: this.y + Math.sin(ang) * 96,
-          r: 24,
-          frame: 'proj_anchor',
-          size: 42,
-          rot: ang * 3,
+          x: this.x + Math.cos(ang) * orbitDist,
+          y: this.y + Math.sin(ang) * orbitDist,
+          r: 28,
+          frame: 'proj_anchor_new',
+          size: 54,
+          rot: ang + Math.PI * 0.5,
           blocksBullets: false,
-          dmg: 30 * this.getTotalDamageMult()
+          dmg: 34 * this.getTotalDamageMult()
         });
       }
     }

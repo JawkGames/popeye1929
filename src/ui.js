@@ -430,8 +430,7 @@ window.UIManager = class UIManager {
     ctx.fillStyle = 'rgba(4, 12, 26, 0.84)';
     ctx.fillRect(0, 0, W, H);
 
-    const headerY = 235 + this.midOff;
-    window.Atlas.draw(ctx, 'badge_levelup', W * 0.5, headerY - 38, 120, 72);
+    const headerY = 278 + this.midOff;
     this.drawTextFitted(
       ctx,
       `${window.I18N.t('LEVEL_UP_TITLE')} (${window.I18N.t('XP_LABEL')} ${this.game.level})`,
@@ -446,7 +445,7 @@ window.UIManager = class UIManager {
       ctx,
       window.I18N.t('LEVEL_UP_SUB'),
       W * 0.5,
-      headerY + 46,
+      headerY + 44,
       14,
       500,
       '#68e4ff',
@@ -458,17 +457,20 @@ window.UIManager = class UIManager {
       if (!sk) continue;
       const card = this.skillCards[i];
       const info = isTr ? sk.tr : sk.en;
+      const curLvl = (this.game.player.skills && this.game.player.skills[sk.id]) || 0;
+      const maxLvl = sk.max || 1;
 
       window.Atlas.draw(ctx, 'ui_skill_card', card.x, card.y, card.w, card.h);
       this.drawTextOutlined(ctx, info.tag, card.x, card.y - 114, 10, sk.color || '#ffe047', 'center', 3);
 
-      const canY = card.y - 42;
-      window.Atlas.draw(ctx, sk.can || 'can_skill_gold', card.x, canY, 92, 96);
-      if (sk.badge && sk.badge !== sk.can) {
-        window.Atlas.draw(ctx, sk.badge, card.x + 22, canY + 18, 44, 44);
-      }
+      // Tekil Ispanak Konservesi (İçinden direkt o özelliğin gücü çıkan tek görsel, yanında ikinci görsel yok)
+      const canY = card.y - 44;
+      window.Atlas.draw(ctx, sk.can || 'can_heal', card.x, canY, 102, 102);
 
-      this.drawTextOutlined(ctx, isTr ? '★ ÖZEL GÜÇ ★' : '★ UNIQUE PERK ★', card.x, card.y + 18, 10.5, '#ffe047', 'center', 3);
+      const perkLabel = maxLvl > 1
+        ? `★ ${curLvl + 1} / ${maxLvl} ★`
+        : (isTr ? '★ ÖZEL GÜÇ ★' : '★ UNIQUE PERK ★');
+      this.drawTextOutlined(ctx, perkLabel, card.x, card.y + 18, 10.5, '#ffe047', 'center', 3);
       this.drawWrappedText(ctx, info.name, card.x, card.y + 42, card.w - 22, 15, 11.5, '#ffffff');
       this.drawWrappedText(ctx, info.desc, card.x, card.y + 78, card.w - 24, 14, 10, '#bfe3ff');
     }

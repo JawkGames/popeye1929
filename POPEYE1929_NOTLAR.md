@@ -2,8 +2,22 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.023`
+- **Güncel Sürüm:** `v0.024`
+- **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.024 — 8 Yönlü Geniş Yörünge Döner Çapa Sistemi, Tekil Özel Ispanak Konservesi Kartları ve Seviye Başlığı Düzeni
+- **Seviye Atlama Ekranı Başlığı (`src/ui.js`):** `SEVİYE ATLADIN!` yazısının üstündeki sabit rozet (`badge_levelup`) tamamen kaldırıldı ve başlık yazıları 3 seçenek kartına yaklaştırıldı.
+- **Tekil Ispanak Konservesi Kartları (`assets/skill_cans_atlas.png`, `src/ui.js`, `src/skills.js`):** Kartlarda ıspanak konservesinin yanına ikinci bir küçük ikon bindirilmesi kaldırıldı. Tek sayfada (4x4 = 16 görsel) içinden doğrudan ilgili yeteneğin silahı/gücü çıkan 15 özel ıspanak konservesi ve yeni ağır döner savaş çapası (`proj_anchor_new`) üretildi; her kartta yalnızca tek bir ıspanak konservesi görseli çizilir.
+- **8 Yönlü Geniş Yörünge Döner Çapa (`src/player.js`, `src/skills.js`):** İleri atılıp geri gelen bumerang çapa (`boomerang_anchor`) kaldırıldı. Yerine uçağın etrafında biraz daha uzakta (`128 px` yarıçaplı yörüngede) dönen **Yörünge Döner Çapa (`orbital_anchors`)** sistemi tek çapayla başlayıp aldıkça (`max: 8`) şu sırayla artacak şekilde ayarlandı:
+  1. `+90°` (En Sağ)
+  2. `-90°` (En Sol)
+  3. `0°` (Üst)
+  4. `180°` (Alt)
+  5. `+45°` (Sağ-Üst Çapraz)
+  6. `-135°` (`+45°`'nin Tam Karşısı Sol-Alt)
+  7. `-45°` (Sol-Üst Çapraz)
+  8. `+135°` (`-45°`'nin Tam Karşısı Sağ-Alt)
 
 ## v0.023 — Giriş Ekranı Düzeni (Sağda Çapa, Kalp/Konserve/Portre Kaldırıldı) ve Eski 3D Temel Reis (`hud_portrait`) Temizliği
 - Giriş ekranındaki (`POPEYE 1929` başlığı yanındaki) ıspanak konservesi, kalp ve eski 3D Temel Reis portresi (`hud_portrait`) kaldırıldı; başlığın sağ tarafına kanatlı altın çapa (`emblem_victory`) yerleştirildi.

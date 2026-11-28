@@ -16,7 +16,8 @@ window.Atlas = {
     bosses2: 'assets/bosses_atlas.png',
     stageEnv: 'assets/stage_env_atlas.png',
     hudBar: 'assets/hud_bar_atlas.png',
-    uiIcons: 'assets/ui_icons_atlas.png'
+    uiIcons: 'assets/ui_icons_atlas.png',
+    skillCans: 'assets/skill_cans_atlas.png'
   },
 
   // Koordinat Dilimleme Tablosu (x, y, w, h)
@@ -177,7 +178,25 @@ window.Atlas = {
     emblem_gameover:     { sheet: 'uiIcons', x: 0,   y: 768, w: 256, h: 256 },
     emblem_victory:      { sheet: 'uiIcons', x: 256, y: 768, w: 256, h: 256 },
     emblem_boss_warn:    { sheet: 'uiIcons', x: 512, y: 768, w: 256, h: 256 },
-    emblem_shield_heart: { sheet: 'uiIcons', x: 768, y: 768, w: 256, h: 256 }
+    emblem_shield_heart: { sheet: 'uiIcons', x: 768, y: 768, w: 256, h: 256 },
+
+    // 11. 16'lı (4x4)Yeni Ağır Döner Savaş Çapası ve İçinden Güç Çıkan Tekil Ispanak Konserveleri (skill_cans_atlas.png)
+    proj_anchor_new:     { sheet: 'skillCans', x: 0,   y: 0,   w: 256, h: 256 },
+    can_anchor:          { sheet: 'skillCans', x: 256, y: 0,   w: 256, h: 256 },
+    can_multishot:       { sheet: 'skillCans', x: 512, y: 0,   w: 256, h: 256 },
+    can_spread:          { sheet: 'skillCans', x: 768, y: 0,   w: 256, h: 256 },
+    can_rear:            { sheet: 'skillCans', x: 0,   y: 256, w: 256, h: 256 },
+    can_pierce:          { sheet: 'skillCans', x: 256, y: 256, w: 256, h: 256 },
+    can_missile:         { sheet: 'skillCans', x: 512, y: 256, w: 256, h: 256 },
+    can_laser:           { sheet: 'skillCans', x: 768, y: 256, w: 256, h: 256 },
+    can_saw:             { sheet: 'skillCans', x: 0,   y: 512, w: 256, h: 256 },
+    can_fire:            { sheet: 'skillCans', x: 256, y: 512, w: 256, h: 256 },
+    can_ice:             { sheet: 'skillCans', x: 512, y: 512, w: 256, h: 256 },
+    can_acid:            { sheet: 'skillCans', x: 768, y: 512, w: 256, h: 256 },
+    can_lightning:       { sheet: 'skillCans', x: 0,   y: 768, w: 256, h: 256 },
+    can_crit:            { sheet: 'skillCans', x: 256, y: 768, w: 256, h: 256 },
+    can_heal:            { sheet: 'skillCans', x: 512, y: 768, w: 256, h: 256 },
+    can_dodge:           { sheet: 'skillCans', x: 768, y: 768, w: 256, h: 256 }
   },
 
   loadAll(onProgress) {
