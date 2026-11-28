@@ -463,7 +463,7 @@ window.UIManager = class UIManager {
       this.drawTextOutlined(ctx, info.tag, card.x, card.y - 114, 10, sk.color || '#ffe047', 'center', 3);
 
       const canY = card.y - 42;
-      window.Atlas.draw(ctx, sk.can || 'hud_portrait', card.x, canY, 92, 96);
+      window.Atlas.draw(ctx, sk.can || 'can_skill_gold', card.x, canY, 92, 96);
       if (sk.badge && sk.badge !== sk.can) {
         window.Atlas.draw(ctx, sk.badge, card.x + 22, canY + 18, 44, 44);
       }
@@ -498,8 +498,7 @@ window.UIManager = class UIManager {
     ctx.translate(0, this.midOff);
 
     window.Atlas.draw(ctx, 'boss_dreadnought', W * 0.5, 210, 210, 175);
-    window.Atlas.draw(ctx, 'hud_portrait', W * 0.5 - 135, 345, 68, 68);
-    window.Atlas.draw(ctx, 'can_6x', W * 0.5 + 135, 345, 62, 68, { rotation: 0.18 });
+    window.Atlas.draw(ctx, 'emblem_victory', W * 0.5 + 145, 345, 70, 70, { rotation: 0.14 });
 
     this.drawTextOutlined(ctx, 'POPEYE 1929', W * 0.5, 345, 36, '#ffe047', 'center', 7);
     this.drawTextFitted(ctx, window.I18N.t('SUBTITLE'), W * 0.5, 386, 15, 480, '#68e4ff', 4);
@@ -535,7 +534,7 @@ window.UIManager = class UIManager {
     ctx.save();
     ctx.translate(0, this.midOff);
 
-    window.Atlas.draw(ctx, 'hud_portrait', W * 0.5, 320, 110, 110);
+    window.Atlas.draw(ctx, 'emblem_victory', W * 0.5, 320, 118, 118);
     this.drawTextFitted(ctx, window.I18N.t('PAUSED'), W * 0.5, 430, 30, 460, '#ffe047', 6);
     ctx.restore();
 

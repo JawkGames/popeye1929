@@ -2,8 +2,12 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.022`
+- **Güncel Sürüm:** `v0.023`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.023 — Giriş Ekranı Düzeni (Sağda Çapa, Kalp/Konserve/Portre Kaldırıldı) ve Eski 3D Temel Reis (`hud_portrait`) Temizliği
+- Giriş ekranındaki (`POPEYE 1929` başlığı yanındaki) ıspanak konservesi, kalp ve eski 3D Temel Reis portresi (`hud_portrait`) kaldırıldı; başlığın sağ tarafına kanatlı altın çapa (`emblem_victory`) yerleştirildi.
+- Oyunda eski `hud_portrait` görselinin kullanıldığı diğer tüm yerlerden (Duraklatma ekranı ve 3 can/onarım yetenek kartı) o Temel Reis görseli kaldırıldı.
 
 ## v0.022 — Klasik Üst/Ana Sayfa Butonları, Çerçevesiz Ölüm Ekranı (Kırık Uçak/Şapka/Çapa + Reklam İkonlu Butonlar) ve Kart Dokunma Düzeltmesi
 - **Kart Seçimi & Dil Geçişi Düzeltmesi (`src/ui.js`, `src/i18n.js`):** Seviye atlama (`LEVELUP`) ekranı açıkken dokunmaların en üstte doğrudan 3 yetenek kartını kontrol etmesi sağlandı. Dil butonu `TR <-> EN` arasında tek dokunuşla geçiş yapacak şekilde sadeleştirildi.
