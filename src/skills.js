@@ -324,6 +324,7 @@ window.SkillSystem = {
 
       case 'crit_chance':
         player.critChance = Math.min(0.75, player.critChance + 0.22);
+        player.critMult += 0.20; // Kart açıklamasıyla eşit: kritik vuruşlar 2.2x
         break;
 
       case 'crit_damage':

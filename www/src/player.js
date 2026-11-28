@@ -65,6 +65,11 @@ window.PlayerController = class PlayerController {
     // Yardımcı Uçaklar (Wingman / Companion)
     this.wingmen = [];
     this.wingmanFireTimer = 0;
+
+    // Yörünge birimleri önbelleği (her karede bir kez hesaplanır, çizimde yeniden kullanılır)
+    if (!this._orbitals) this._orbitals = [];
+    this._orbitals.length = 0;
+    if (!this._orbPool) this._orbPool = [];
   }
 
   hasSkill(id) {
@@ -87,10 +92,12 @@ window.PlayerController = class PlayerController {
     canvas.addEventListener('pointerdown', (e) => {
       if (window.AudioManager) window.AudioManager.init();
       const pt = toVirtualCoords(e.clientX, e.clientY);
+      const stateBefore = this.game.state;
       if (this.game.ui && this.game.ui.handlePointerDown(pt.x, pt.y)) {
-        return;
-      }
-      if (this.game.state === 'MENU') {
+        // Dokunuş bir ekranı kapatıp oyunu başlattı/devam ettirdiyse (yetenek kartı, devam, başla)
+        // parmağı kaldırmaya gerek kalmadan aynı dokunuşla uçağı sürüklemeye başla
+        if (stateBefore === 'PLAYING' || this.game.state !== 'PLAYING') return;
+      } else if (this.game.state === 'MENU') {
         this.game.startGame();
       }
       if (this.game.state !== 'PLAYING') return;
@@ -216,6 +223,21 @@ window.PlayerController = class PlayerController {
     return mult;
   }
 
+  // Özel silahlar (lazer, füze, testere, taret, yörünge birimleri, yardımcı uçaklar vb.) ana silah
+  // kademesiyle (1X..8X) birlikte güçlenir; böylece ileri bölümlerde de işe yarar kalırlar
+  getSpecialWeaponScale() {
+    const cfg = window.GAME_CONFIG;
+    if (this._spScaleLevel === this.weaponLevel) return this._spScale;
+    const lanes = cfg.WEAPON_LADDER[this.weaponLevel] || 'T';
+    let volley = 0;
+    for (let i = 0; i < lanes.length; i++) {
+      volley += (lanes[i] === 'K' ? cfg.WEAPON_THICK.damage : cfg.WEAPON_THIN.damage);
+    }
+    this._spScaleLevel = this.weaponLevel;
+    this._spScale = 1 + (volley / cfg.WEAPON_THIN.damage - 1) * cfg.SPECIAL_WEAPON_SCALING;
+    return this._spScale;
+  }
+
   getTotalFireRateMult() {
     let mult = 1 + this.rateLvl * window.GAME_CONFIG.FIRE_RATE_STEP + this.bonusFireRate;
     if (this.hasSkill('berserker_rage') > 0) {
@@ -322,6 +344,7 @@ window.PlayerController = class PlayerController {
 
     // Özel Archero Silahlarını Güncelle (Lazer, Füze, Testere, Çapa, Yıldırım vb.)
     this.updateSpecialWeapons(dt, rateMult);
+    this.refreshOrbitals();
 
     // Yardımcı Uçaklar (Wingman)
     if (this.wingmen.length > 0) {
@@ -352,7 +375,7 @@ window.PlayerController = class PlayerController {
             wm.y - 20,
             0,
             -860,
-            wCfg.DAMAGE * (thick ? 1.7 : 1) * (this.getTotalDamageMult() + this.wingBonus),
+            wCfg.DAMAGE * this.getSpecialWeaponScale() * (this.getTotalDamageMult() + this.wingBonus),
             thick ? 'bullet_super' : 'bullet_player',
             thick ? 28 : 18,
             thick ? 28 : 34,
@@ -439,7 +462,7 @@ window.PlayerController = class PlayerController {
   }
 
   updateSpecialWeapons(dt, rateMult) {
-    const dmgMult = this.getTotalDamageMult();
+    const dmgMult = this.getTotalDamageMult() * this.getSpecialWeaponScale();
 
     // 1) Sürekli Lazer Işını (laser_beam & twin_laser)
     const centerLaser = this.hasSkill('laser_beam');
@@ -449,8 +472,8 @@ window.PlayerController = class PlayerController {
       this.laserTickTimer -= dt;
       if (this.laserTickTimer <= 0) {
         this.laserTickTimer = 0.085;
-        const beamScale = 1 + overLaser * 0.45;
-        const tickDmg = (9 + (centerLaser + twinLaser + overLaser) * 4.5) * dmgMult;
+        const beamScale = 1 + overLaser * 0.6;
+        const tickDmg = (9 + (centerLaser + twinLaser) * 4.5) * (1 + overLaser * 0.6) * dmgMult;
         const beams = [];
         if (centerLaser > 0) {
           beams.push({ x: this.x, halfW: (18 + centerLaser * 4) * beamScale });
@@ -616,49 +639,66 @@ window.PlayerController = class PlayerController {
     }
   }
 
-  getOrbitalPositions() {
-    const res = [];
+  // Yörünge birimlerini (küreler + çapalar) karede bir kez hesaplar; nesneler yeniden kullanılır (GC yok)
+  refreshOrbitals() {
+    const res = this._orbitals;
+    const pool = this._orbPool;
+    let n = 0;
     const orbLvl = this.hasSkill('orbital_orbs');
+    const ancLvl = this.hasSkill('orbital_anchors');
+    if (orbLvl <= 0 && ancLvl <= 0) {
+      res.length = 0;
+      return res;
+    }
+    const dmgMult = this.getTotalDamageMult() * this.getSpecialWeaponScale();
+    const slot = () => {
+      if (!pool[n]) pool[n] = { x: 0, y: 0, r: 0, frame: '', size: 0, rot: 0, blocksBullets: false, dmg: 0 };
+      res[n] = pool[n];
+      return pool[n++];
+    };
+
     if (orbLvl > 0) {
       const count = 3;
       for (let i = 0; i < count; i++) {
         const ang = this.orbitAngle + (i / count) * Math.PI * 2;
-        res.push({
-          x: this.x + Math.cos(ang) * 66,
-          y: this.y + Math.sin(ang) * 66,
-          r: 20,
-          frame: 'orb_drone',
-          size: 32,
-          rot: ang,
-          blocksBullets: true,
-          dmg: 22 * this.getTotalDamageMult()
-        });
+        const ob = slot();
+        ob.x = this.x + Math.cos(ang) * 66;
+        ob.y = this.y + Math.sin(ang) * 66;
+        ob.r = 20;
+        ob.frame = 'orb_drone';
+        ob.size = 32;
+        ob.rot = ang;
+        ob.blocksBullets = true;
+        ob.dmg = 22 * dmgMult;
       }
     }
 
     // Döner Çapa (orbital_anchors): Tek başlar, aldıkça artar (1..8)
     // Sıralama: +90° (Sağ), -90° (Sol), 0° (Üst), 180° (Alt), +45° (Sağ-Üst), -135° (Karşısı Sol-Alt), -45° (Sol-Üst), +135° (Karşısı Sağ-Alt)
-    const ancLvl = this.hasSkill('orbital_anchors');
     if (ancLvl > 0) {
-      const ANCHOR_ANGLES_DEG = [90, -90, 0, 180, 45, -135, -45, 135];
+      const ANCHOR_ANGLES_DEG = PlayerController.ANCHOR_ANGLES_DEG;
       const count = Math.min(ANCHOR_ANGLES_DEG.length, ancLvl);
       const orbitDist = 128; // Uçaktan biraz daha uzakta geniş koruma yörüngesi
       for (let i = 0; i < count; i++) {
         const offsetRad = (ANCHOR_ANGLES_DEG[i] - 90) * (Math.PI / 180);
         const ang = this.orbitAngle * 1.35 + offsetRad;
-        res.push({
-          x: this.x + Math.cos(ang) * orbitDist,
-          y: this.y + Math.sin(ang) * orbitDist,
-          r: 28,
-          frame: 'proj_anchor_new',
-          size: 54,
-          rot: ang + Math.PI * 0.5,
-          blocksBullets: false,
-          dmg: 34 * this.getTotalDamageMult()
-        });
+        const ob = slot();
+        ob.x = this.x + Math.cos(ang) * orbitDist;
+        ob.y = this.y + Math.sin(ang) * orbitDist;
+        ob.r = 28;
+        ob.frame = 'proj_anchor_new';
+        ob.size = 54;
+        ob.rot = ang + Math.PI * 0.5;
+        ob.blocksBullets = false;
+        ob.dmg = 34 * dmgMult;
       }
     }
+    res.length = n;
     return res;
+  }
+
+  getOrbitalPositions() {
+    return this._orbitals;
   }
 
   takeDamage(amount) {
@@ -699,6 +739,8 @@ window.PlayerController = class PlayerController {
     this.shieldTimer = 4.0;
     this.x = this.cfg.START_X;
     this.y = this.cfg.START_Y;
+    this.dragging = false;
+    this.pointerId = null;
   }
 
   draw(ctx) {
@@ -710,7 +752,7 @@ window.PlayerController = class PlayerController {
     const overLaser = this.hasSkill('laser_overcharge');
     if (centerLaser > 0 || twinLaser > 0) {
       const pulse = 0.88 + Math.sin(this.thrusterPulse * 1.8) * 0.14;
-      const bScale = (1 + overLaser * 0.35) * pulse;
+      const bScale = (1 + overLaser * 0.6) * pulse;
       const drawBeam = (bx, bw) => {
         const beamBottom = this.y - 34;
         const beamTop = -12;
@@ -755,7 +797,7 @@ window.PlayerController = class PlayerController {
     });
 
     // 4) Yörünge Küreleri ve Döner Çapalar (orbital_orbs & orbital_anchors)
-    const orbitals = this.getOrbitalPositions();
+    const orbitals = this._orbitals;
     for (let i = 0; i < orbitals.length; i++) {
       const ob = orbitals[i];
       window.Atlas.draw(ctx, ob.frame, ob.x, ob.y, ob.size, ob.size, {
@@ -779,3 +821,5 @@ window.PlayerController = class PlayerController {
     }
   }
 };
+
+window.PlayerController.ANCHOR_ANGLES_DEG = [90, -90, 0, 180, 45, -135, -45, 135];

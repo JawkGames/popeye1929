@@ -2,7 +2,8 @@
 window.PopeyeShmupGame = class PopeyeShmupGame {
   constructor() {
     this.canvas = document.getElementById('game-canvas');
-    this.ctx = this.canvas.getContext('2d');
+    // Tuval tamamen opak çizildiği için alfa kanalı kapalı: tarayıcı birleştirmesi daha ucuz
+    this.ctx = this.canvas.getContext('2d', { alpha: false }) || this.canvas.getContext('2d');
 
     this.W = window.GAME_CONFIG.WIDTH;
     this.H = window.GAME_CONFIG.HEIGHT;
@@ -21,13 +22,17 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.shakeTime = 0;
     this.shakeIntensity = 0;
     this.lastTimestamp = 0;
+    this.adHold = false;      // Tam ekran reklam açıkken oyun bekletilir
+    this._skyGrad = null;     // Gökyüzü gradyanı önbelleği (bölüm/yükseklik değişince yenilenir)
+    this._skyGradKey = '';
+    this._nebulaSprites = {}; // Nebula bulutları için önceden çizilmiş dokular
 
     this.setupCanvasScaling();
     window.addEventListener('resize', () => this.setupCanvasScaling());
 
     // Uygulama arka plana atıldığında oyunu ve sesi otomatik duraklat
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden && this.state === 'PLAYING') {
+      if (document.hidden && this.state === 'PLAYING' && !this.adHold) {
         this.state = 'PAUSED';
         this.shakeTime = 0;
         this.shakeIntensity = 0;
@@ -303,6 +308,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
     this.player.reset();
     this.waveDirector.reset();
+    this.adHold = false;
     this.state = 'PLAYING';
   }
 
@@ -342,6 +348,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
     // İlgili bölümün Boss'unu ve özel çevre nesnelerini sahneye yükle
     this.waveDirector.stage = st;
+    this.waveDirector.cycle = 0;
     this.waveDirector.stageTime = window.GAME_CONFIG.TIMELINE.PHASE_3_END;
     this.waveDirector.bossSpawned = true;
     this.waveDirector.bossWarningTimer = 0;
@@ -351,12 +358,13 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     if (this.waveDirector.bossActive) {
       this.waveDirector.bossActive.y = 125;
     }
+    this.adHold = false;
 
     this.state = 'PLAYING';
     const stInfo = window.StageThemes ? window.StageThemes.getStage(st) : null;
     const isTr = window.I18N.lang === 'TR';
     const stTitle = stInfo ? (isTr ? stInfo.nameTR : stInfo.nameEN) : '';
-    this.addFloatText(`STAGE ${st}: ${stTitle}`, this.W * 0.5, 250, '#ffe047', 20);
+    this.addFloatText(`${window.I18N.t('STAGE')} ${st}: ${stTitle}`, this.W * 0.5, 250, '#ffe047', 20);
   }
 
   onPlayerDeath() {
@@ -459,6 +467,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
   }
 
   spawnVfx(x, y, frame, size = 48, duration = 0.18) {
+    // Yoğun çatışmada kıvılcım sayısı sınırlanır (patlamalar etkilenmez): kare hızı düşmesin
+    if (this.vfxPool.activeList.length >= window.GAME_CONFIG.MAX_SPARK_VFX) return;
     this.vfxPool.acquire(x, y, 'spark', frame, size, duration);
   }
 
@@ -501,17 +511,18 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       );
     }
 
-    const bombDmg = window.GAME_CONFIG.PICKUPS.BOMB_DAMAGE;
+    // Bomba: ekrandaki normal düşmanları yok eder, Boss'un canının bir kısmını götürür
     const list = this.enemyPool.activeList;
     for (let i = list.length - 1; i >= 0; i--) {
       const e = list[i];
       if (!e._active) continue;
-      this.damageEnemy(e, bombDmg);
+      this.damageEnemy(e, e.isBoss ? e.maxHp * window.GAME_CONFIG.PICKUPS.BOMB_BOSS_RATIO : e.hp + 1, true);
     }
   }
 
   damageEnemy(e, dmg, isDot = false) {
-    if (!e._active || (e.isBoss && e.dying)) return;
+    // Boss sahneye inerken (giriş animasyonu) ve ölürken hasar almaz
+    if (!e._active || (e.isBoss && (e.dying || e.entering))) return;
 
     let finalDmg = dmg;
 
@@ -627,7 +638,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
   update(dt) {
     // Oyun durduğunda (LEVELUP skill seçim ekranı, PAUSED, GAMEOVER) arka akan plan ve müzik tamamen durur
-    if (this.state !== 'PLAYING') return;
+    if (this.state !== 'PLAYING' || this.adHold) return;
 
     if (window.AudioManager) {
       window.AudioManager.updateMusic(dt, this.waveDirector.stage, Boolean(this.waveDirector.bossActive));
@@ -769,7 +780,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       return true;
     });
 
-    const orbitals = this.player.getOrbitalPositions();
+    const orbitals = this.player.getOrbitalPositions(); // player.update içinde bu kare için hesaplandı
 
     this.enemyPool.updateAll(dt, (e) => {
       if (e.hitFlash > 0) e.hitFlash = Math.max(0, e.hitFlash - dt * 6.5);
@@ -810,7 +821,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
         if (dx * dx + dy * dy <= sumR * sumR) {
           this.player.takeDamage(e.damage);
           if (!e.isBoss) {
-            this.damageEnemy(e, 999);
+            // Çarpışan düşman her bölümde kesin patlar (canı ne kadar yüksek olursa olsun) ve XP bırakır
+            this.damageEnemy(e, e.hp + 1, true);
             return false;
           }
         }
@@ -915,11 +927,16 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const midC = (st && st.skyMid) || [11, 28, 54];
     const botC = (st && st.skyBot) || [5, 13, 26];
 
-    const grad = ctx.createLinearGradient(0, 0, 0, this.H);
-    grad.addColorStop(0,   `rgb(${topC[0]},${topC[1]},${topC[2]})`);
-    grad.addColorStop(0.5, `rgb(${midC[0]},${midC[1]},${midC[2]})`);
-    grad.addColorStop(1,   `rgb(${botC[0]},${botC[1]},${botC[2]})`);
-    ctx.fillStyle = grad;
+    const skyKey = `${this.waveDirector.stage}|${this.H}`;
+    if (this._skyGradKey !== skyKey) {
+      const grad = ctx.createLinearGradient(0, 0, 0, this.H);
+      grad.addColorStop(0,   `rgb(${topC[0]},${topC[1]},${topC[2]})`);
+      grad.addColorStop(0.5, `rgb(${midC[0]},${midC[1]},${midC[2]})`);
+      grad.addColorStop(1,   `rgb(${botC[0]},${botC[1]},${botC[2]})`);
+      this._skyGrad = grad;
+      this._skyGradKey = skyKey;
+    }
+    ctx.fillStyle = this._skyGrad;
     ctx.fillRect(0, 0, this.W, this.H);
 
     // Sadece aktif oynanışta ekran sarsıntısı uygula
@@ -936,15 +953,10 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
 
     // 3) Zeminsiz / Nebula Bölümlerde Atmosferik Nebula Bulutları
     if (st && st.nebula) {
+      const nebSprite = this.getNebulaSprite(st.nebula);
       for (let i = 0; i < this.nebulae.length; i++) {
         const nb = this.nebulae[i];
-        const nGrad = ctx.createRadialGradient(nb.x, nb.y, 10, nb.x, nb.y, nb.r);
-        nGrad.addColorStop(0, st.nebula);
-        nGrad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = nGrad;
-        ctx.beginPath();
-        ctx.arc(nb.x, nb.y, nb.r, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.drawImage(nebSprite, nb.x - nb.r, nb.y - nb.r, nb.r * 2, nb.r * 2);
       }
     }
 
@@ -989,16 +1001,14 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const pBullets = this.playerBulletPool.activeList;
     for (let i = 0; i < pBullets.length; i++) {
       const b = pBullets[i];
-      window.Atlas.draw(ctx, b.frame, b.x, b.y, b.w, b.h, { rotation: b.rot });
+      window.Atlas.drawRot(ctx, b.frame, b.x, b.y, b.w, b.h, b.rot);
     }
 
     // 8) Düşman Gemileri ve Dev Bosslar (Darbede beyazlama kapalı)
     const enemies = this.enemyPool.activeList;
     for (let i = 0; i < enemies.length; i++) {
       const e = enemies[i];
-      window.Atlas.draw(ctx, e.type, e.x, e.y, e.w, e.h, {
-        rotation: e.rotation
-      });
+      window.Atlas.drawRot(ctx, e.type, e.x, e.y, e.w, e.h, e.rotation);
     }
 
     // 9) Oyuncu Uçağı, Lazerler, Yörüngeler ve Wingman'ler
@@ -1008,7 +1018,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     const eBullets = this.enemyBulletPool.activeList;
     for (let i = 0; i < eBullets.length; i++) {
       const b = eBullets[i];
-      window.Atlas.draw(ctx, b.frame, b.x, b.y, b.w, b.h, { rotation: b.rot });
+      window.Atlas.drawRot(ctx, b.frame, b.x, b.y, b.w, b.h, b.rot);
     }
 
     // 11) VFX ve Patlamalar
@@ -1018,10 +1028,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       const prog = v.age / v.duration;
       const scale = v.type === 'explosion' ? (0.75 + prog * 0.55) : (1.1 - prog * 0.4);
       const alpha = prog > 0.7 ? (1 - (prog - 0.7) / 0.3) : 1;
-      window.Atlas.draw(ctx, v.frame, v.x, v.y, v.size * scale, v.size * scale, {
-        rotation: v.rot,
-        alpha
-      });
+      window.Atlas.drawRot(ctx, v.frame, v.x, v.y, v.size * scale, v.size * scale, v.rot, alpha);
     }
 
     // 12) Uçuşan Yazılar
@@ -1039,6 +1046,25 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.ui.draw(ctx);
 
     ctx.restore();
+  }
+
+  // Nebula bulutu dokusu: renk başına bir kez çizilir, her karede yalnızca kopyalanır
+  getNebulaSprite(color) {
+    let spr = this._nebulaSprites[color];
+    if (spr) return spr;
+    const size = 256;
+    spr = document.createElement('canvas');
+    spr.width = size;
+    spr.height = size;
+    const c = spr.getContext('2d');
+    const half = size * 0.5;
+    const g = c.createRadialGradient(half, half, half * 0.05, half, half, half);
+    g.addColorStop(0, color);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.fillRect(0, 0, size, size);
+    this._nebulaSprites[color] = spr;
+    return spr;
   }
 
   loop(timestamp) {

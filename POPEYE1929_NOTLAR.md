@@ -2,9 +2,19 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.029`
+- **Güncel Sürüm:** `v0.030`
 - **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.030 — AAB Derleme Düzeltmesi, Reklam İzni (UMP), Güvenilir Reklam Akışı ve Zorluk Eğrisi
+- **AAB derleme hatası (`MainActivity.java`):** Dosyanın başındaki BOM karakteri Java derlemesini kırıyordu; kaldırıldı, bozuk kodlanmış Türkçe yorumlar düzeltildi.
+- **Reklam izni (`src/ads.js`):** AdMob başlatılmadan önce UMP izin akışı çalışır (Avrupa/İngiltere için form). İzin gereken bölgelerde ana menüde `GİZLİLİK SEÇENEKLERİ` butonu görünür.
+- **Reklam akışı (`src/ads.js`, `src/ui.js`):** Ödüllü reklam erken kapatılınca butonun kilitlenmesi ve sesin kalıcı kapanması düzeltildi; canlanma reklam kapanınca olur. Geçiş reklamı yalnızca önceden yüklüyse gösterilir (oyun ortasında gecikmeli açılmaz), reklam açıkken oyun bekler, kapanınca devam eder. Uygulama açıldıktan sonraki ilk 90 sn geçiş reklamı çıkmaz. Banner reklam yoktur.
+- **Zorluk eğrisi (`src/config.js` `DIFFICULTY`, `src/enemies.js`):** Eskiden 1. bölüm en zoruydu, sonrası giderek kolaylaşıyordu (son Boss ~6 sn). Düşman/Boss canı artık `(1 + 0.9n) * 1.12^n` ile büyür; Boss can gücü `0.8 -> 2.2`, Boss hasarı `1.0 -> 1.98`, normal düşman hasarı `1.15 -> 1.8` kademeli artar. Simülasyonda Boss süresi 1. bölümde ~15 sn, 15. bölümde ~58 sn.
+- **15. bölüm sonrası:** Oyun 1. bölümün kolaylığına geri dönüyordu; tur sayacı (`cycle`) eklendi; bölüm 16, 17... olarak zorlaşarak devam eder.
+- **Özel silahlar (`src/player.js`, `SPECIAL_WEAPON_SCALING`):** Lazer, füze, testere, taret, yıldırım, yörünge birimleri ve yardımcı uçaklar ana silah kademesiyle birlikte güçlenir (8X'te 5 kat); ileri bölümlerde işe yaramaz kalmazlar.
+- **Diğer:** Boss sahneye inerken hasar almaz. Çarpışan düşman her bölümde kesin patlar. Canlanma bombası normal düşmanları yok eder, Boss'tan %5 can götürür. Kritik kartı açıklamasıyla eşitlendi (2.2x), Mega Lazer +%60. Yetenek kartı/devam/başla dokunuşuyla parmağı kaldırmadan sürükleme başlar. Metinlerdeki "50 yetenek" 48 olarak düzeltildi.
+- **Performans:** Mermi/düşman/efekt çizimi nesne ayırmadan yapılır (`Atlas.drawRot`), yörünge birimleri karede bir kez hesaplanır, gökyüzü gradyanı ve nebula önbelleğe alındı, kıvılcım efekti sayısı sınırlandı (`MAX_SPARK_VFX`).
 
 ## v0.029
 - Düşmanların ve Boss'ların darbe aldığında beyaza boyanması (`hitFlash`) kaldırıldı.

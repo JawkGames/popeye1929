@@ -7,6 +7,7 @@ window.WaveDirector = class WaveDirector {
 
   reset() {
     this.stage = 1;
+    this.cycle = 0; // 15 bölüm bitince tur sayacı artar; zorluk kaldığı yerden büyümeye devam eder
     this.stageTime = 0;
     this.waveTimer = 0.6;
     this.waveIndex = 0;
@@ -22,7 +23,9 @@ window.WaveDirector = class WaveDirector {
   // Stage 8..10: Grup 3 (e2_11..e2_15) -> Grup 4'e kademeli geçiş
   // Stage 11..15: Grup 4 (e2_16..e2_20) elit filo kombinasyonları
   getStageRoster() {
-    if (this.stage === 1) {
+    // 2. tur ve sonrasında (bölüm 16+) her zaman en güçlü elit kadro uçar
+    const rosterStage = this.cycle > 0 ? 15 : this.stage;
+    if (rosterStage === 1) {
       return {
         tier1: 'scout_pod',
         tier2: 'fang_fighter',
@@ -50,7 +53,7 @@ window.WaveDirector = class WaveDirector {
       15: { tier1: 'e2_18', tier2: 'e2_18', tier3: 'e2_19', tier4: 'e2_19', tier5: 'e2_20', diver: 'e2_19' }
     };
 
-    return LINEAR_ROSTERS[Math.min(15, Math.max(2, this.stage))];
+    return LINEAR_ROSTERS[Math.min(15, Math.max(2, rosterStage))];
   }
 
   // Her bölümde (1..15) o bölüme özel Dev Boss'u seçer
@@ -64,8 +67,34 @@ window.WaveDirector = class WaveDirector {
     return `boss_${bIdx}`;
   }
 
+  // Oynanan toplam bölüm numarası (1..15, sonraki turlarda 16, 17, ...)
+  getTotalStage() {
+    return this.cycle * 15 + this.stage;
+  }
+
+  // Düşman ve Boss can çarpanı: oyuncunun silah/yetenek gelişimine ayak uyduran hızlanan eğri
   getDifficultyMult() {
-    return 1 + (this.stage - 1) * 0.28;
+    const d = window.GAME_CONFIG.DIFFICULTY;
+    const n = this.getTotalStage() - 1;
+    return (1 + d.HP_LINEAR * n) * Math.pow(d.HP_GROWTH, n);
+  }
+
+  // Normal düşman vuruş hasarı çarpanı
+  getEnemyDamageMult() {
+    const c = window.GAME_CONFIG;
+    return Math.min(c.ENEMY_DAMAGE_MAX, c.ENEMY_DAMAGE_MULT + c.ENEMY_DAMAGE_STEP * (this.getTotalStage() - 1));
+  }
+
+  // Boss can çarpanı (ilk bölümde düşük başlar, bölüm ilerledikçe artar)
+  getBossHpPower() {
+    const d = window.GAME_CONFIG.DIFFICULTY;
+    return Math.min(d.BOSS_HP_MAX, d.BOSS_HP_START + d.BOSS_HP_STEP * (this.getTotalStage() - 1));
+  }
+
+  // Boss mermi/çarpma hasar çarpanı
+  getBossDamagePower() {
+    const d = window.GAME_CONFIG.DIFFICULTY;
+    return Math.min(d.BOSS_DMG_MAX, d.BOSS_DMG_START + d.BOSS_DMG_STEP * (this.getTotalStage() - 1));
   }
 
   update(dt) {
@@ -318,8 +347,8 @@ window.WaveDirector = class WaveDirector {
     e.maxHp = Math.round(base.hp * mult);
     e.hp = e.maxHp;
     e.score = base.score;
-    e.damage = Math.round(base.damage * window.GAME_CONFIG.ENEMY_DAMAGE_MULT);
-    e.fireRate = base.fireRate / Math.min(1.45, 1 + (this.stage - 1) * 0.10);
+    e.damage = Math.round(base.damage * this.getEnemyDamageMult());
+    e.fireRate = base.fireRate / Math.min(1.45, 1 + (this.getTotalStage() - 1) * 0.10);
     e.fireTimer = 0.8 + Math.random() * e.fireRate;
     e.bulletSpeed = base.bulletSpeed;
     e.bulletFrame = base.bullet || 'bullet_enemy_dart';
@@ -327,6 +356,8 @@ window.WaveDirector = class WaveDirector {
     e.hitFlash = 0;
     e.rotation = 0;
     e.isBoss = false;
+    e.entering = false;
+    e.dying = false;
     e.burnTimer = 0;
     e.burnDps = 0;
     e.chillTimer = 0;
@@ -448,11 +479,14 @@ window.WaveDirector = class WaveDirector {
     boss.w = base.w;
     boss.h = base.h;
     boss.radius = base.radius;
-    boss.maxHp = Math.round(base.hp * mult * window.GAME_CONFIG.BOSS_POWER);
+    // 2. tur ve sonrasında Boss taban canı son bölüm Boss'unun altına düşmez
+    const baseHp = this.cycle > 0 ? Math.max(base.hp, window.GAME_CONFIG.ENEMIES.boss_14.hp) : base.hp;
+    boss.maxHp = Math.round(baseHp * mult * this.getBossHpPower());
     boss.hp = boss.maxHp;
     boss.score = base.score;
     boss.xpReward = base.xp || 360;
-    boss.damage = base.damage * window.GAME_CONFIG.BOSS_POWER;
+    boss.damage = Math.round(base.damage * this.getBossDamagePower());
+    boss.bulletPower = this.getBossDamagePower();
     boss.bullet1 = base.bullet1 || 'bullet_enemy_dart';
     boss.bullet2 = base.bullet2 || 'bullet_enemy_orb';
     boss.hitFlash = 0;
@@ -467,6 +501,7 @@ window.WaveDirector = class WaveDirector {
     boss.droneTimer = 7.5;
     boss.dying = false;
     boss.deathTimer = 0;
+    boss.entering = true; // Yerine oturana kadar hasar almaz
 
     this.bossActive = boss;
   }
@@ -492,6 +527,7 @@ window.WaveDirector = class WaveDirector {
       b.y += 110 * dt;
       return;
     }
+    b.entering = false;
 
     const hpRatio = b.hp / b.maxHp;
     const newPhase = hpRatio > 0.65 ? 1 : (hpRatio > 0.30 ? 2 : 3);
@@ -524,12 +560,12 @@ window.WaveDirector = class WaveDirector {
           this.game.spawnEnemyBullet(
             leftBarrelX, barrelY,
             Math.cos(ang) * 305, Math.sin(ang) * 305,
-            20 * window.GAME_CONFIG.BOSS_POWER, b1, 26, 38, i * 0.19
+            20 * b.bulletPower, b1, 26, 38, i * 0.19
           );
           this.game.spawnEnemyBullet(
             rightBarrelX, barrelY,
             Math.cos(ang) * 305, Math.sin(ang) * 305,
-            20 * window.GAME_CONFIG.BOSS_POWER, b1, 26, 38, i * 0.19
+            20 * b.bulletPower, b1, 26, 38, i * 0.19
           );
         }
       } else if (b.phase === 2) {
@@ -540,7 +576,7 @@ window.WaveDirector = class WaveDirector {
           this.game.spawnEnemyBullet(
             bx, barrelY,
             Math.cos(ang) * 335, Math.sin(ang) * 335,
-            22 * window.GAME_CONFIG.BOSS_POWER, b2, 30, 30, 0
+            22 * b.bulletPower, b2, 30, 30, 0
           );
         }
       } else {
@@ -550,12 +586,12 @@ window.WaveDirector = class WaveDirector {
           this.game.spawnEnemyBullet(
             leftBarrelX, barrelY,
             Math.cos(ang) * 360, Math.sin(ang) * 360,
-            24 * window.GAME_CONFIG.BOSS_POWER, b1, 26, 38, ang - Math.PI * 0.5
+            24 * b.bulletPower, b1, 26, 38, ang - Math.PI * 0.5
           );
           this.game.spawnEnemyBullet(
             rightBarrelX, barrelY,
             Math.cos(ang) * 360, Math.sin(ang) * 360,
-            24 * window.GAME_CONFIG.BOSS_POWER, b2, 28, 28, 0
+            24 * b.bulletPower, b2, 28, 28, 0
           );
         }
       }
@@ -611,10 +647,13 @@ window.WaveDirector = class WaveDirector {
     }
 
     this.game.addScore(b.score, bx, by);
+    // Bölüm arası geçiş reklamı: yalnızca hazırsa gösterilir, reklam kapanana kadar oyun bekletilir
     if (window.Ads) window.Ads.showInterstitial();
     this.game.addFloatText(window.I18N.t('STAGE_CLEAR'), bx, by - 40, '#ffe047', 26);
 
     // Yeni Bölüme Geçiş (1..15): Yeni çevre nesneleri, yeni zemin/atmosfer ve yeni Boss!
+    // 15. bölümden sonra çevre başa döner ama zorluk artmaya devam eder (bölüm 16, 17, ...)
+    if (this.stage >= 15) this.cycle++;
     this.stage = (this.stage % 15) + 1;
     this.stageTime = 0;
     this.bossSpawned = false;
@@ -626,7 +665,7 @@ window.WaveDirector = class WaveDirector {
     if (stInfo) {
       const isTr = window.I18N.lang === 'TR';
       const stTitle = isTr ? stInfo.nameTR : stInfo.nameEN;
-      this.game.addFloatText(`STAGE ${this.stage}: ${stTitle}`, this.game.W * 0.5, 250, '#68e4ff', 20);
+      this.game.addFloatText(`${window.I18N.t('STAGE')} ${this.getTotalStage()}: ${stTitle}`, this.game.W * 0.5, 250, '#68e4ff', 20);
     }
   }
 };

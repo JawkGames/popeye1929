@@ -1,6 +1,6 @@
 // Popeye 1929: Vertical Arcade SHMUP — Yapılandırma ve Sürüm Bilgisi
 window.GAME_CONFIG = {
-  VERSION: 'v0.029',
+  VERSION: 'v0.030',
   TITLE: 'POPEYE 1929: IRON ARMADA',
 
   // 9:16 Dikey Mobil Referans Çözünürlük (Tüm ekranlara responsive ölçeklenir)
@@ -10,10 +10,27 @@ window.GAME_CONFIG = {
   MIN_HEIGHT: 800,
   MAX_HEIGHT: 1400,
 
-  // Normal düşmanların vuruş hasarı çarpanı
-  ENEMY_DAMAGE_MULT: 1.5,
-  // Boss güç çarpanı (can ve mermi hasarı)
-  BOSS_POWER: 2,
+  // Normal düşmanların vuruş hasarı çarpanı: ilk bölümde yumuşak başlar, bölüm başına STEP kadar artar (en fazla MAX)
+  ENEMY_DAMAGE_MULT: 1.15,
+  ENEMY_DAMAGE_STEP: 0.05,
+  ENEMY_DAMAGE_MAX: 1.8,
+  // Bölüm ilerledikçe büyüyen zorluk eğrisi (n = bölüm - 1):
+  //  - Düşman/Boss canı çarpanı = (1 + HP_LINEAR * n) * HP_GROWTH ^ n
+  //  - Boss can gücü   = BOSS_HP_START  + BOSS_HP_STEP  * n (en fazla BOSS_HP_MAX)
+  //  - Boss hasar gücü = BOSS_DMG_START + BOSS_DMG_STEP * n (en fazla BOSS_DMG_MAX)
+  DIFFICULTY: {
+    HP_LINEAR: 0.9,
+    HP_GROWTH: 1.12,
+    BOSS_HP_START: 0.8,
+    BOSS_HP_STEP: 0.1,
+    BOSS_HP_MAX: 2.4,
+    BOSS_DMG_START: 1.0,
+    BOSS_DMG_STEP: 0.07,
+    BOSS_DMG_MAX: 2.0
+  },
+
+  // Aynı anda ekranda bulunabilecek en fazla kıvılcım efekti (performans sınırı)
+  MAX_SPARK_VFX: 110,
 
   // Varsayılan Dil
   DEFAULT_LANG: 'TR',
@@ -70,6 +87,8 @@ window.GAME_CONFIG = {
   WEAPON_THIN:  { damage: 20, w: 20, h: 44, speed: 900 },
   WEAPON_THICK: { damage: 36, w: 34, h: 50, speed: 940 },
   WINGMAN_THICK_LEVEL: 6,
+  // Özel silah hasarının ana silah kademesine bağlı büyüme oranı (0 = büyümez, 1 = ana silahla aynı oranda)
+  SPECIAL_WEAPON_SCALING: 0.5,
   FIRE_RATE_STEP: 0.15,
   FIRE_RATE_MAX: 3,
   DAMAGE_STEP: 0.15,
@@ -81,6 +100,7 @@ window.GAME_CONFIG = {
     TOUCH_RADIUS: 56,
     SPINACH_HEAL: 35,
     BOMB_DAMAGE: 420,
+    BOMB_BOSS_RATIO: 0.05, // Canlanma bombasının Boss'tan götürdüğü can oranı
     SCORE_BONUS: 250,
     COIN_SCORE: 100
   },

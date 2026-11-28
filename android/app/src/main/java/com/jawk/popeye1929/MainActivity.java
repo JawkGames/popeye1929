@@ -1,4 +1,4 @@
-﻿package com.jawk.popeye1929;
+package com.jawk.popeye1929;
 
 import android.os.Bundle;
 import androidx.core.view.WindowCompat;
@@ -13,9 +13,9 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);   // oynarken ekran kararmasÄ±n
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);   // oynarken ekran kararmasın
         tamEkran();
-        // Android geri tuÅŸu: oyun iÃ§indeki geriTus() (mobil.js) karar verir; 'cik' dÃ¶nerse uygulama kapanÄ±r
+        // Android geri tuşu: oyun içindeki geriTus() (mobil.js) karar verir; 'cik' dönerse uygulama kapanır
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -33,10 +33,10 @@ public class MainActivity extends BridgeActivity {
         if (hasFocus) tamEkran();
     }
 
-    // Durum Ã§ubuÄŸu ve gezinme Ã§ubuÄŸunu gizle (oyun tam ekran)
+    // Durum çubuğu ve gezinme çubuğunu gizle (oyun tam ekran)
     private void tamEkran() {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {   // Ã§entikli telefonlarda yanlarda siyah boÅŸluk kalmasÄ±n: oyun Ã§entiÄŸin altÄ±na da uzanÄ±r
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {   // çentikli telefonlarda yanlarda siyah boşluk kalmasın: oyun çentiğin altına da uzanır
             WindowManager.LayoutParams lp = getWindow().getAttributes();
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
             getWindow().setAttributes(lp);

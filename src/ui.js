@@ -17,6 +17,8 @@ window.UIManager = class UIManager {
     // Modal butonları
     this.btnPrimary   = { x: 270, y: 540, w: 296, h: 72 };
     this.btnSecondary = { x: 270, y: 632, w: 296, h: 68 };
+    // Menüdeki "Gizlilik Seçenekleri" butonu (yalnızca reklam izni gereken bölgelerde görünür)
+    this.btnPrivacy   = { x: 104, y: 930, w: 184, h: 36 };
 
     // 3'lü Ispanak Yetenek Kartı Alanları (Seviye Atlama Ekranı)
     this.skillCards = [
@@ -32,6 +34,7 @@ window.UIManager = class UIManager {
     this.midOff = Math.round((window.GAME_CONFIG.HEIGHT - window.GAME_CONFIG.BASE_HEIGHT) * 0.5);
     this.btnPrimary.y = 540 + this.midOff;
     this.btnSecondary.y = 632 + this.midOff;
+    this.btnPrivacy.y = window.GAME_CONFIG.HEIGHT - 30;
     for (let i = 0; i < this.skillCards.length; i++) {
       this.skillCards[i].y = 495 + this.midOff;
     }
@@ -86,6 +89,10 @@ window.UIManager = class UIManager {
 
     // 6) Menü / Pause / Game Over Modal Butonları
     if (this.game.state === 'MENU') {
+      if (this.privacyVisible() && this.hitRect(px, py, this.btnPrivacy)) {
+        window.Ads.showPrivacyOptions();
+        return true;
+      }
       if (this.hitRect(px, py, this.btnPrimary)) {
         this.game.startGame();
         return true;
@@ -110,18 +117,29 @@ window.UIManager = class UIManager {
             } else if (!ok) {
               this.game.addFloatText(window.I18N.t('AD_NOT_READY'), window.GAME_CONFIG.WIDTH * 0.5, this.btnPrimary.y - 48, '#ff6b5b', 18);
             }
-          });
+          }).catch(() => { this.adBusy = false; });
         }
         return true;
       }
       if (this.hitRect(px, py, this.btnSecondary)) {
-        window.Ads.showInterstitial();
-        this.game.startGame();
+        if (!this.adBusy) {
+          // Geçiş reklamı hazırsa önce o gösterilir; reklam kapanınca yeni oyun başlar
+          this.adBusy = true;
+          const restart = () => {
+            this.adBusy = false;
+            if (this.game.state === 'GAMEOVER') this.game.startGame();
+          };
+          window.Ads.showInterstitial().then(restart, restart);
+        }
         return true;
       }
     }
 
     return false;
+  }
+
+  privacyVisible() {
+    return Boolean(this.isNativeAndroid && window.Ads && window.Ads.privacyOptionsRequired);
   }
 
   toggleFullscreen() {
@@ -342,7 +360,7 @@ window.UIManager = class UIManager {
     // BÖLÜM 1 & Aktif Silah Rozeti
     this.drawTextOutlined(
       ctx,
-      `${window.I18N.t('STAGE')} ${wd.stage}`,
+      `${window.I18N.t('STAGE')} ${wd.getTotalStage()}`,
       18,
       122,
       14,
@@ -545,6 +563,9 @@ window.UIManager = class UIManager {
 
     ctx.restore();
     this.drawSpriteButton(ctx, this.btnPrimary, window.I18N.t('START_BTN'), '#ffe047', 21);
+    if (this.privacyVisible()) {
+      this.drawSpriteButton(ctx, this.btnPrivacy, window.I18N.t('PRIVACY_BTN'), '#dbeeff', 12);
+    }
 
     this.drawTextOutlined(
       ctx,
@@ -595,7 +616,7 @@ window.UIManager = class UIManager {
     this.drawTextFitted(ctx, window.I18N.t('GAME_OVER'), W * 0.5, 405, 32, 460, '#ff5c4d', 6);
     this.drawTextFitted(
       ctx,
-      `${window.I18N.t('XP_LABEL')} ${this.game.level}  ·  ${window.I18N.t('STAGE')} ${this.game.waveDirector.stage}`,
+      `${window.I18N.t('XP_LABEL')} ${this.game.level}  ·  ${window.I18N.t('STAGE')} ${this.game.waveDirector.getTotalStage()}`,
       W * 0.5,
       455,
       22,

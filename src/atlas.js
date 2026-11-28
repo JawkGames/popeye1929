@@ -270,11 +270,40 @@ window.Atlas = {
     });
   },
 
+  // Yoğun çizimler (mermi, düşman, efekt) için: seçenek nesnesi ayırmadan ve save/restore kullanmadan
+  // döndürme + saydamlık uygular. Her karede yüzlerce kez çağrıldığı için bellek çöpü üretmez.
+  drawRot(ctx, frameKey, cx, cy, dw, dh, rot, alpha) {
+    const f = this.FRAMES[frameKey];
+    if (!f) return false;
+    const img = this.sheets[f.sheet];
+    if (!img || !img.complete || !img.naturalWidth) return false;
+
+    const useAlpha = alpha !== undefined && alpha !== 1;
+    if (useAlpha) ctx.globalAlpha = alpha;
+    if (rot) {
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      ctx.drawImage(img, f.x, f.y, f.w, f.h, -dw * 0.5, -dh * 0.5, dw, dh);
+      ctx.rotate(-rot);
+      ctx.translate(-cx, -cy);
+    } else {
+      ctx.drawImage(img, f.x, f.y, f.w, f.h, cx - dw * 0.5, cy - dh * 0.5, dw, dh);
+    }
+    if (useAlpha) ctx.globalAlpha = 1;
+    return true;
+  },
+
   draw(ctx, frameKey, cx, cy, dw, dh, opts = null) {
     const f = this.FRAMES[frameKey];
     if (!f) return false;
     const img = this.sheets[f.sheet];
     if (!img || !img.complete || !img.naturalWidth) return false;
+
+    // Hızlı yol: döndürme/saydamlık/ölçek yoksa durum kaydetmeden doğrudan çiz (mermi ve efekt yoğunluğunda belirgin kazanç)
+    if (!opts) {
+      ctx.drawImage(img, f.x, f.y, f.w, f.h, cx - dw * 0.5, cy - dh * 0.5, dw, dh);
+      return true;
+    }
 
     const rot = (opts && opts.rotation) || 0;
     const alpha = (opts && opts.alpha !== undefined) ? opts.alpha : 1;
