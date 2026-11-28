@@ -2,9 +2,13 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.024`
+- **Güncel Sürüm:** `v0.025`
 - **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.025 — Yeni 16'lı Ispanak Konservesi & Ağır Çapa Atlası ve Çizgi Roman Arcade Yazı Stilleri (`Bangers` + `Nunito`)
+- **Yeni 16'lı Yetenek Konservesi & Ağır Savaş Çapası Atlası (`assets/skill_cans_atlas.png`):** Kullanıcının gönderdiği 4x4 (16 görsellik) siyah arka planlı sayfa temizlenip şeffaf atlasa paketlendi; ağır cyan çekirdekli savaş çapası (`proj_anchor_new`) ve tüm 15 açık ıspanak yetenek konservesi (`can_anchor`, `can_multishot`, `can_spread`, `can_rear`, `can_pierce`, `can_missile`, `can_laser`, `can_saw`, `can_fire`, `can_ice`, `can_acid`, `can_lightning`, `can_crit`, `can_heal`, `can_dodge`) bağlandı.
+- **Yeni Yazı Stilleri (`fonts/*.woff2`, `index.html`, `src/ui.js`):** Çevrimdışı yerel Türkçe karakter destekli **`Bangers`** (başlıklar, butonlar, HUD ve kart adları için çizgi roman arcade fontu) ve **`Nunito 800`** (kart açıklamaları için okunaklı modern font) entegre edildi.
 
 ## v0.024 — 8 Yönlü Geniş Yörünge Döner Çapa Sistemi, Tekil Özel Ispanak Konservesi Kartları ve Seviye Başlığı Düzeni
 - **Seviye Atlama Ekranı Başlığı (`src/ui.js`):** `SEVİYE ATLADIN!` yazısının üstündeki sabit rozet (`badge_levelup`) tamamen kaldırıldı ve başlık yazıları 3 seçenek kartına yaklaştırıldı.

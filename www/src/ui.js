@@ -174,9 +174,14 @@ window.UIManager = class UIManager {
     ctx.restore();
   }
 
-  drawTextOutlined(ctx, text, x, y, size, fill, align = 'left', strokeWidth = 4) {
+  drawTextOutlined(ctx, text, x, y, size, fill, align = 'left', strokeWidth = 4, useBodyFont = false) {
     ctx.save();
-    ctx.font = `900 ${size}px "Arial Black", Impact, sans-serif`;
+    if (useBodyFont) {
+      ctx.font = `800 ${size}px 'Nunito', 'Segoe UI', Arial, sans-serif`;
+    } else {
+      const displaySize = Math.round(size * 1.16);
+      ctx.font = `400 ${displaySize}px 'Bangers', "Arial Black", Impact, sans-serif`;
+    }
     ctx.textAlign = align;
     ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round';
@@ -188,29 +193,35 @@ window.UIManager = class UIManager {
     ctx.restore();
   }
 
-  drawTextFitted(ctx, text, x, y, maxSize, maxWidth, fill, strokeWidth = 4) {
+  drawTextFitted(ctx, text, x, y, maxSize, maxWidth, fill, strokeWidth = 4, useBodyFont = false) {
     let sz = maxSize;
     ctx.save();
     while (sz > 10) {
-      ctx.font = `900 ${sz}px "Arial Black", Impact, sans-serif`;
+      if (useBodyFont) {
+        ctx.font = `800 ${sz}px 'Nunito', 'Segoe UI', Arial, sans-serif`;
+      } else {
+        ctx.font = `400 ${Math.round(sz * 1.16)}px 'Bangers', "Arial Black", Impact, sans-serif`;
+      }
       if (ctx.measureText(text).width <= maxWidth) break;
       sz -= 1;
     }
     ctx.restore();
-    this.drawTextOutlined(ctx, text, x, y, sz, fill, 'center', strokeWidth);
+    this.drawTextOutlined(ctx, text, x, y, sz, fill, 'center', strokeWidth, useBodyFont);
   }
 
-  drawWrappedText(ctx, text, cx, startY, maxWidth, lineHeight, size, fill) {
+  drawWrappedText(ctx, text, cx, startY, maxWidth, lineHeight, size, fill, isTitle = false) {
     const words = text.split(' ');
     let line = '';
     let y = startY;
     ctx.save();
-    ctx.font = `800 ${size}px Arial, Helvetica, sans-serif`;
+    ctx.font = isTitle
+      ? `400 ${Math.round(size * 1.24)}px 'Bangers', "Arial Black", Impact, sans-serif`
+      : `800 ${size}px 'Nunito', 'Segoe UI', Arial, sans-serif`;
     for (let n = 0; n < words.length; n++) {
       const testLine = line + words[n] + ' ';
       const metrics = ctx.measureText(testLine);
       if (metrics.width > maxWidth && n > 0) {
-        this.drawTextOutlined(ctx, line.trim(), cx, y, size, fill, 'center', 3);
+        this.drawTextOutlined(ctx, line.trim(), cx, y, isTitle ? size * 1.07 : size, fill, 'center', isTitle ? 3.5 : 2.8, !isTitle);
         line = words[n] + ' ';
         y += lineHeight;
       } else {
@@ -218,7 +229,7 @@ window.UIManager = class UIManager {
       }
     }
     if (line.trim()) {
-      this.drawTextOutlined(ctx, line.trim(), cx, y, size, fill, 'center', 3);
+      this.drawTextOutlined(ctx, line.trim(), cx, y, isTitle ? size * 1.07 : size, fill, 'center', isTitle ? 3.5 : 2.8, !isTitle);
     }
     ctx.restore();
   }
@@ -471,8 +482,8 @@ window.UIManager = class UIManager {
         ? `★ ${curLvl + 1} / ${maxLvl} ★`
         : (isTr ? '★ ÖZEL GÜÇ ★' : '★ UNIQUE PERK ★');
       this.drawTextOutlined(ctx, perkLabel, card.x, card.y + 18, 10.5, '#ffe047', 'center', 3);
-      this.drawWrappedText(ctx, info.name, card.x, card.y + 42, card.w - 22, 15, 11.5, '#ffffff');
-      this.drawWrappedText(ctx, info.desc, card.x, card.y + 78, card.w - 24, 14, 10, '#bfe3ff');
+      this.drawWrappedText(ctx, info.name, card.x, card.y + 42, card.w - 20, 16, 12, '#ffffff', true);
+      this.drawWrappedText(ctx, info.desc, card.x, card.y + 78, card.w - 22, 14, 10.5, '#bfe3ff', false);
     }
 
     this.drawTextFitted(
