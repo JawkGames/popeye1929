@@ -2,9 +2,12 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.026`
+- **Güncel Sürüm:** `v0.027`
 - **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.027 — Yenilenen 16'lı Parlak Silah, Mermi ve Vuruş Efekti Atlası (`assets/weapons_vfx_new_atlas.png`)
+- Oyuncunun tüm mermileri (`bullet_player`, `bullet_super`), sarı halkasız kesintisiz cyan lazer ışını (`proj_laser`), güdümlü füze (`proj_missile`), çelik testere diski (`proj_sawblade`), ejder ateşi (`proj_fireball`), buzul kristali (`proj_ice`), korozif asit (`proj_acid`), yıldırım arkı (`proj_lightning`), yukarı bakan sonik hilal dalgası (`proj_wave`), yörünge kalkan küresi (`orb_drone`), zümrüt XP kristali (`xp_gem`), vuruş/kritik kıvılcımları (`spark_small`, `spark_crit`), motor alevi (`thruster_blue`) ve şeffaf merkezli altıgen enerji kalkanı (`shield_ring`) siyah arka plan parlama-alfa ayrıştırmasıyla yeni atlasa geçirildi.
 
 ## v0.026 — 48 Yeteneğin Tamamına %100 Benzersiz Özel Ispanak Konservesi Görselleri ve Arka Kuyruk Topu Kaldırılması
 - **`Arka Kuyruk Topu` (`rear_shot`) Kaldırıldı (`src/skills.js`, `src/player.js`):** Oyundan çıkarıldı; çift namlulu mekanik taret konservesi (`can_rear`) `Otonom Omuz Tareti` (`auto_shoulder_cannon`) yeteneğine atandı.

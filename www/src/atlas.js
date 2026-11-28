@@ -19,7 +19,8 @@ window.Atlas = {
     uiIcons: 'assets/ui_icons_atlas.png',
     skillCans: 'assets/skill_cans_atlas.png',
     skillCans2: 'assets/skill_cans_atlas2.png',
-    skillCans3: 'assets/skill_cans_atlas3.png'
+    skillCans3: 'assets/skill_cans_atlas3.png',
+    weaponsVfxNew: 'assets/weapons_vfx_new_atlas.png'
   },
 
   // Koordinat Dilimleme Tablosu (x, y, w, h)
@@ -53,15 +54,15 @@ window.Atlas = {
     hud_heart:        { sheet: 'items', x: 512, y: 512, w: 256, h: 256 },
     ui_button:        { sheet: 'items', x: 768, y: 512, w: 256, h: 256 },
 
-    // 3. Mermi, Vuruş, Alev, Kalkan ve Patlama Efektleri (vfx_atlas.png)
-    bullet_player:     { sheet: 'vfx', x: 0,   y: 0,   w: 256, h: 256 },
-    bullet_super:      { sheet: 'vfx', x: 256, y: 0,   w: 256, h: 256 },
+    // 3. Mermi, Vuruş, Alev, Kalkan ve Patlama Efektleri (Yeni parlak weapons_vfx_new_atlas.png + vfx_atlas.png)
+    bullet_player:     { sheet: 'weaponsVfxNew', x: 0,   y: 0,   w: 256, h: 256 },
+    bullet_super:      { sheet: 'weaponsVfxNew', x: 256, y: 0,   w: 256, h: 256 },
     bullet_enemy_dart: { sheet: 'vfx', x: 512, y: 0,   w: 256, h: 256 },
     bullet_enemy_orb:  { sheet: 'vfx', x: 768, y: 0,   w: 256, h: 256 },
-    spark_small:       { sheet: 'vfx', x: 0,   y: 256, w: 256, h: 256 },
-    spark_crit:        { sheet: 'vfx', x: 256, y: 256, w: 256, h: 256 },
-    thruster_blue:     { sheet: 'vfx', x: 512, y: 256, w: 256, h: 256 },
-    shield_ring:       { sheet: 'vfx', x: 768, y: 256, w: 256, h: 256 },
+    spark_small:       { sheet: 'weaponsVfxNew', x: 0,   y: 768, w: 256, h: 256 },
+    spark_crit:        { sheet: 'weaponsVfxNew', x: 256, y: 768, w: 256, h: 256 },
+    thruster_blue:     { sheet: 'weaponsVfxNew', x: 512, y: 768, w: 256, h: 256 },
+    shield_ring:       { sheet: 'weaponsVfxNew', x: 768, y: 768, w: 256, h: 256 },
     exp_1:             { sheet: 'vfx', x: 0,   y: 512, w: 256, h: 256 },
     exp_2:             { sheet: 'vfx', x: 256, y: 512, w: 256, h: 256 },
     exp_3:             { sheet: 'vfx', x: 512, y: 512, w: 256, h: 256 },
@@ -93,22 +94,22 @@ window.Atlas = {
     env2_blackhole:    { sheet: 'stageEnv', x: 512, y: 768, w: 256, h: 256 },
     env2_teslaspire:   { sheet: 'stageEnv', x: 768, y: 768, w: 256, h: 256 },
 
-    // 6. Archero Yetenek Silahları, Özel Konserveler, XP Kristali ve 3'lü Kart Çerçevesi (skills_weapons_atlas.png)
-    proj_laser:        { sheet: 'skills', x: 0,   y: 0,   w: 256, h: 256 },
-    proj_missile:      { sheet: 'skills', x: 256, y: 0,   w: 256, h: 256 },
-    proj_sawblade:     { sheet: 'skills', x: 512, y: 0,   w: 256, h: 256 },
-    proj_anchor:       { sheet: 'skills', x: 768, y: 0,   w: 256, h: 256 },
-    proj_fireball:     { sheet: 'skills', x: 0,   y: 256, w: 256, h: 256 },
-    proj_ice:          { sheet: 'skills', x: 256, y: 256, w: 256, h: 256 },
-    proj_acid:         { sheet: 'skills', x: 512, y: 256, w: 256, h: 256 },
-    proj_lightning:    { sheet: 'skills', x: 768, y: 256, w: 256, h: 256 },
+    // 6. Archero Yetenek Silahları, Özel Konserveler, XP Kristali ve 3'lü Kart Çerçevesi (Yeni weapons_vfx_new_atlas.png + skills_weapons_atlas.png)
+    proj_laser:        { sheet: 'weaponsVfxNew', x: 512, y: 0,   w: 256, h: 256 },
+    proj_missile:      { sheet: 'weaponsVfxNew', x: 768, y: 0,   w: 256, h: 256 },
+    proj_sawblade:     { sheet: 'weaponsVfxNew', x: 0,   y: 256, w: 256, h: 256 },
+    proj_anchor:       { sheet: 'skillCans',     x: 0,   y: 0,   w: 256, h: 256 },
+    proj_fireball:     { sheet: 'weaponsVfxNew', x: 256, y: 256, w: 256, h: 256 },
+    proj_ice:          { sheet: 'weaponsVfxNew', x: 512, y: 256, w: 256, h: 256 },
+    proj_acid:         { sheet: 'weaponsVfxNew', x: 768, y: 256, w: 256, h: 256 },
+    proj_lightning:    { sheet: 'weaponsVfxNew', x: 0,   y: 512, w: 256, h: 256 },
     can_skill_red:     { sheet: 'skills', x: 0,   y: 512, w: 256, h: 256 },
     can_skill_purple:  { sheet: 'skills', x: 256, y: 512, w: 256, h: 256 },
     can_skill_gold:    { sheet: 'skills', x: 512, y: 512, w: 256, h: 256 },
-    orb_drone:         { sheet: 'skills', x: 768, y: 512, w: 256, h: 256 },
+    orb_drone:         { sheet: 'weaponsVfxNew', x: 512, y: 512, w: 256, h: 256 },
     ui_skill_card:     { sheet: 'skills', x: 0,   y: 768, w: 256, h: 256 },
-    xp_gem:            { sheet: 'skills', x: 256, y: 768, w: 256, h: 256 },
-    proj_wave:         { sheet: 'skills', x: 512, y: 768, w: 256, h: 256 },
+    xp_gem:            { sheet: 'weaponsVfxNew', x: 768, y: 512, w: 256, h: 256 },
+    proj_wave:         { sheet: 'weaponsVfxNew', x: 256, y: 512, w: 256, h: 256 },
     badge_levelup:     { sheet: 'skills', x: 768, y: 768, w: 256, h: 256 },
 
     // 7. 20 Yeni Düşman + 10 Yeni Düşman Mermisi (enemies_bullets_atlas.png)
