@@ -1,13 +1,31 @@
 // Çoklu Dil Desteği (TR / EN hızlı geçiş + 17 dil sözlüğü)
 window.I18N = {
   ORDER: ['TR', 'EN'],
-  lang: (function () {
+  SUPPORTED: ['TR', 'EN', 'ES', 'HI', 'PT', 'FIL', 'ID', 'AF', 'RU', 'KO', 'MS', 'IT', 'DE', 'EL', 'FR', 'AR', 'UR'],
+  // Cihaz dilini 17 desteklenen dilden biriyle eşleştirir (yoksa null)
+  detectDeviceLang() {
     try {
-      const saved = localStorage.getItem('popeye1929_lang');
-      if (saved === 'TR' || saved === 'EN') return saved;
+      const list = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+      for (let i = 0; i < list.length; i++) {
+        let code = String(list[i] || '').split('-')[0].toUpperCase();
+        if (code === 'TL') code = 'FIL';
+        if (code === 'IN') code = 'ID';
+        if (this.SUPPORTED.indexOf(code) >= 0) return code;
+      }
     } catch (e) {}
-    return (window.GAME_CONFIG && window.GAME_CONFIG.DEFAULT_LANG) || 'TR';
-  })(),
+    return null;
+  },
+  lang: 'TR',
+  // Kayıtlı seçim varsa onu, yoksa cihaz dilini (17 dil), o da yoksa İngilizce'yi kullanır
+  initLang() {
+    const device = this.detectDeviceLang();
+    // Dil butonu sırası: cihaz dili -> EN -> TR
+    this.ORDER = [];
+    [device, 'EN', 'TR'].forEach((c) => { if (c && this.ORDER.indexOf(c) < 0) this.ORDER.push(c); });
+    let saved = null;
+    try { saved = localStorage.getItem('popeye1929_lang'); } catch (e) {}
+    this.lang = (saved && this.SUPPORTED.indexOf(saved) >= 0) ? saved : (device || 'EN');
+  },
 
   strings: {
     TR: {
@@ -214,3 +232,5 @@ window.I18N = {
     return this.lang;
   }
 };
+
+window.I18N.initLang();

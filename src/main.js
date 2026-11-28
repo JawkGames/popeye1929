@@ -1111,7 +1111,7 @@ window.geriTus = () => {
   }
   window._lastBackPress = now;
   g.addFloatText(
-    window.I18N && window.I18N.lang === 'EN' ? 'PRESS BACK AGAIN TO EXIT' : 'ÇIKMAK İÇİN TEKRAR GERİ BASIN',
+    window.I18N && window.I18N.lang === 'TR' ? 'ÇIKMAK İÇİN TEKRAR GERİ BASIN' : 'PRESS BACK AGAIN TO EXIT',
     g.W * 0.5,
     g.H - 110,
     '#ffe047',

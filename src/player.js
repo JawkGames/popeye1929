@@ -753,18 +753,19 @@ window.PlayerController = class PlayerController {
     if (centerLaser > 0 || twinLaser > 0) {
       const pulse = 0.88 + Math.sin(this.thrusterPulse * 1.8) * 0.14;
       const bScale = (1 + overLaser * 0.6) * pulse;
-      const drawBeam = (bx, bw) => {
-        const beamBottom = this.y - 34;
+      // Işınlar uçağın gövdesinin/kanatlarının altından başlar; uçak üstüne çizildiği için çıkış noktası görünmez
+      const drawBeam = (bx, bw, originY) => {
+        const beamBottom = originY;
         const beamTop = -12;
         const beamH = Math.max(20, beamBottom - beamTop);
         const beamCy = beamTop + beamH * 0.5;
         window.Atlas.draw(ctx, 'proj_laser', bx, beamCy, bw, beamH, { alpha: 0.94 });
       };
-      if (centerLaser > 0) drawBeam(this.x, (32 + centerLaser * 6) * bScale);
+      if (centerLaser > 0) drawBeam(this.x, (32 + centerLaser * 6) * bScale, this.y + 6);
       if (twinLaser > 0) {
         const tw = (22 + twinLaser * 4) * bScale;
-        drawBeam(this.x - 32, tw);
-        drawBeam(this.x + 32, tw);
+        drawBeam(this.x - 32, tw, this.y + 16);
+        drawBeam(this.x + 32, tw, this.y + 16);
       }
     }
 

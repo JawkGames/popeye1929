@@ -2,9 +2,14 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.030`
+- **Güncel Sürüm:** `v0.031`
 - **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.031 — Lazer Çıkış Noktası, Cihaz Dili Algılama ve 17 Dilli Mağaza Girişi
+- **Lazer (`src/player.js`):** Merkez lazer uçağın gövdesinin altından, kanat lazerleri kanatların altından çıkar (eskiden burnun önünde, havada başlıyordu).
+- **Dil (`src/i18n.js`):** Oyun ilk açılışta cihaz dilini 17 desteklenen dilden biriyle eşleştirir (yoksa İngilizce). Dil butonu sırası: cihaz dili -> EN -> TR. Oyun adı tüm dillerde `POPEYE 1929`.
+- **Mağaza (`magaza/MAGAZA_GIRISI.md`):** 17 dilde uygulama adı, kısa açıklama (<=80) ve tam açıklama.
 
 ## v0.030 — AAB Derleme Düzeltmesi, Reklam İzni (UMP), Güvenilir Reklam Akışı ve Zorluk Eğrisi
 - **AAB derleme hatası (`MainActivity.java`):** Dosyanın başındaki BOM karakteri Java derlemesini kırıyordu; kaldırıldı, bozuk kodlanmış Türkçe yorumlar düzeltildi.
