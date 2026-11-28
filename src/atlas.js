@@ -5,7 +5,7 @@ window.Atlas = {
   flashCanvas: null,
   flashCtx: null,
 
-  // 8 Toplu Sprite Sheet Dosyası (Tek tek görsel yok, tamamı toplu atlas)
+  // 10 Toplu Sprite Sheet Dosyası (Tek tek görsel yok, tamamı toplu atlas)
   SHEET_PATHS: {
     ships: 'assets/ships_atlas.png',
     items: 'assets/items_ui_atlas.png',
@@ -14,7 +14,9 @@ window.Atlas = {
     skills: 'assets/skills_weapons_atlas.png',
     enemies2: 'assets/enemies_bullets_atlas.png',
     bosses2: 'assets/bosses_atlas.png',
-    stageEnv: 'assets/stage_env_atlas.png'
+    stageEnv: 'assets/stage_env_atlas.png',
+    hudBar: 'assets/hud_bar_atlas.png',
+    uiIcons: 'assets/ui_icons_atlas.png'
   },
 
   // Koordinat Dilimleme Tablosu (x, y, w, h)
@@ -153,7 +155,29 @@ window.Atlas = {
     boss_11: { sheet: 'bosses2', x: 0,    y: 560, w: 256, h: 280 },
     boss_12: { sheet: 'bosses2', x: 256,  y: 560, w: 256, h: 280 },
     boss_13: { sheet: 'bosses2', x: 512,  y: 560, w: 256, h: 280 },
-    boss_14: { sheet: 'bosses2', x: 768,  y: 560, w: 256, h: 280 }
+    boss_14: { sheet: 'bosses2', x: 768,  y: 560, w: 256, h: 280 },
+
+    // 9. Dişli Çerçeveli Popeye Can & Seviye (XP) Bar Sistemi (hud_bar_atlas.png)
+    hud_bar_full:  { sheet: 'hudBar', x: 0, y: 0,   w: 1024, h: 382 },
+    hud_bar_empty: { sheet: 'hudBar', x: 0, y: 382, w: 1024, h: 382 },
+
+    // 10. 16'lı (4x4) Özel Arayüz İkonları, Butonlar, Panel ve Rozetler (ui_icons_atlas.png)
+    icon_pause:          { sheet: 'uiIcons', x: 0,   y: 0,   w: 256, h: 256 },
+    icon_sound_on:       { sheet: 'uiIcons', x: 256, y: 0,   w: 256, h: 256 },
+    icon_sound_off:      { sheet: 'uiIcons', x: 512, y: 0,   w: 256, h: 256 },
+    icon_fullscreen:     { sheet: 'uiIcons', x: 768, y: 0,   w: 256, h: 256 },
+    icon_lang:           { sheet: 'uiIcons', x: 0,   y: 256, w: 256, h: 256 },
+    icon_video_ad:       { sheet: 'uiIcons', x: 256, y: 256, w: 256, h: 256 },
+    icon_restart:        { sheet: 'uiIcons', x: 512, y: 256, w: 256, h: 256 },
+    icon_play:           { sheet: 'uiIcons', x: 768, y: 256, w: 256, h: 256 },
+    btn_green:           { sheet: 'uiIcons', x: 0,   y: 512, w: 256, h: 256 },
+    btn_blue:            { sheet: 'uiIcons', x: 256, y: 512, w: 256, h: 256 },
+    btn_gold:            { sheet: 'uiIcons', x: 512, y: 512, w: 256, h: 256 },
+    panel_modal:         { sheet: 'uiIcons', x: 768, y: 512, w: 256, h: 256 },
+    emblem_gameover:     { sheet: 'uiIcons', x: 0,   y: 768, w: 256, h: 256 },
+    emblem_victory:      { sheet: 'uiIcons', x: 256, y: 768, w: 256, h: 256 },
+    emblem_boss_warn:    { sheet: 'uiIcons', x: 512, y: 768, w: 256, h: 256 },
+    emblem_shield_heart: { sheet: 'uiIcons', x: 768, y: 768, w: 256, h: 256 }
   },
 
   loadAll(onProgress) {

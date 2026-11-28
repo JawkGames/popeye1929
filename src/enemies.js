@@ -612,8 +612,7 @@ window.WaveDirector = class WaveDirector {
 
     this.game.addScore(b.score, bx, by);
     if (window.Ads) window.Ads.showInterstitial();
-    const scoreTxt = this.game.ui ? this.game.ui.formatNumber(b.score) : b.score;
-    this.game.addFloatText(`${window.I18N.t('STAGE_CLEAR')} +${scoreTxt}`, bx, by - 40, '#ffe047', 26);
+    this.game.addFloatText(window.I18N.t('STAGE_CLEAR'), bx, by - 40, '#ffe047', 26);
 
     // Yeni Bölüme Geçiş (1..15): Yeni çevre nesneleri, yeni zemin/atmosfer ve yeni Boss!
     this.stage = (this.stage % 15) + 1;

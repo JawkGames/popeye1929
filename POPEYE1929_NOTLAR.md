@@ -2,8 +2,17 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.020`
+- **Güncel Sürüm:** `v0.021`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.021 — Dişli Çerçeveli Yeni Can & XP Bar Sistemi (Skorsuz), 16'lı Özel Arayüz/Reklam İkon Atlası ve 17 Dilli Dil Sistemi
+- **Yeni Dişli Çerçeveli Can & Seviye Bar Sistemi (`assets/hud_bar_atlas.png`, `src/ui.js`):** Kullanıcının gönderdiği dolu (kırmızı can + mavi XP) ve boş dişli çerçeveli Popeye bar görselleri piksel hizalı şeffaf atlasa dönüştürüldü. Skor tutma ve ekranda skor gösterimi tamamen kaldırıldı (seviye `SV / LV` ve bölüm ana ilerleme göstergesidir).
+- **16'lı (4x4) Özel Arayüz İkonları, Butonlar ve Game Over Rozeti (`assets/ui_icons_atlas.png`):** Tek sayfada 16 yeni arayüz görseli üretildi ve bağlandı:
+  - Sağ üst metalik ikonlu butonlar: Duraklat (`icon_pause`), Ses Açık (`icon_sound_on`), Ses Kapalı (`icon_sound_off`), Tam Ekran (`icon_fullscreen`), Dil Küresi (`icon_lang`).
+  - Aksiyon ikonları ve geniş butonlar: Kalpli Video Klaket Reklam İkonu (`icon_video_ad`), Yeniden Başla Oku (`icon_restart`), Oynat/Devam Üçgeni (`icon_play`), Yeşil/Mavi/Altın geniş metalik butonlar (`btn_green`, `btn_blue`, `btn_gold`) ve dişli köşeli modal çerçeve (`panel_modal`).
+  - Rozetler: Özel Gemi Düştü / Game Over rozeti (`emblem_gameover`), Zafer Çapası (`emblem_victory`), Boss Kuru Kafa Dişli Uyarı rozeti (`emblem_boss_warn`) ve Kanatlı Kalp Kalkanı (`emblem_shield_heart`).
+- **Game Over Ekranı Düzeni (`src/ui.js`):** Dişli köşeli modal panel üzerine özel Game Over rozeti, ulaşılan seviye/bölüm (`SV X · BÖLÜM Y`), solunda video klaket reklam ikonu bulunan yeşil `REKLAMLA CANLAN` (`+%100 CAN` yazısı kaldırıldı, butona otomatik sığan taşmasız yazı) ve döner oklu mavi `YENİDEN BAŞLA` butonu yerleştirildi.
+- **17 Dilli Çoklu Dil Sistemi (`src/i18n.js`):** `TR, EN, ES, HI, PT, FIL, ID, AF, RU, KO, MS, IT, DE, EL, FR, AR, UR` olmak üzere 17 dil desteği ve `localStorage` dil kaydı eklendi (`STAGE` Türkçe'de `BÖLÜM` olarak düzeltildi).
 
 ## v0.020 — Yeni Kokpit Oyun İkonu (Köşe Beyazlıkları Silinmiş) ve Soldan Sağa Renklenen 9:16 Loading Ekranı
 - **Oyun İkonu (`magaza/icon-512.png`, `android/app/src/main/res/mipmap-*`, `www/favicon.png`, `www/apple-touch-icon.png`):** Kullanıcının gönderdiği kokpit içi Popeye oyun ikonunun 4 dış köşesindeki beyazlıklar flood-fill + 4 geçişli defringe ile sıfır kenar beyazlığı kalacak şekilde şeffaflaştırıldı ve tüm mağaza/Android ikonlarına uygulandı.

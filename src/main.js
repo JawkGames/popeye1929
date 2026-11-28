@@ -378,12 +378,8 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     this.shakeTime = Math.max(this.shakeTime, duration);
   }
 
-  addScore(basePoints, x, y) {
-    const total = Math.round(basePoints);
-    this.score += total;
-    if (x !== undefined && y !== undefined) {
-      this.addFloatText(`+${total}`, x, y, '#ffffff', 15);
-    }
+  addScore(basePoints) {
+    this.score += Math.round(basePoints || 0);
   }
 
   resetCombo() {}
