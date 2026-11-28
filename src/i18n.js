@@ -1,10 +1,10 @@
-// 17 Dilli Çoklu Dil Desteği (TR, EN, ES, HI, PT, FIL, ID, AF, RU, KO, MS, IT, DE, EL, FR, AR, UR)
+// Çoklu Dil Desteği (TR / EN hızlı geçiş + 17 dil sözlüğü)
 window.I18N = {
-  ORDER: ['TR', 'EN', 'ES', 'HI', 'PT', 'FIL', 'ID', 'AF', 'RU', 'KO', 'MS', 'IT', 'DE', 'EL', 'FR', 'AR', 'UR'],
+  ORDER: ['TR', 'EN'],
   lang: (function () {
     try {
       const saved = localStorage.getItem('popeye1929_lang');
-      if (saved) return saved;
+      if (saved === 'TR' || saved === 'EN') return saved;
     } catch (e) {}
     return (window.GAME_CONFIG && window.GAME_CONFIG.DEFAULT_LANG) || 'TR';
   })(),

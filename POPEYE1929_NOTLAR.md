@@ -2,8 +2,13 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.021`
+- **Güncel Sürüm:** `v0.022`
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.022 — Klasik Üst/Ana Sayfa Butonları, Çerçevesiz Ölüm Ekranı (Kırık Uçak/Şapka/Çapa + Reklam İkonlu Butonlar) ve Kart Dokunma Düzeltmesi
+- **Kart Seçimi & Dil Geçişi Düzeltmesi (`src/ui.js`, `src/i18n.js`):** Seviye atlama (`LEVELUP`) ekranı açıkken dokunmaların en üstte doğrudan 3 yetenek kartını kontrol etmesi sağlandı. Dil butonu `TR <-> EN` arasında tek dokunuşla geçiş yapacak şekilde sadeleştirildi.
+- **Klasik Üst Butonlar ve Ana Sayfa (`src/ui.js`):** Sağ üstteki 4 buton (`||`, `TR/EN`, `🔊/🔇`, tam ekran) ve Ana Sayfa (`SAVAŞA BAŞLA` butonu ve yerleşimi) beğenilen eski klasik `ui_button` görünümüne geri döndürüldü.
+- **Ölüm (Game Over) Ekranı (`src/ui.js`):** Arka plandaki düşük çözünürlüklü modal çerçeve (`panel_modal`) kaldırılarak eski temiz koyu arka plana dönüldü; kırılmış savaş uçağı + denizci şapkası + çapa rozeti (`emblem_gameover`) ve yeni reklam klaket ikonlu (`icon_video_ad`) yeşil `REKLAMLA CANLAN` ile döner oklu (`icon_restart`) mavi `YENİDEN BAŞLA` butonları korundu.
 
 ## v0.021 — Dişli Çerçeveli Yeni Can & XP Bar Sistemi (Skorsuz), 16'lı Özel Arayüz/Reklam İkon Atlası ve 17 Dilli Dil Sistemi
 - **Yeni Dişli Çerçeveli Can & Seviye Bar Sistemi (`assets/hud_bar_atlas.png`, `src/ui.js`):** Kullanıcının gönderdiği dolu (kırmızı can + mavi XP) ve boş dişli çerçeveli Popeye bar görselleri piksel hizalı şeffaf atlasa dönüştürüldü. Skor tutma ve ekranda skor gösterimi tamamen kaldırıldı (seviye `SV / LV` ve bölüm ana ilerleme göstergesidir).

@@ -1,4 +1,4 @@
-// Dişli Çerçeveli Yeni Can & Seviye (XP) Bar Sistemi, 17 Dilli Arayüz, Özel İkonlu Butonlar ve 3'lü Ispanak Seçim Ekranı
+// Dişli Çerçeveli Yeni Can & Seviye (XP) Bar Sistemi, Klasik Üst/Ana Sayfa Butonları ve Yenilenmiş Ölüm Ekranı
 window.UIManager = class UIManager {
   constructor(game) {
     this.game = game;
@@ -8,15 +8,15 @@ window.UIManager = class UIManager {
       window.Capacitor.isNativePlatform()
     );
 
-    // Sağ üst özel ikonlu buton alanları
-    this.btnPause = { x: 500, y: 38, w: 50, h: 50 };
-    this.btnLang  = { x: 444, y: 38, w: 50, h: 50 };
-    this.btnMute  = { x: 444, y: 94, w: 50, h: 50 };
-    this.btnFull  = { x: 500, y: 94, w: 50, h: 50 };
+    // Sağ üst klasik buton alanları (ui_button sprite'ı ile çizilir)
+    this.btnPause = { x: 500, y: 38, w: 46, h: 46 };
+    this.btnLang  = { x: 446, y: 38, w: 46, h: 46 };
+    this.btnMute  = { x: 446, y: 92, w: 46, h: 46 };
+    this.btnFull  = { x: 500, y: 92, w: 46, h: 46 };
 
-    // Modal aksiyon butonları (Geniş, ikonlu ve yazı taşmayan yapı)
-    this.btnPrimary   = { x: 270, y: 548, w: 312, h: 84 };
-    this.btnSecondary = { x: 270, y: 642, w: 312, h: 78 };
+    // Modal butonları
+    this.btnPrimary   = { x: 270, y: 540, w: 296, h: 72 };
+    this.btnSecondary = { x: 270, y: 632, w: 296, h: 68 };
 
     // 3'lü Ispanak Yetenek Kartı Alanları (Seviye Atlama Ekranı)
     this.skillCards = [
@@ -30,8 +30,8 @@ window.UIManager = class UIManager {
 
   layout() {
     this.midOff = Math.round((window.GAME_CONFIG.HEIGHT - window.GAME_CONFIG.BASE_HEIGHT) * 0.5);
-    this.btnPrimary.y = 548 + this.midOff;
-    this.btnSecondary.y = 642 + this.midOff;
+    this.btnPrimary.y = 540 + this.midOff;
+    this.btnSecondary.y = 632 + this.midOff;
     for (let i = 0; i < this.skillCards.length; i++) {
       this.skillCards[i].y = 495 + this.midOff;
     }
@@ -42,30 +42,12 @@ window.UIManager = class UIManager {
       px >= b.x - b.w * 0.5 &&
       px <= b.x + b.w * 0.5 &&
       py >= b.y - b.h * 0.5 &&
-      py >= b.y + b.h * 0.5
+      py <= b.y + b.h * 0.5
     );
   }
 
   handlePointerDown(px, py) {
-    // 1) Dil Değiştirme Butonu (17 Dil: TR, EN, ES, HI, PT, FIL, ID, AF, RU, KO, MS, IT, DE, EL, FR, AR, UR)
-    if (this.hitRect(px, py, this.btnLang)) {
-      window.I18N.toggleLang();
-      return true;
-    }
-
-    // 1b) Ses Açma/Kapatma Butonu
-    if (this.hitRect(px, py, this.btnMute)) {
-      if (window.AudioManager) window.AudioManager.toggleMute();
-      return true;
-    }
-
-    // 2) Tam Ekran Butonu (Sadece Web sürümünde görünür ve çalışır, Android AAB'de gizli)
-    if (!this.isNativeAndroid && this.hitRect(px, py, this.btnFull)) {
-      this.toggleFullscreen();
-      return true;
-    }
-
-    // 3) Seviye Atlama (3'lü Ispanak Kutusu Seçimi)
+    // 1) Seviye Atlama (3'lü Ispanak Kutusu Seçimi) AÇIKKEN yalnızca kartlara dokunulabilir (üst butonlarla karışmaz)
     if (this.game.state === 'LEVELUP') {
       for (let i = 0; i < this.skillCards.length; i++) {
         if (this.hitRect(px, py, this.skillCards[i])) {
@@ -76,7 +58,25 @@ window.UIManager = class UIManager {
       return true;
     }
 
-    // 4) Duraklatma (Pause) Butonu
+    // 2) Dil Değiştirme Butonu (TR / EN)
+    if (this.hitRect(px, py, this.btnLang)) {
+      window.I18N.toggleLang();
+      return true;
+    }
+
+    // 3) Ses Açma/Kapatma Butonu
+    if (this.hitRect(px, py, this.btnMute)) {
+      if (window.AudioManager) window.AudioManager.toggleMute();
+      return true;
+    }
+
+    // 4) Tam Ekran Butonu (Sadece Web sürümünde görünür ve çalışır, Android AAB'de gizli)
+    if (!this.isNativeAndroid && this.hitRect(px, py, this.btnFull)) {
+      this.toggleFullscreen();
+      return true;
+    }
+
+    // 5) Duraklatma (Pause) Butonu
     if (this.hitRect(px, py, this.btnPause)) {
       if (this.game.state === 'PLAYING' || this.game.state === 'PAUSED') {
         this.game.togglePause();
@@ -84,7 +84,7 @@ window.UIManager = class UIManager {
       }
     }
 
-    // 5) Menü / Pause / Game Over Modal Butonları
+    // 6) Menü / Pause / Game Over Modal Butonları
     if (this.game.state === 'MENU') {
       if (this.hitRect(px, py, this.btnPrimary)) {
         this.game.startGame();
@@ -108,7 +108,7 @@ window.UIManager = class UIManager {
             if (ok && this.game.state === 'GAMEOVER') {
               this.game.reviveWithAd();
             } else if (!ok) {
-              this.game.addFloatText(window.I18N.t('AD_NOT_READY'), window.GAME_CONFIG.WIDTH * 0.5, this.btnPrimary.y - 52, '#ff6b5b', 18);
+              this.game.addFloatText(window.I18N.t('AD_NOT_READY'), window.GAME_CONFIG.WIDTH * 0.5, this.btnPrimary.y - 48, '#ff6b5b', 18);
             }
           });
         }
@@ -188,7 +188,6 @@ window.UIManager = class UIManager {
     ctx.restore();
   }
 
-  // Buton içine taşmadan otomatik küçülen yazı çizimi
   drawTextFitted(ctx, text, x, y, maxSize, maxWidth, fill, strokeWidth = 4) {
     let sz = maxSize;
     ctx.save();
@@ -224,9 +223,9 @@ window.UIManager = class UIManager {
     ctx.restore();
   }
 
-  // İkonlu ve Geniş Arcade Buton Çizimi (Yazı asla taşmaz)
-  drawActionButton(ctx, rect, btnFrame, iconFrame, label, textColor = '#ffffff', fontSize = 18) {
-    const drawn = window.Atlas.draw(ctx, btnFrame || 'btn_blue', rect.x, rect.y, rect.w, rect.h * 1.45);
+  // Klasik ui_button çizimi (Üst butonlar ve Ana Sayfa için)
+  drawSpriteButton(ctx, rect, label, textColor = '#ffffff', fontSize = 18) {
+    const drawn = window.Atlas.draw(ctx, 'ui_button', rect.x, rect.y, rect.w, rect.h);
     if (!drawn) {
       this.drawSlantedBar(
         ctx,
@@ -234,22 +233,32 @@ window.UIManager = class UIManager {
         rect.y - rect.h * 0.5,
         rect.w,
         rect.h,
-        8,
+        6,
         'rgba(18, 46, 82, 0.94)',
-        btnFrame === 'btn_green' ? 'rgba(28, 152, 84, 0.9)' : 'rgba(38, 96, 158, 0.85)',
+        'rgba(38, 96, 158, 0.85)',
         1,
-        '#ffe066'
+        '#8fd2ff'
       );
     }
+    if (label) {
+      this.drawTextFitted(ctx, label, rect.x, rect.y, fontSize, rect.w - 18, textColor, 4);
+    }
+  }
 
+  // Ölüm / Duraklatma ekranı için ikonlu buton çizimi
+  drawIconActionButton(ctx, rect, btnFrame, iconFrame, label, textColor = '#ffffff', fontSize = 18) {
+    const drawn = window.Atlas.draw(ctx, btnFrame || 'ui_button', rect.x, rect.y, rect.w, rect.h * 1.45);
+    if (!drawn) {
+      window.Atlas.draw(ctx, 'ui_button', rect.x, rect.y, rect.w, rect.h);
+    }
     if (iconFrame) {
-      const iconX = rect.x - rect.w * 0.34;
-      window.Atlas.draw(ctx, iconFrame, iconX, rect.y, 44, 44);
+      const iconX = rect.x - rect.w * 0.33;
+      window.Atlas.draw(ctx, iconFrame, iconX, rect.y, 42, 42);
       if (label) {
-        this.drawTextFitted(ctx, label, rect.x + 20, rect.y, fontSize, rect.w * 0.58, textColor, 4.5);
+        this.drawTextFitted(ctx, label, rect.x + 18, rect.y, fontSize, rect.w * 0.58, textColor, 4.5);
       }
     } else if (label) {
-      this.drawTextFitted(ctx, label, rect.x, rect.y, fontSize, rect.w * 0.80, textColor, 4.5);
+      this.drawTextFitted(ctx, label, rect.x, rect.y, fontSize, rect.w - 22, textColor, 4.5);
     }
   }
 
@@ -270,10 +279,8 @@ window.UIManager = class UIManager {
     const hpRatio = Math.max(0, Math.min(1, p.hp / Math.max(1, p.maxHp)));
     const xpRatio = Math.max(0, Math.min(1, this.game.xp / Math.max(1, this.game.xpToNext)));
 
-    // Önce boş metalik HUD barını çiz
     const hasNewHud = window.Atlas.draw(ctx, 'hud_bar_empty', hcx, hcy, hw, hh);
     if (hasNewHud) {
-      // Üst Kırmızı Can Barı (hpRatio oranında soldan sağa kırpılarak dolu bar çizilir)
       if (hpRatio > 0) {
         const hpStartX = hx + hw * 0.380;
         const hpMaxW = hw * (0.935 - 0.380);
@@ -285,7 +292,6 @@ window.UIManager = class UIManager {
         ctx.restore();
       }
 
-      // Alt Mavi XP / Seviye Barı (xpRatio oranında soldan sağa kırpılarak dolu bar çizilir)
       if (xpRatio > 0) {
         const xpStartX = hx + hw * 0.370;
         const xpMaxW = hw * (0.785 - 0.370);
@@ -297,7 +303,6 @@ window.UIManager = class UIManager {
         ctx.restore();
       }
 
-      // Alt Mavi Bar Üzerinde Seviye (SV 2 / LV 2) ve Yüzde Bilgisi
       this.drawTextOutlined(
         ctx,
         `${window.I18N.t('XP_LABEL')} ${this.game.level}`,
@@ -319,7 +324,6 @@ window.UIManager = class UIManager {
         3
       );
     } else {
-      // Görsel inerken anlık yedek bar
       this.drawSlantedBar(ctx, 74, 24, 165, 22, 7, 'rgba(13, 32, 54, 0.88)', '#e82c2c', hpRatio, '#b5d4ef');
       this.drawSlantedBar(ctx, 70, 54, 148, 20, 5, 'rgba(10, 32, 46, 0.92)', '#00d2ff', xpRatio, '#6bf5d2');
     }
@@ -340,25 +344,28 @@ window.UIManager = class UIManager {
     this.drawTextOutlined(ctx, weaponBadge, 114, 122, 13, '#57e2ff', 'left', 3.5);
 
     // =========================================================================
-    // 2) SAĞ ÜST ÖZEL İKONLU BUTONLAR (Dil Küresi, Duraklat, Ses, Tam Ekran)
+    // 2) SAĞ ÜST KLASİK BUTONLAR (ui_button)
     // =========================================================================
-    window.Atlas.draw(ctx, 'icon_pause', this.btnPause.x, this.btnPause.y, this.btnPause.w, this.btnPause.h);
-
-    window.Atlas.draw(ctx, 'icon_lang', this.btnLang.x, this.btnLang.y, this.btnLang.w, this.btnLang.h);
-    this.drawTextOutlined(ctx, window.I18N.lang, this.btnLang.x, this.btnLang.y + 13, 10.5, '#ffe047', 'center', 3.5);
-
-    const isMuted = Boolean(window.AudioManager && window.AudioManager.muted);
-    window.Atlas.draw(
-      ctx,
-      isMuted ? 'icon_sound_off' : 'icon_sound_on',
-      this.btnMute.x,
-      this.btnMute.y,
-      this.btnMute.w,
-      this.btnMute.h
-    );
+    this.drawSpriteButton(ctx, this.btnPause, '||', '#eaf4ff', 17);
+    this.drawSpriteButton(ctx, this.btnLang, window.I18N.lang, '#ffe066', 14);
+    const isMuted = window.AudioManager && window.AudioManager.muted;
+    this.drawSpriteButton(ctx, this.btnMute, isMuted ? '🔇' : '🔊', isMuted ? '#ff6b5b' : '#6dff5c', 16);
 
     if (!this.isNativeAndroid) {
-      window.Atlas.draw(ctx, 'icon_fullscreen', this.btnFull.x, this.btnFull.y, this.btnFull.w, this.btnFull.h);
+      window.Atlas.draw(ctx, 'ui_button', this.btnFull.x, this.btnFull.y, this.btnFull.w, this.btnFull.h);
+      ctx.save();
+      ctx.strokeStyle = '#d8ecff';
+      ctx.lineWidth = 2.4;
+      const fx = this.btnFull.x;
+      const fy = this.btnFull.y;
+      const s = 9;
+      ctx.beginPath();
+      ctx.moveTo(fx - s, fy - s + 5); ctx.lineTo(fx - s, fy - s); ctx.lineTo(fx - s + 5, fy - s);
+      ctx.moveTo(fx + s - 5, fy - s); ctx.lineTo(fx + s, fy - s); ctx.lineTo(fx + s, fy - s + 5);
+      ctx.moveTo(fx - s, fy + s - 5); ctx.lineTo(fx - s, fy + s); ctx.lineTo(fx - s + 5, fy + s);
+      ctx.moveTo(fx + s - 5, fy + s); ctx.lineTo(fx + s, fy + s); ctx.lineTo(fx + s, fy + s - 5);
+      ctx.stroke();
+      ctx.restore();
     }
 
     // =========================================================================
@@ -367,21 +374,19 @@ window.UIManager = class UIManager {
     if (wd.bossWarningTimer > 0) {
       const pulse = 0.55 + Math.sin(wd.bossWarningTimer * 14) * 0.45;
       ctx.save();
-      ctx.fillStyle = `rgba(190, 18, 28, ${0.78 * pulse})`;
+      ctx.fillStyle = `rgba(190, 18, 28, ${0.75 * pulse})`;
       ctx.translate(0, this.midOff);
-      ctx.fillRect(0, 382, window.GAME_CONFIG.WIDTH, 108);
+      ctx.fillRect(0, 390, window.GAME_CONFIG.WIDTH, 96);
       ctx.fillStyle = '#ffe047';
-      ctx.fillRect(0, 382, window.GAME_CONFIG.WIDTH, 5);
-      ctx.fillRect(0, 485, window.GAME_CONFIG.WIDTH, 5);
-      window.Atlas.draw(ctx, 'emblem_boss_warn', 58, 436, 72, 72);
-      window.Atlas.draw(ctx, 'emblem_boss_warn', window.GAME_CONFIG.WIDTH - 58, 436, 72, 72);
+      ctx.fillRect(0, 390, window.GAME_CONFIG.WIDTH, 6);
+      ctx.fillRect(0, 480, window.GAME_CONFIG.WIDTH, 6);
       this.drawTextFitted(
         ctx,
         window.I18N.t('WARNING_BOSS'),
         window.GAME_CONFIG.WIDTH * 0.5,
-        436,
-        18,
-        360,
+        438,
+        20,
+        500,
         '#ffffff',
         5
       );
@@ -432,8 +437,8 @@ window.UIManager = class UIManager {
       `${window.I18N.t('LEVEL_UP_TITLE')} (${window.I18N.t('XP_LABEL')} ${this.game.level})`,
       W * 0.5,
       headerY + 12,
-      25,
-      490,
+      26,
+      500,
       '#ffe047',
       6
     );
@@ -443,7 +448,7 @@ window.UIManager = class UIManager {
       W * 0.5,
       headerY + 46,
       14,
-      490,
+      500,
       '#68e4ff',
       4
     );
@@ -474,7 +479,7 @@ window.UIManager = class UIManager {
       W * 0.5,
       675 + this.midOff,
       14,
-      480,
+      490,
       '#6dff5c',
       4
     );
@@ -482,29 +487,30 @@ window.UIManager = class UIManager {
     ctx.restore();
   }
 
+  // Ana Sayfa (Eski Klasik Görünüm ve Buton)
   drawMenuOverlay(ctx) {
     const W = window.GAME_CONFIG.WIDTH;
     const H = window.GAME_CONFIG.HEIGHT;
     ctx.save();
-    ctx.fillStyle = 'rgba(4, 12, 24, 0.74)';
+    ctx.fillStyle = 'rgba(4, 12, 24, 0.72)';
     ctx.fillRect(0, 0, W, H);
     ctx.save();
     ctx.translate(0, this.midOff);
 
     window.Atlas.draw(ctx, 'boss_dreadnought', W * 0.5, 210, 210, 175);
-    window.Atlas.draw(ctx, 'emblem_victory', W * 0.5 - 140, 345, 72, 72, { rotation: -0.14 });
-    window.Atlas.draw(ctx, 'emblem_shield_heart', W * 0.5 + 140, 345, 72, 72, { rotation: 0.14 });
+    window.Atlas.draw(ctx, 'hud_portrait', W * 0.5 - 135, 345, 68, 68);
+    window.Atlas.draw(ctx, 'can_6x', W * 0.5 + 135, 345, 62, 68, { rotation: 0.18 });
 
     this.drawTextOutlined(ctx, 'POPEYE 1929', W * 0.5, 345, 36, '#ffe047', 'center', 7);
-    this.drawTextFitted(ctx, window.I18N.t('SUBTITLE'), W * 0.5, 388, 15, 460, '#68e4ff', 4);
+    this.drawTextFitted(ctx, window.I18N.t('SUBTITLE'), W * 0.5, 386, 15, 480, '#68e4ff', 4);
 
     const lines = window.I18N.t('CONTROL_HINT').split('\n');
     for (let i = 0; i < lines.length; i++) {
-      this.drawTextFitted(ctx, lines[i], W * 0.5, 438 + i * 24, 13, 480, '#dbeeff', 3.5);
+      this.drawTextFitted(ctx, lines[i], W * 0.5, 438 + i * 24, 13, 490, '#dbeeff', 3.5);
     }
 
     ctx.restore();
-    this.drawActionButton(ctx, this.btnPrimary, 'btn_gold', 'icon_play', window.I18N.t('START_BTN'), '#ffffff', 20);
+    this.drawSpriteButton(ctx, this.btnPrimary, window.I18N.t('START_BTN'), '#ffe047', 21);
 
     this.drawTextOutlined(
       ctx,
@@ -519,71 +525,55 @@ window.UIManager = class UIManager {
     ctx.restore();
   }
 
+  // Duraklatma Ekranı (Çerçevesiz Klasik Arka Plan)
   drawPauseOverlay(ctx) {
     const W = window.GAME_CONFIG.WIDTH;
     const H = window.GAME_CONFIG.HEIGHT;
     ctx.save();
-    ctx.fillStyle = 'rgba(4, 12, 24, 0.80)';
+    ctx.fillStyle = 'rgba(4, 12, 24, 0.78)';
     ctx.fillRect(0, 0, W, H);
-
-    // Dişli Köşeli Metalik Duraklatma Paneli
-    window.Atlas.draw(ctx, 'panel_modal', W * 0.5, 480 + this.midOff, 470, 520);
-
     ctx.save();
     ctx.translate(0, this.midOff);
-    window.Atlas.draw(ctx, 'emblem_victory', W * 0.5, 320, 130, 130);
-    this.drawTextFitted(ctx, window.I18N.t('PAUSED'), W * 0.5, 430, 28, 370, '#ffe047', 6);
-    this.drawTextFitted(
-      ctx,
-      `${window.I18N.t('XP_LABEL')} ${this.game.level}  ·  ${window.I18N.t('STAGE')} ${this.game.waveDirector.stage}`,
-      W * 0.5,
-      472,
-      18,
-      360,
-      '#68e4ff',
-      4
-    );
+
+    window.Atlas.draw(ctx, 'hud_portrait', W * 0.5, 320, 110, 110);
+    this.drawTextFitted(ctx, window.I18N.t('PAUSED'), W * 0.5, 430, 30, 460, '#ffe047', 6);
     ctx.restore();
 
-    this.drawActionButton(ctx, this.btnPrimary, 'btn_green', 'icon_play', window.I18N.t('RESUME_BTN'), '#ffffff', 19);
-    this.drawActionButton(ctx, this.btnSecondary, 'btn_blue', 'icon_restart', window.I18N.t('RESTART_BTN'), '#ffffff', 18);
+    this.drawSpriteButton(ctx, this.btnPrimary, window.I18N.t('RESUME_BTN'), '#6dff5c', 20);
+    this.drawSpriteButton(ctx, this.btnSecondary, window.I18N.t('RESTART_BTN'), '#ffffff', 18);
 
     this.drawTextOutlined(ctx, window.GAME_CONFIG.VERSION, W - 14, H - 16, 12, '#8fb8de', 'right', 3);
     ctx.restore();
   }
 
+  // Ölüm (Game Over) Ekranı: Çerçevesiz Klasik Koyu Arka Plan + Kırılmış Uçak/Şapka/Çapa Rozeti + Yeni Reklam İkonlu Butonlar
   drawGameOverOverlay(ctx) {
     const W = window.GAME_CONFIG.WIDTH;
     const H = window.GAME_CONFIG.HEIGHT;
     ctx.save();
-    ctx.fillStyle = 'rgba(10, 6, 16, 0.84)';
+    ctx.fillStyle = 'rgba(14, 6, 14, 0.82)';
     ctx.fillRect(0, 0, W, H);
-
-    // Dişli Köşeli Metalik Game Over Paneli
-    window.Atlas.draw(ctx, 'panel_modal', W * 0.5, 480 + this.midOff, 476, 540);
-
     ctx.save();
     ctx.translate(0, this.midOff);
 
-    // Özel Gemi Düştü Rozeti (Hasarlı Savaş Uçağı, Denizci Şapkası ve Demir Çapa)
-    window.Atlas.draw(ctx, 'emblem_gameover', W * 0.5, 308, 152, 152);
-    this.drawTextFitted(ctx, window.I18N.t('GAME_OVER'), W * 0.5, 412, 30, 370, '#ff5c4d', 6);
+    // Kırılmış Uçak, Denizci Şapkası ve Demir Çapa Rozeti
+    window.Atlas.draw(ctx, 'emblem_gameover', W * 0.5, 300, 156, 156);
+    this.drawTextFitted(ctx, window.I18N.t('GAME_OVER'), W * 0.5, 405, 32, 460, '#ff5c4d', 6);
     this.drawTextFitted(
       ctx,
       `${window.I18N.t('XP_LABEL')} ${this.game.level}  ·  ${window.I18N.t('STAGE')} ${this.game.waveDirector.stage}`,
       W * 0.5,
-      462,
-      21,
-      370,
+      455,
+      22,
+      460,
       '#ffe047',
       5
     );
     ctx.restore();
 
-    // Yeşil Ödüllü Reklamla Canlan Butonu (Solunda Altın Klaket + Yeşil Kalp Reklam İkonu, Taşmayan Yazı)
-    this.drawActionButton(ctx, this.btnPrimary, 'btn_green', 'icon_video_ad', window.I18N.t('REVIVE_AD_BTN'), '#ffffff', 18);
-    // Mavi Yeniden Başla Butonu (Solunda Döner Yeniden Başlatma Oku)
-    this.drawActionButton(ctx, this.btnSecondary, 'btn_blue', 'icon_restart', window.I18N.t('RESTART_BTN'), '#ffffff', 18);
+    // Yeni Reklam İkonlu Canlanma Butonu ve Yeniden Başla Butonu
+    this.drawIconActionButton(ctx, this.btnPrimary, 'btn_green', 'icon_video_ad', window.I18N.t('REVIVE_AD_BTN'), '#ffffff', 18);
+    this.drawIconActionButton(ctx, this.btnSecondary, 'btn_blue', 'icon_restart', window.I18N.t('RESTART_BTN'), '#ffffff', 18);
     ctx.restore();
   }
 };
