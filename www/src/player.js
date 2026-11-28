@@ -436,16 +436,6 @@ window.PlayerController = class PlayerController {
       this.game.spawnPlayerBullet(this.x - 28, this.y - 6, -Math.sin(rad) * baseSpd, -Math.cos(rad) * baseSpd, sDmg, baseFrame, bw, bh, -rad, bOpts);
       this.game.spawnPlayerBullet(this.x + 28, this.y - 6, Math.sin(rad) * baseSpd, -Math.cos(rad) * baseSpd, sDmg, baseFrame, bw, bh, rad, bOpts);
     }
-
-    // 5) Arka Kuyruk Topu (rear_shot)
-    const rearLvl = this.hasSkill('rear_shot');
-    if (rearLvl > 0) {
-      this.game.spawnPlayerBullet(
-        this.x, this.y + 34, 0, baseSpd * 0.85,
-        baseDmg * (0.9 + rearLvl * 0.35),
-        'bullet_super', 26 * sizeScale, 26 * sizeScale, Math.PI, bOpts
-      );
-    }
   }
 
   updateSpecialWeapons(dt, rateMult) {

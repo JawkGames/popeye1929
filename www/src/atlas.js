@@ -17,7 +17,9 @@ window.Atlas = {
     stageEnv: 'assets/stage_env_atlas.png',
     hudBar: 'assets/hud_bar_atlas.png',
     uiIcons: 'assets/ui_icons_atlas.png',
-    skillCans: 'assets/skill_cans_atlas.png'
+    skillCans: 'assets/skill_cans_atlas.png',
+    skillCans2: 'assets/skill_cans_atlas2.png',
+    skillCans3: 'assets/skill_cans_atlas3.png'
   },
 
   // Koordinat Dilimleme Tablosu (x, y, w, h)
@@ -196,7 +198,44 @@ window.Atlas = {
     can_lightning:       { sheet: 'skillCans', x: 0,   y: 768, w: 256, h: 256 },
     can_crit:            { sheet: 'skillCans', x: 256, y: 768, w: 256, h: 256 },
     can_heal:            { sheet: 'skillCans', x: 512, y: 768, w: 256, h: 256 },
-    can_dodge:           { sheet: 'skillCans', x: 768, y: 768, w: 256, h: 256 }
+    can_dodge:           { sheet: 'skillCans', x: 768, y: 768, w: 256, h: 256 },
+
+    // 12. 2. Sayfa 16 Benzersiz Ispanak Yetenek Konservesi (skill_cans_atlas2.png)
+    can_diagonal:        { sheet: 'skillCans2', x: 0,   y: 0,   w: 256, h: 256 },
+    can_side:            { sheet: 'skillCans2', x: 256, y: 0,   w: 256, h: 256 },
+    can_burst:           { sheet: 'skillCans2', x: 512, y: 0,   w: 256, h: 256 },
+    can_nova:            { sheet: 'skillCans2', x: 768, y: 0,   w: 256, h: 256 },
+    can_double_cal:      { sheet: 'skillCans2', x: 0,   y: 256, w: 256, h: 256 },
+    can_bouncy:          { sheet: 'skillCans2', x: 256, y: 256, w: 256, h: 256 },
+    can_ricochet:        { sheet: 'skillCans2', x: 512, y: 256, w: 256, h: 256 },
+    can_homing:          { sheet: 'skillCans2', x: 768, y: 256, w: 256, h: 256 },
+    can_shrapnel:        { sheet: 'skillCans2', x: 0,   y: 512, w: 256, h: 256 },
+    can_giant:           { sheet: 'skillCans2', x: 256, y: 512, w: 256, h: 256 },
+    can_supersonic:      { sheet: 'skillCans2', x: 512, y: 512, w: 256, h: 256 },
+    can_knockback:       { sheet: 'skillCans2', x: 768, y: 512, w: 256, h: 256 },
+    can_twin_laser:      { sheet: 'skillCans2', x: 0,   y: 768, w: 256, h: 256 },
+    can_mega_laser:      { sheet: 'skillCans2', x: 256, y: 768, w: 256, h: 256 },
+    can_sonic_wave:      { sheet: 'skillCans2', x: 512, y: 768, w: 256, h: 256 },
+    can_barrage:         { sheet: 'skillCans2', x: 768, y: 768, w: 256, h: 256 },
+
+    // 13. 3. Sayfa 17 Benzersiz Ispanak Yetenek Konservesi (skill_cans_atlas3.png)
+    can_plasma_nuke:     { sheet: 'skillCans3', x: 0,   y: 0,   w: 256, h: 256 },
+    can_storm:           { sheet: 'skillCans3', x: 256, y: 0,   w: 256, h: 256 },
+    can_explosive:       { sheet: 'skillCans3', x: 512, y: 0,   w: 256, h: 256 },
+    can_headshot:        { sheet: 'skillCans3', x: 768, y: 0,   w: 256, h: 256 },
+    can_boss_hunter:     { sheet: 'skillCans3', x: 0,   y: 256, w: 256, h: 256 },
+    can_rapid1:          { sheet: 'skillCans3', x: 256, y: 256, w: 256, h: 256 },
+    can_rapid2:          { sheet: 'skillCans3', x: 512, y: 256, w: 256, h: 256 },
+    can_damage1:         { sheet: 'skillCans3', x: 768, y: 256, w: 256, h: 256 },
+    can_crit_dmg:        { sheet: 'skillCans3', x: 0,   y: 512, w: 256, h: 256 },
+    can_berserker:       { sheet: 'skillCans3', x: 256, y: 512, w: 256, h: 256 },
+    can_wingman:         { sheet: 'skillCans3', x: 512, y: 512, w: 256, h: 256 },
+    can_orbital_orbs:    { sheet: 'skillCans3', x: 768, y: 512, w: 256, h: 256 },
+    can_max_hp:          { sheet: 'skillCans3', x: 0,   y: 768, w: 256, h: 256 },
+    can_vampiric:        { sheet: 'skillCans3', x: 256, y: 768, w: 256, h: 256 },
+    can_regen:           { sheet: 'skillCans3', x: 512, y: 768, w: 256, h: 256 },
+    can_phantom:         { sheet: 'skillCans3', x: 768, y: 768, w: 256, h: 256 },
+    can_xp_overdrive:    { sheet: 'skillCans3', x: 0,   y: 1024,w: 256, h: 256 }
   },
 
   loadAll(onProgress) {

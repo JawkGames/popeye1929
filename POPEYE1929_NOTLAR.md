@@ -2,9 +2,13 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.025`
+- **Güncel Sürüm:** `v0.026`
 - **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.026 — 48 Yeteneğin Tamamına %100 Benzersiz Özel Ispanak Konservesi Görselleri ve Arka Kuyruk Topu Kaldırılması
+- **`Arka Kuyruk Topu` (`rear_shot`) Kaldırıldı (`src/skills.js`, `src/player.js`):** Oyundan çıkarıldı; çift namlulu mekanik taret konservesi (`can_rear`) `Otonom Omuz Tareti` (`auto_shoulder_cannon`) yeteneğine atandı.
+- **48 Benzersiz Yetenek Konservesi (`assets/skill_cans_atlas.png`, `skill_cans_atlas2.png`, `skill_cans_atlas3.png`):** Kullanıcının gönderdiği 3 adet 4x4 (16+16+16) sayfa şeffaf atlasa paketlendi ve 48. yetenek (`xp_overdrive`) için zümrüt XP kristalli konserve (`can_xp_overdrive`) eklendi. Oyundaki 48 yeteneğin 48'i de artık tamamen kendine özel, benzersiz ıspanak konservesi görseline sahip.
 
 ## v0.025 — Yeni 16'lı Ispanak Konservesi & Ağır Çapa Atlası ve Çizgi Roman Arcade Yazı Stilleri (`Bangers` + `Nunito`)
 - **Yeni 16'lı Yetenek Konservesi & Ağır Savaş Çapası Atlası (`assets/skill_cans_atlas.png`):** Kullanıcının gönderdiği 4x4 (16 görsellik) siyah arka planlı sayfa temizlenip şeffaf atlasa paketlendi; ağır cyan çekirdekli savaş çapası (`proj_anchor_new`) ve tüm 15 açık ıspanak yetenek konservesi (`can_anchor`, `can_multishot`, `can_spread`, `can_rear`, `can_pierce`, `can_missile`, `can_laser`, `can_saw`, `can_fire`, `can_ice`, `can_acid`, `can_lightning`, `can_crit`, `can_heal`, `can_dodge`) bağlandı.
