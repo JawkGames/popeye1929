@@ -530,7 +530,6 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     }
 
     e.hp -= finalDmg;
-    e.hitFlash = 1.0;
 
     const hsLvl = this.player.hasSkill('headshot_kill');
     if (hsLvl > 0 && !e.isBoss && e.hp > 0) {
@@ -598,7 +597,7 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
     if (b.lightning > 0) {
       const nextTarget = this.findNearestEnemy(e.x, e.y, e, 240);
       if (nextTarget) {
-        this.spawnVfx((e.x + nextTarget.x) * 0.5, (e.y + nextTarget.y) * 0.5, 'proj_lightning', 72, 0.18);
+        this.spawnVfx((e.x + nextTarget.x) * 0.5, (e.y + nextTarget.y) * 0.5, 'proj_lightning', 54, 0.18);
         this.damageEnemy(nextTarget, b.dmg * 0.65, true);
       }
     }
@@ -993,13 +992,12 @@ window.PopeyeShmupGame = class PopeyeShmupGame {
       window.Atlas.draw(ctx, b.frame, b.x, b.y, b.w, b.h, { rotation: b.rot });
     }
 
-    // 8) Düşman Gemileri ve Dev Bosslar
+    // 8) Düşman Gemileri ve Dev Bosslar (Darbede beyazlama kapalı)
     const enemies = this.enemyPool.activeList;
     for (let i = 0; i < enemies.length; i++) {
       const e = enemies[i];
       window.Atlas.draw(ctx, e.type, e.x, e.y, e.w, e.h, {
-        rotation: e.rotation,
-        hitFlash: e.hitFlash
+        rotation: e.rotation
       });
     }
 

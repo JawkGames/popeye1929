@@ -608,7 +608,7 @@ window.PlayerController = class PlayerController {
           const e = enemies[i];
           if (!e._active || e.y < 20) continue;
           strikes--;
-          this.game.spawnVfx(e.x, e.y - 35, 'proj_lightning', 88, 0.24);
+          this.game.spawnVfx(e.x, e.y - 35, 'proj_lightning', 66, 0.24);
           this.game.spawnVfx(e.x, e.y, 'spark_crit', 56, 0.20);
           this.game.damageEnemy(e, 45 * dmgMult * (1 + stormLvl * 0.2));
         }

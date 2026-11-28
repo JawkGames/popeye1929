@@ -1,6 +1,6 @@
 // Popeye 1929: Vertical Arcade SHMUP — Yapılandırma ve Sürüm Bilgisi
 window.GAME_CONFIG = {
-  VERSION: 'v0.028',
+  VERSION: 'v0.029',
   TITLE: 'POPEYE 1929: IRON ARMADA',
 
   // 9:16 Dikey Mobil Referans Çözünürlük (Tüm ekranlara responsive ölçeklenir)
@@ -18,10 +18,10 @@ window.GAME_CONFIG = {
   // Varsayılan Dil
   DEFAULT_LANG: 'TR',
 
-  // XP ve Seviye Atlama Ayarları (2x yavaşlatılmış seviye hızı, alt ekran mıknatıslı XP elmasları)
+  // XP ve Seviye Atlama Ayarları (2 kat zorlaştırılmış seviye atlama, alt ekran mıknatıslı XP elmasları)
   XP: {
-    START_NEEDED: 180,
-    STEP_INC: 95,
+    START_NEEDED: 360,
+    STEP_INC: 190,
     GEM_VALUE: 22
   },
 

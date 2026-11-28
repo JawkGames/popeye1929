@@ -2,9 +2,14 @@
 
 Bu dosya `README.md` ile senkron tutulmaktadır. Tüm güncel can, hasar, konserve, formasyon ve sürüm bilgileri için `README.md` dosyasına bakınız.
 
-- **Güncel Sürüm:** `v0.028`
+- **Güncel Sürüm:** `v0.029`
 - **Görsel Üretim Kotası Durumu (Claude İçin Not):** `HTTP 429 (RESOURCE_EXHAUSTED)` — Görsel üretim kotası **28.11.2026 saat 07:54**'te (TSİ, `4s 8dk` sonra) sıfırlanacak / açılacak.
 - **Not:** Değişiklikler görsel kontrol yapılmadan yapılıyor, hataları kullanıcı bildiriyor. Üretilen ve kullanılan tüm karakter/parça görselleri ortalanmış, sağa bakan, dik duran çizimlerdir.
+
+## v0.029
+- Düşmanların ve Boss'ların darbe aldığında beyaza boyanması (`hitFlash`) kaldırıldı.
+- Düşmanlar arasında seken zincirleme yıldırım ve yıldırım fırtınası efekt boyutu `%25` küçültüldü (`72 -> 54`, `88 -> 66`).
+- Seviye atlama 2 kat zorlaştırıldı (`START_NEEDED: 360`, `STEP_INC: 190`).
 
 ## v0.028 — Tek Parça Kesintisiz Lazer Işını, Eski Turkuaz XP Kristali ve 3 Kademeli Ses/Müzik Butonu
 - **Tek Parça Kesintisiz Lazer Işını (`src/atlas.js`, `src/player.js`):** Lazer ışınının uç ek yerleri (`y: 48, h: 160`) kesildi ve üst üste binen parçalar yerine uçaktan ekranın tepesine tek parça pürüzsüz ışın olarak çizilmesi sağlandı.
